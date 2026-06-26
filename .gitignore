@@ -1,0 +1,9 @@
+luna-arcana-tarot.zip
+node_modules/
+.env
+.env.local
+.env.*
+.DS_Store
+Thumbs.db
+vedic-python-api/.venv/
+vedic-python-api/__pycache__/

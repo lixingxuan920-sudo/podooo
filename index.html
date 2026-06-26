@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luna Arcana Tarot | 专业塔罗占卜</title>
+    <meta name="theme-color" content="#d99aaa" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Luna Tarot" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/app-icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#home" aria-label="返回首页">Luna Arcana Tarot</a>
+      <nav class="nav" aria-label="主导航">
+        <a href="#home">档案与问题</a>
+        <a href="#draw">塔罗抽取</a>
+        <a href="#history">历史记录</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="home-app section" id="home">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="auth-screen" id="authScreen">
+          <div class="home-copy">
+            <p class="kicker">Luna Arcana Tarot</p>
+            <h1>登录后开始占卜</h1>
+            <p class="hero-copy">一个账号只保存自己的档案与历史记录。登录后进入塔罗、个人星盘和印度占星三个功能。</p>
+          </div>
+
+          <form class="login-panel" id="loginForm">
+            <h2>账号登录</h2>
+            <p class="disclaimer">用邮箱或账号名登录。新账号先发送验证码，再设置密码注册。</p>
+            <label for="loginName">邮箱 / 账号</label>
+            <input id="loginName" type="text" placeholder="例如：luna@example.com" autocomplete="username" />
+            <label for="loginPassword">密码</label>
+            <input id="loginPassword" type="password" placeholder="自己设置的密码" autocomplete="current-password" />
+            <div class="code-row">
+              <div>
+                <label for="loginCode">邮箱验证码</label>
+                <input id="loginCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" />
+              </div>
+              <button class="button secondary" id="sendCodeButton" type="button">发送验证码</button>
+            </div>
+            <div class="auth-actions">
+              <button class="button primary" id="loginButton" type="submit">登录</button>
+              <button class="button secondary" id="registerButton" type="button">注册账号</button>
+            </div>
+            <p class="current-user-label" id="currentUserLabel">当前用户：访客</p>
+            <p class="status" id="authStatus">请先登录，再开始占卜。</p>
+          </form>
+        </div>
+
+        <div class="app-dashboard" id="appDashboard" hidden>
+          <div class="dashboard-top">
+            <div>
+              <p class="kicker">Luna Arcana</p>
+              <h1>选择你的占卜</h1>
+              <p class="hero-copy">塔罗、个人星盘、印度占星，三项功能分开进入。</p>
+            </div>
+            <button class="text-button" id="logoutButton" type="button">退出登录</button>
+          </div>
+
+          <div class="feature-grid" aria-label="占卜功能入口">
+            <button class="feature-card" id="showTarotButton" type="button">
+              <span>01</span>
+              <h2>塔罗占卜</h2>
+              <p>提问、洗牌、抽牌、获得针对问题的解读。</p>
+            </button>
+            <button class="feature-card" id="showAstrologyButton" type="button">
+              <span>02</span>
+              <h2>个人星盘</h2>
+              <p>输入出生资料，查看行星落座和占星师解读。</p>
+            </button>
+            <button class="feature-card" id="showIndianButton" type="button">
+              <span>03</span>
+              <h2>印度占星</h2>
+              <p>查看印占命盘、月宿与业力轴提示。</p>
+            </button>
+          </div>
+
+          <div class="dashboard-actions">
+            <button class="button secondary" id="showProfileButton" type="button">个人档案</button>
+            <button class="button secondary" id="showHistoryButton" type="button">历史记录</button>
+          </div>
+
+          <details class="profile-drawer" id="profileDrawer">
+            <summary>编辑个人档案</summary>
+            <form class="profile-form" id="profileForm">
+              <div class="compact-fields">
+                <div>
+                  <label for="profileName">称呼</label>
+                  <input id="profileName" type="text" placeholder="例如：Luna" />
+                </div>
+                <div>
+                  <label for="birthDate">生日</label>
+                  <input id="birthDate" type="date" />
+                </div>
+              </div>
+              <div class="compact-fields">
+                <div>
+                  <label for="birthTime">出生时间</label>
+                  <input id="birthTime" type="time" />
+                </div>
+                <div>
+                  <label for="birthCity">出生城市</label>
+                  <input id="birthCity" type="text" placeholder="城市即可" />
+                </div>
+              </div>
+              <label for="currentCity">现居城市</label>
+              <input id="currentCity" type="text" placeholder="可选" />
+              <button class="button secondary full" type="submit">保存档案</button>
+            </form>
+            <div class="profile-reading home-profile-reading" id="profileReading">
+              <p>填写生日、出生时间和城市后，这里会生成基础星座、生肖和五行倾向。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section astrology-section" id="astrology" hidden>
+        <div class="section-heading compact-heading">
+          <p class="kicker">个人星盘</p>
+          <h2>占星师式星盘解读</h2>
+          <button class="text-button" id="backFromAstrologyButton" type="button">返回档案与问题</button>
+        </div>
+        <div class="astrology-layout">
+          <div class="profile-form">
+            <h2>出生资料</h2>
+            <p class="disclaimer">星盘需要生日、出生时间和出生城市。当前为本地近似星盘，适合性格和能量结构参考。</p>
+            <div class="compact-fields">
+              <div>
+                <label for="astroBirthDate">生日</label>
+                <input id="astroBirthDate" type="date" />
+              </div>
+              <div>
+                <label for="astroBirthTime">出生时间</label>
+                <input id="astroBirthTime" type="time" />
+              </div>
+            </div>
+            <label for="astroBirthCity">出生城市</label>
+            <input id="astroBirthCity" type="text" placeholder="城市即可，例如：上海" />
+            <label for="astroChartType">星盘类型</label>
+            <select id="astroChartType">
+              <option value="natal">本命盘</option>
+              <option value="synastry">合盘 / 比较盘</option>
+              <option value="composite">组合盘</option>
+              <option value="transit">流年盘</option>
+              <option value="solar-return">日返盘</option>
+              <option value="lunar-return">月返盘</option>
+              <option value="firdaria">法达盘</option>
+              <option value="profection">小限盘</option>
+            </select>
+            <details class="intake-details">
+              <summary>合盘对象 / 推运目标资料</summary>
+              <label for="astroPartnerName">对象称呼</label>
+              <input id="astroPartnerName" type="text" placeholder="例如：对方 / Partner" />
+              <div class="compact-fields">
+                <div>
+                  <label for="astroPartnerBirthDate">对象生日</label>
+                  <input id="astroPartnerBirthDate" type="date" />
+                </div>
+                <div>
+                  <label for="astroPartnerBirthTime">对象出生时间</label>
+                  <input id="astroPartnerBirthTime" type="time" />
+                </div>
+              </div>
+              <label for="astroPartnerBirthCity">对象出生城市</label>
+              <input id="astroPartnerBirthCity" type="text" placeholder="城市即可，例如：北京" />
+            </details>
+            <label for="astroTargetDate">推运 / 返照日期</label>
+            <input id="astroTargetDate" type="date" />
+            <button class="button primary full" id="refreshAstrologyButton" type="button">生成/更新星盘</button>
+          </div>
+          <div class="profile-reading astrology-reading" id="astrologyReading">
+            <p>请先在首页填写生日、出生时间和出生城市，然后生成个人星盘。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section astrology-section" id="indianAstrology" hidden>
+        <div class="section-heading compact-heading">
+          <p class="kicker">印度占星</p>
+          <h2>印占命盘与解说</h2>
+          <button class="text-button" id="backFromIndianButton" type="button">返回档案与问题</button>
+        </div>
+        <div class="astrology-layout">
+          <div class="profile-form">
+            <h2>出生资料</h2>
+            <p class="disclaimer">印度占星重视上升、月亮、月宿和 Rahu/Ketu 业力轴。当前为本地近似盘，适合自我观察。</p>
+            <div class="compact-fields">
+              <div>
+                <label for="indianBirthDate">生日</label>
+                <input id="indianBirthDate" type="date" />
+              </div>
+              <div>
+                <label for="indianBirthTime">出生时间</label>
+                <input id="indianBirthTime" type="time" step="1" />
+              </div>
+            </div>
+            <label for="indianBirthCity">出生城市</label>
+            <input id="indianBirthCity" type="text" placeholder="城市即可，例如：广州" />
+            <p class="auto-location-note" id="indianLocationStatus">输入城市后会自动生成经纬度。</p>
+            <label for="indianConcernSelect">目前最关心的问题</label>
+            <select id="indianConcernSelect">
+              <option>事业</option>
+              <option>财富</option>
+              <option>婚姻</option>
+              <option>感情</option>
+              <option>健康</option>
+              <option>学业</option>
+              <option>家庭</option>
+              <option>未来几年运势</option>
+              <option>其他</option>
+            </select>
+            <details class="advanced-vedic-fields">
+              <summary>专业排盘参数</summary>
+              <p class="auto-location-note">参考 JHora 输入方式。普通用户只填城市即可；需要更准时，可展开填写秒、时区、经纬度、海拔。</p>
+              <div class="compact-fields">
+                <div>
+                  <label for="indianBirthSecond">出生秒数</label>
+                  <input id="indianBirthSecond" type="number" min="0" max="59.999999" step="0.000001" placeholder="23.999991" />
+                </div>
+                <div>
+                  <label for="indianTimezoneHour">时区小时</label>
+                  <input id="indianTimezoneHour" type="number" min="0" max="14" step="1" placeholder="4" />
+                </div>
+              </div>
+              <div class="compact-fields three">
+                <div>
+                  <label for="indianTimezoneMinute">时区分钟</label>
+                  <input id="indianTimezoneMinute" type="number" min="0" max="59" step="1" placeholder="0" />
+                </div>
+                <div>
+                  <label for="indianTimezoneDirection">时区方向</label>
+                  <select id="indianTimezoneDirection">
+                    <option value="E">East of GMT</option>
+                    <option value="W">West of GMT</option>
+                  </select>
+                </div>
+                <label class="toggle-row">
+                  <input id="indianDaylightSaving" type="checkbox" />
+                  <span>Daylight Saving</span>
+                </label>
+              </div>
+              <div class="compact-fields three">
+                <div>
+                  <label for="indianLongitudeDegree">经度度</label>
+                  <input id="indianLongitudeDegree" type="number" min="0" max="180" step="1" placeholder="71" />
+                </div>
+                <div>
+                  <label for="indianLongitudeDirection">经度方向</label>
+                  <select id="indianLongitudeDirection">
+                    <option value="E">E</option>
+                    <option value="W">W</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="indianLongitudeMinute">经度分</label>
+                  <input id="indianLongitudeMinute" type="number" min="0" max="59" step="1" placeholder="41" />
+                </div>
+              </div>
+              <div class="compact-fields three">
+                <div>
+                  <label for="indianLongitudeSecond">经度秒</label>
+                  <input id="indianLongitudeSecond" type="number" min="0" max="59.999999" step="0.000001" placeholder="10" />
+                </div>
+                <div>
+                  <label for="indianLatitudeDegree">纬度度</label>
+                  <input id="indianLatitudeDegree" type="number" min="0" max="90" step="1" placeholder="42" />
+                </div>
+                <div>
+                  <label for="indianLatitudeDirection">纬度方向</label>
+                  <select id="indianLatitudeDirection">
+                    <option value="N">N</option>
+                    <option value="S">S</option>
+                  </select>
+                </div>
+              </div>
+              <div class="compact-fields three">
+                <div>
+                  <label for="indianLatitudeMinute">纬度分</label>
+                  <input id="indianLatitudeMinute" type="number" min="0" max="59" step="1" placeholder="12" />
+                </div>
+                <div>
+                  <label for="indianLatitudeSecond">纬度秒</label>
+                  <input id="indianLatitudeSecond" type="number" min="0" max="59.999999" step="0.000001" placeholder="10" />
+                </div>
+                <label class="toggle-row">
+                  <input id="indianUseLmt" type="checkbox" />
+                  <span>Use LMT</span>
+                </label>
+              </div>
+              <div class="compact-fields three">
+                <div>
+                  <label for="indianAltitude">海拔米</label>
+                  <input id="indianAltitude" type="number" step="1" placeholder="425" />
+                </div>
+                <div>
+                  <label for="indianPressure">气压 hPa</label>
+                  <input id="indianPressure" type="number" step="0.01" placeholder="1013.25" />
+                </div>
+                <div>
+                  <label for="indianTemperature">温度 °C</label>
+                  <input id="indianTemperature" type="number" step="0.1" placeholder="20" />
+                </div>
+              </div>
+              <button class="button secondary full" id="loadJhoraSouthGraftonButton" type="button">填入截图示例 South Grafton</button>
+            </details>
+            <div hidden>
+              <button class="button secondary full" id="resolveIndianLocationButton" type="button">根据地址生成经纬度</button>
+              <div class="compact-fields">
+              <div>
+                <label for="indianLatitude">出生纬度</label>
+                <input id="indianLatitude" type="text" placeholder="例如：36N50'00&quot;" />
+              </div>
+              <div>
+                <label for="indianLongitude">出生经度</label>
+                <input id="indianLongitude" type="text" placeholder="例如：101E49'10&quot;" />
+              </div>
+            </div>
+            <div class="compact-fields">
+              <div>
+                <label for="indianTimezone">时区</label>
+                <input id="indianTimezone" type="text" placeholder="例如：UTC+08:00" />
+              </div>
+              <div>
+                <label for="indianAyanamsa">Ayanamsa</label>
+                <input id="indianAyanamsa" type="text" placeholder="Lahiri" />
+              </div>
+            </div>
+              <label for="vedicModuleSelect">解读模块</label>
+              <select id="vedicModuleSelect">
+                <option value="reader">综合命盘 / vedic-reader</option>
+                <option value="core">核心校验 / vedic-core</option>
+                <option value="career">事业专题 / vedic-career</option>
+                <option value="love">感情专题 / vedic-love</option>
+                <option value="rectifier">出生时间校正 / vedic-rectifier</option>
+                <option value="synastry">合盘 / vedic-synastry</option>
+              </select>
+              <input id="vedicPartnerName" type="text" />
+              <input id="vedicPartnerBirthDate" type="date" />
+              <input id="vedicPartnerBirthTime" type="time" />
+              <input id="vedicPartnerBirthCity" type="text" />
+              <button class="button secondary full" id="loadPdfIndianButton" type="button">载入 PDF 样例数据</button>
+            </div>
+            <button class="button primary full" id="refreshIndianButton" type="button">生成印度星盘</button>
+          </div>
+          <div class="profile-reading astrology-reading" id="indianReading">
+            <p>请先在首页填写生日、出生时间和出生城市，然后生成印度占星命盘。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section draw-section" id="draw" hidden>
+        <div class="section-heading compact-heading">
+          <p class="kicker">塔罗抽取</p>
+          <h2>提问后开始抽牌</h2>
+          <button class="text-button" id="backToHomeButton" type="button">返回占卜入口</button>
+        </div>
+
+        <div class="question-panel tarot-question-panel">
+          <h2>本次问题</h2>
+          <label for="questionInput">你想询问什么？</label>
+          <textarea id="questionInput" rows="2" placeholder="例如：这段关系接下来适合继续推进吗？"></textarea>
+          <div class="compact-fields">
+            <div>
+              <label for="moodSelect">心情</label>
+              <select id="moodSelect">
+                <option>平静</option>
+                <option>期待</option>
+                <option>犹豫</option>
+                <option>焦虑</option>
+                <option>疲惫</option>
+              </select>
+            </div>
+            <div>
+              <label for="timeframeSelect">时间</label>
+              <select id="timeframeSelect">
+                <option>未来一周</option>
+                <option>未来一个月</option>
+                <option>未来三个月</option>
+                <option>当前阶段</option>
+              </select>
+            </div>
+          </div>
+          <details class="intake-details">
+            <summary>精准模式：补充背景</summary>
+            <label for="backgroundInput">当前背景</label>
+            <textarea id="backgroundInput" rows="2" placeholder="简单写下发生了什么、你最在意什么。"></textarea>
+            <label for="focusInput">最想确认的一点</label>
+            <input id="focusInput" type="text" placeholder="例如：对方态度、是否该主动、机会风险" />
+          </details>
+          <button class="button primary full" id="enterDrawButton" type="button">开始洗牌抽取</button>
+          <p class="status" id="ritualStatus">先写下问题，再进入抽牌流程。</p>
+        </div>
+
+        <div class="flow-stack">
+          <div>
+            <h3>占卜主题</h3>
+            <div class="topic-grid compact-choice-grid" id="topicGrid"></div>
+          </div>
+          <div>
+            <h3>牌阵</h3>
+            <div class="spread-grid compact-choice-grid" id="spreadGrid"></div>
+          </div>
+        </div>
+
+        <div class="deck-panel single-panel">
+          <div class="deck-header">
+            <div>
+              <p class="kicker">洗牌抽牌</p>
+              <h2>让牌面回应问题</h2>
+            </div>
+            <div class="deck-tools">
+              <span id="drawCount">需抽取 1 张</span>
+              <button class="icon-button" id="shuffleButton" type="button">洗牌</button>
+            </div>
+          </div>
+          <div class="shuffle-stage" id="shuffleStage" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <button class="button primary full ritual-button" id="prepareButton" type="button">静心 5 秒</button>
+          <p class="deck-note">屏幕上只展示仪式牌面，实际从完整 78 张牌库中抽取。</p>
+          <div class="deck" id="deck"></div>
+        </div>
+      </section>
+
+      <section class="section result-section" id="result" hidden>
+        <div class="section-heading compact-heading">
+          <p class="kicker">解读结果</p>
+          <h2>牌面给出的倾向回答</h2>
+        </div>
+        <div class="result-summary" id="resultSummary"></div>
+        <div class="position-tabs" id="positionTabs"></div>
+        <div class="result-list" id="resultList"></div>
+        <div class="result-actions">
+          <input id="noteInput" type="text" placeholder="为本次占卜添加备注" />
+          <button class="button secondary" id="favoriteButton">收藏</button>
+          <button class="button primary" id="saveButton">保存本次占卜</button>
+        </div>
+        <p class="disclaimer">塔罗解读会结合你的问题、背景、牌位和牌义给出倾向性分析，用于自我反思与启发，不替代法律、医疗、财务等专业建议。</p>
+      </section>
+
+      <section class="section history-section" id="history" hidden>
+        <div class="section-heading compact-heading">
+          <p class="kicker">个人记录</p>
+          <h2>历史占卜</h2>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Luna Arcana Tarot</span>
+      <span>愿每一次提问，都更靠近你真实的选择。</span>
+    </footer>
+
+    <div class="install-banner" id="installBanner" hidden>
+      <span>可以把 Luna Tarot 添加到手机主屏幕。</span>
+      <button class="text-button" id="installButton" type="button">安装</button>
+      <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
+    </div>
+
+    <script src="astrology-skill.js?v=22"></script>
+    <script src="indian-astrology-skill.js?v=22"></script>
+    <script src="tarot-skill.js?v=22"></script>
+    <script src="app.js?v=22"></script>
+  </body>
+</html>

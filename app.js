@@ -1,0 +1,2389 @@
+const topics = [
+  { id: "love", name: "爱情关系", desc: "看见关系中的真实需求、边界与靠近方式。" },
+  { id: "career", name: "事业方向", desc: "梳理当下职业处境、机会与下一步行动。" },
+  { id: "wealth", name: "财富机会", desc: "观察资源流动、风险意识与可持续选择。" },
+  { id: "growth", name: "自我成长", desc: "理解内在模式，找到更稳定的自我支持。" },
+  { id: "daily", name: "今日指引", desc: "为今天抽取一个温和、具体的提醒。" },
+  { id: "choice", name: "重大选择", desc: "比较不同路径背后的代价、潜力与隐含因素。" }
+];
+
+const spreads = [
+  {
+    id: "one",
+    name: "单张牌",
+    subtitle: "今日能量 / 快速指引",
+    bestFor: "适合简单提问、日常提醒与快速校准。",
+    depth: "轻量",
+    positions: ["核心指引"]
+  },
+  {
+    id: "yesno",
+    name: "Yes / No",
+    subtitle: "是 / 否 / 条件尚未成熟",
+    bestFor: "适合询问短期内是否适合行动、回应、推进或等待。",
+    depth: "快速判断",
+    positions: ["是或否倾向"]
+  },
+  {
+    id: "three",
+    name: "三张牌",
+    subtitle: "过去 / 现在 / 未来",
+    bestFor: "适合梳理事件脉络、趋势与阶段变化。",
+    depth: "中等",
+    positions: ["过去影响", "当前状态", "未来趋势"]
+  },
+  {
+    id: "relationship",
+    name: "关系牌阵",
+    subtitle: "我 / 对方 / 关系现状 / 阻碍 / 建议",
+    bestFor: "适合爱情、合作、家庭与重要人际关系。",
+    depth: "深入",
+    positions: ["我的状态", "对方状态", "关系现状", "潜在阻碍", "行动建议"]
+  },
+  {
+    id: "decision",
+    name: "选择牌阵",
+    subtitle: "选项 A / 选项 B / 隐藏因素 / 建议",
+    bestFor: "适合面对两个方向、方案或关系选择时使用。",
+    depth: "深入",
+    positions: ["选项 A", "选项 B", "隐藏因素", "行动建议"]
+  }
+];
+
+const majorArcana = [
+  ["the-fool", "愚者", ["开始", "自由", "信任"], "这张牌提示你可以用更开放的心态面对未知，新的阶段正在形成。", "这张牌提示你先确认边界与准备度，避免只凭冲动行动。"],
+  ["the-magician", "魔术师", ["意志", "资源", "显化"], "你已经拥有推动事情的关键资源，重点是把想法转化为行动。", "资源可能分散，建议先聚焦一个最可执行的切入点。"],
+  ["the-high-priestess", "女祭司", ["直觉", "隐秘", "等待"], "答案可能暂时不在表面，倾听直觉与细微信号会更有帮助。", "你可能过度沉默或逃避确认事实，需要让信息变得更清晰。"],
+  ["the-empress", "女皇", ["滋养", "丰盛", "关系"], "局势倾向于通过照顾、创造与稳定连接而逐渐生长。", "过度付出可能让边界变弱，建议把照顾也留给自己。"],
+  ["the-emperor", "皇帝", ["秩序", "责任", "结构"], "建立规则和清晰边界，会让事情更稳固地推进。", "控制感过强可能阻碍流动，试着区分原则与固执。"],
+  ["the-hierophant", "教皇", ["传统", "学习", "承诺"], "向经验、制度或可信赖的人求助，可能带来稳定答案。", "旧规则未必适合此刻，你需要判断哪些框架仍然有效。"],
+  ["the-lovers", "恋人", ["选择", "连接", "价值"], "这张牌强调真诚选择，关系或合作需要价值观对齐。", "你可能在取悦与真实需求之间摇摆，需要回到自己的核心标准。"],
+  ["the-chariot", "战车", ["推进", "意志", "胜利"], "保持方向感与自律，事情有机会在主动推进中打开。", "过度用力可能带来消耗，先调整节奏再继续前进。"],
+  ["strength", "力量", ["温柔", "勇气", "耐心"], "柔和而稳定的力量比强硬对抗更有效，你可以慢慢驯服局势。", "你可能低估了自己的承受力，也可能需要停止硬撑。"],
+  ["the-hermit", "隐士", ["独处", "省思", "智慧"], "暂时抽离喧嚣，能帮助你看清真正重要的问题。", "孤立太久会削弱反馈，适度寻求支持会更平衡。"],
+  ["wheel-of-fortune", "命运之轮", ["转变", "周期", "机会"], "局势正在转动，顺势观察变化比强行固定更合适。", "不确定感较强，建议不要把短期波动误判成最终答案。"],
+  ["justice", "正义", ["平衡", "因果", "判断"], "事实、契约与公平是关键，请基于证据做决定。", "你可能在回避责任或信息不对称中判断失准。"],
+  ["the-hanged-man", "倒吊人", ["暂停", "换位", "臣服"], "暂停不是失败，而是换一个角度理解局势的机会。", "长期停滞可能来自不愿取舍，需要温和地做出决定。"],
+  ["death", "死神", ["结束", "更新", "蜕变"], "某个旧阶段正在退场，为新的状态腾出空间。", "你可能明知需要改变却仍紧抓旧模式，先允许自己告别。"],
+  ["temperance", "节制", ["调和", "疗愈", "耐心"], "事情适合通过协调、试探和逐步融合来推进。", "节奏可能失衡，建议减少极端选择，回到中间道路。"],
+  ["the-devil", "恶魔", ["执念", "束缚", "欲望"], "这张牌提醒你看见诱惑、依赖或不健康循环。", "束缚正在松动，但仍需要诚实面对自己的真实动机。"],
+  ["the-tower", "高塔", ["震动", "真相", "重建"], "旧结构可能被打破，真相虽然突然，却能带来重建空间。", "变化已在内部发生，拖延面对只会延长不安。"],
+  ["the-star", "星星", ["希望", "疗愈", "愿景"], "局势里仍有清澈的希望，适合恢复信心与长期愿景。", "期待可能过于理想化，需要把愿景落到可执行的小步骤。"],
+  ["the-moon", "月亮", ["潜意识", "迷雾", "敏感"], "情绪与未知因素较多，先观察，不急着下结论。", "迷雾正在散开，但你仍需要核对事实与感受的差异。"],
+  ["the-sun", "太阳", ["清晰", "喜悦", "显现"], "事情倾向于变得明朗，真实表达会带来积极回应。", "你可能忽略了简单答案，别让担忧遮住已经出现的光。"],
+  ["judgement", "审判", ["觉醒", "召唤", "复盘"], "这是重新回应内在召唤的时刻，复盘会带来新的判断。", "旧评价可能困住你，试着用现在的自己重新理解过去。"],
+  ["the-world", "世界", ["完成", "整合", "成熟"], "一个阶段正在整合完成，你可以更成熟地进入下一轮。", "离完成只差收尾与确认，别因为完美主义迟迟不结束。"]
+].map(([id, name, keywords, upright, reversed]) => ({
+  id,
+  name,
+  arcana: "major",
+  suit: "大阿卡那",
+  keywords,
+  upright,
+  reversed,
+  yesNo: ["the-sun", "the-star", "the-world", "the-magician", "strength", "temperance", "the-chariot"].includes(id)
+    ? "yes"
+    : ["the-devil", "the-tower", "the-moon", "death", "the-hanged-man"].includes(id)
+      ? "no"
+      : "maybe"
+}));
+
+const suitProfiles = {
+  wands: {
+    name: "权杖",
+    element: "火",
+    theme: "行动力、热情、事业推进与创造冲动",
+    advice: "把热情落到具体行动，避免只停留在想法或情绪高点。"
+  },
+  cups: {
+    name: "圣杯",
+    element: "水",
+    theme: "情感、关系、直觉、疗愈与内在需求",
+    advice: "先辨认真实感受，再决定如何表达和回应。"
+  },
+  swords: {
+    name: "宝剑",
+    element: "风",
+    theme: "思考、沟通、冲突、判断与信息清晰度",
+    advice: "把事实和想象分开，用清晰沟通减少内耗。"
+  },
+  pentacles: {
+    name: "星币",
+    element: "土",
+    theme: "现实资源、金钱、身体、工作成果与长期稳定",
+    advice: "回到现实条件，优先处理资源、时间和可持续性。"
+  }
+};
+
+const rankProfiles = [
+  ["ace", "一", ["种子", "新机会", "潜力"], "新的能量正在出现，适合开启、试探或为未来播种。", "机会尚未完全成形，可能需要更多准备、耐心或现实条件。", "yes"],
+  ["two", "二", ["选择", "平衡", "关系"], "你正在面对两个方向或两股力量，关键是找到平衡点。", "摇摆、迟疑或信息不完整可能让决定变得不稳定。", "maybe"],
+  ["three", "三", ["成长", "合作", "扩展"], "事情开始向外发展，合作、表达或阶段性成果变得重要。", "扩展受阻，可能需要重新确认团队、节奏或期待。", "yes"],
+  ["four", "四", ["稳定", "结构", "停顿"], "局势进入稳定或收束阶段，适合整理基础与安全感。", "稳定可能变成停滞，过度保守会压住流动。", "maybe"],
+  ["five", "五", ["冲突", "变化", "挑战"], "挑战浮现，但它也暴露了真正需要调整的结构。", "冲突可能被放大，建议减少对抗，先处理核心问题。", "no"],
+  ["six", "六", ["修复", "互助", "过渡"], "能量开始回到较平衡的位置，适合修复、协助与过渡。", "旧账或不公平感仍在影响关系，需要更诚实地处理。", "yes"],
+  ["seven", "七", ["评估", "防守", "考验"], "现在需要评估立场、坚持边界，也要看清真正的挑战。", "过度防御或怀疑会消耗力量，先确认威胁是否真实。", "maybe"],
+  ["eight", "八", ["推进", "练习", "速度"], "事情有加速或持续打磨的趋势，行动会带来反馈。", "节奏不稳，可能因为重复消耗或缺乏有效方法而卡住。", "yes"],
+  ["nine", "九", ["积累", "临界点", "韧性"], "你接近一个阶段性结果，需要保持韧性并照顾自身状态。", "疲惫或过度警戒可能影响判断，先恢复再推进。", "maybe"],
+  ["ten", "十", ["完成", "压力", "结果"], "一个周期接近完成，结果、责任或代价都会更明显。", "负担过重，可能需要放下不属于你的责任。", "no"],
+  ["page", "侍从", ["学习", "消息", "探索"], "新的信息、学习机会或初步表达正在出现。", "经验不足或信息未成熟，适合先学习观察。", "maybe"],
+  ["knight", "骑士", ["推进", "追求", "变化"], "行动力增强，适合主动追求目标，但要注意方向。", "急躁、摇摆或用力过猛可能带来偏差。", "yes"],
+  ["queen", "王后", ["成熟", "接纳", "滋养"], "更成熟的承接力出现，适合照顾关系、资源或内在状态。", "过度承接他人需求，可能削弱自身边界。", "yes"],
+  ["king", "国王", ["掌控", "责任", "领导"], "你可以用更成熟、稳定的方式做决定并承担结果。", "控制感或责任压力过强，可能让局势失去弹性。", "yes"]
+];
+
+function buildMinorArcana() {
+  return Object.entries(suitProfiles).flatMap(([suitId, suit]) => (
+    rankProfiles.map(([rankId, rankName, keywords, uprightCore, reversedCore, yesNo]) => ({
+      id: `${suitId}-${rankId}`,
+      name: `${suit.name}${rankName}`,
+      arcana: "minor",
+      rank: rankId,
+      suit: suit.name,
+      element: suit.element,
+      keywords: [...keywords, suit.name],
+      upright: `${suit.name}属于${suit.element}元素，关乎${suit.theme}。${uprightCore}`,
+      reversed: `${suit.name}的能量在逆位时容易表现为失衡、延迟或内耗。${reversedCore}`,
+      yesNo,
+      suitAdvice: suit.advice
+    }))
+  ));
+}
+
+const tarotCards = [...majorArcana, ...buildMinorArcana()];
+
+const state = {
+  topic: topics[0],
+  spread: spreads[0],
+  selectedCards: [],
+  currentReading: null,
+  favorite: false,
+  shuffled: false,
+  installPrompt: null,
+  indianContext: null,
+  indianChatHistory: [],
+  indianSkillResult: null,
+  indianSkillPromise: null,
+  indianSkillRequestId: 0
+};
+
+const els = {
+  topicGrid: document.querySelector("#topicGrid"),
+  spreadGrid: document.querySelector("#spreadGrid"),
+  deck: document.querySelector("#deck"),
+  questionInput: document.querySelector("#questionInput"),
+  moodSelect: document.querySelector("#moodSelect"),
+  timeframeSelect: document.querySelector("#timeframeSelect"),
+  backgroundInput: document.querySelector("#backgroundInput"),
+  focusInput: document.querySelector("#focusInput"),
+  prepareButton: document.querySelector("#prepareButton"),
+  ritualStatus: document.querySelector("#ritualStatus"),
+  drawCount: document.querySelector("#drawCount"),
+  shuffleButton: document.querySelector("#shuffleButton"),
+  shuffleStage: document.querySelector("#shuffleStage"),
+  result: document.querySelector("#result"),
+  resultSummary: document.querySelector("#resultSummary"),
+  positionTabs: document.querySelector("#positionTabs"),
+  resultList: document.querySelector("#resultList"),
+  noteInput: document.querySelector("#noteInput"),
+  saveButton: document.querySelector("#saveButton"),
+  favoriteButton: document.querySelector("#favoriteButton"),
+  historyList: document.querySelector("#historyList")
+};
+
+els.loginForm = document.querySelector("#loginForm");
+els.authScreen = document.querySelector("#authScreen");
+els.appDashboard = document.querySelector("#appDashboard");
+els.loginName = document.querySelector("#loginName");
+els.loginPassword = document.querySelector("#loginPassword");
+els.loginCode = document.querySelector("#loginCode");
+els.sendCodeButton = document.querySelector("#sendCodeButton");
+els.registerButton = document.querySelector("#registerButton");
+els.loginButton = document.querySelector("#loginButton");
+els.authStatus = document.querySelector("#authStatus");
+els.currentUserLabel = document.querySelector("#currentUserLabel");
+els.profileForm = document.querySelector("#profileForm");
+els.home = document.querySelector("#home");
+els.astrologySection = document.querySelector("#astrology");
+els.indianAstrologySection = document.querySelector("#indianAstrology");
+els.drawSection = document.querySelector("#draw");
+els.resultSection = document.querySelector("#result");
+els.historySection = document.querySelector("#history");
+els.enterDrawButton = document.querySelector("#enterDrawButton");
+els.backToHomeButton = document.querySelector("#backToHomeButton");
+els.showTarotButton = document.querySelector("#showTarotButton");
+els.showAstrologyButton = document.querySelector("#showAstrologyButton");
+els.showIndianButton = document.querySelector("#showIndianButton");
+els.backFromAstrologyButton = document.querySelector("#backFromAstrologyButton");
+els.backFromIndianButton = document.querySelector("#backFromIndianButton");
+els.refreshAstrologyButton = document.querySelector("#refreshAstrologyButton");
+els.refreshIndianButton = document.querySelector("#refreshIndianButton");
+els.astrologyReading = document.querySelector("#astrologyReading");
+els.indianReading = document.querySelector("#indianReading");
+els.profileName = document.querySelector("#profileName");
+els.birthDate = document.querySelector("#birthDate");
+els.birthTime = document.querySelector("#birthTime");
+els.birthCity = document.querySelector("#birthCity");
+els.currentCity = document.querySelector("#currentCity");
+els.astroBirthDate = document.querySelector("#astroBirthDate");
+els.astroBirthTime = document.querySelector("#astroBirthTime");
+els.astroBirthCity = document.querySelector("#astroBirthCity");
+els.astroChartType = document.querySelector("#astroChartType");
+els.astroPartnerName = document.querySelector("#astroPartnerName");
+els.astroPartnerBirthDate = document.querySelector("#astroPartnerBirthDate");
+els.astroPartnerBirthTime = document.querySelector("#astroPartnerBirthTime");
+els.astroPartnerBirthCity = document.querySelector("#astroPartnerBirthCity");
+els.astroTargetDate = document.querySelector("#astroTargetDate");
+els.indianBirthDate = document.querySelector("#indianBirthDate");
+els.indianBirthTime = document.querySelector("#indianBirthTime");
+els.indianBirthCity = document.querySelector("#indianBirthCity");
+els.indianLatitude = document.querySelector("#indianLatitude");
+els.indianLongitude = document.querySelector("#indianLongitude");
+els.indianTimezone = document.querySelector("#indianTimezone");
+els.indianAyanamsa = document.querySelector("#indianAyanamsa");
+els.indianBirthSecond = document.querySelector("#indianBirthSecond");
+els.indianTimezoneHour = document.querySelector("#indianTimezoneHour");
+els.indianTimezoneMinute = document.querySelector("#indianTimezoneMinute");
+els.indianTimezoneDirection = document.querySelector("#indianTimezoneDirection");
+els.indianDaylightSaving = document.querySelector("#indianDaylightSaving");
+els.indianUseLmt = document.querySelector("#indianUseLmt");
+els.indianLongitudeDegree = document.querySelector("#indianLongitudeDegree");
+els.indianLongitudeDirection = document.querySelector("#indianLongitudeDirection");
+els.indianLongitudeMinute = document.querySelector("#indianLongitudeMinute");
+els.indianLongitudeSecond = document.querySelector("#indianLongitudeSecond");
+els.indianLatitudeDegree = document.querySelector("#indianLatitudeDegree");
+els.indianLatitudeDirection = document.querySelector("#indianLatitudeDirection");
+els.indianLatitudeMinute = document.querySelector("#indianLatitudeMinute");
+els.indianLatitudeSecond = document.querySelector("#indianLatitudeSecond");
+els.indianAltitude = document.querySelector("#indianAltitude");
+els.indianPressure = document.querySelector("#indianPressure");
+els.indianTemperature = document.querySelector("#indianTemperature");
+els.loadJhoraSouthGraftonButton = document.querySelector("#loadJhoraSouthGraftonButton");
+els.indianLocationStatus = document.querySelector("#indianLocationStatus");
+els.indianConcernSelect = document.querySelector("#indianConcernSelect");
+els.vedicModuleSelect = document.querySelector("#vedicModuleSelect");
+els.vedicPartnerName = document.querySelector("#vedicPartnerName");
+els.vedicPartnerBirthDate = document.querySelector("#vedicPartnerBirthDate");
+els.vedicPartnerBirthTime = document.querySelector("#vedicPartnerBirthTime");
+els.vedicPartnerBirthCity = document.querySelector("#vedicPartnerBirthCity");
+els.loadPdfIndianButton = document.querySelector("#loadPdfIndianButton");
+els.resolveIndianLocationButton = document.querySelector("#resolveIndianLocationButton");
+els.profileReading = document.querySelector("#profileReading");
+els.homeHistoryList = document.querySelector("#homeHistoryList");
+els.showHistoryButton = document.querySelector("#showHistoryButton");
+els.showProfileButton = document.querySelector("#showProfileButton");
+els.profileDrawer = document.querySelector("#profileDrawer");
+els.logoutButton = document.querySelector("#logoutButton");
+els.installBanner = document.querySelector("#installBanner");
+els.installButton = document.querySelector("#installButton");
+els.dismissInstallButton = document.querySelector("#dismissInstallButton");
+
+function renderTopics() {
+  els.topicGrid.innerHTML = topics.map((topic) => `
+    <button class="topic-card ${state.topic.id === topic.id ? "active" : ""}" data-topic="${topic.id}">
+      <h3>${topic.name}</h3>
+      <p>${topic.desc}</p>
+    </button>
+  `).join("");
+}
+
+function renderSpreads() {
+  els.spreadGrid.innerHTML = spreads.map((spread) => `
+    <button class="spread-card ${state.spread.id === spread.id ? "active" : ""}" data-spread="${spread.id}">
+      <h3>${spread.name}</h3>
+      <p>${spread.subtitle}</p>
+      <p>适合场景：${spread.bestFor}</p>
+      <p>解读深度：${spread.depth}</p>
+    </button>
+  `).join("");
+  els.drawCount.textContent = `完整 78 张牌组 · 需抽取 ${state.spread.positions.length} 张`;
+}
+
+function renderDeck() {
+  const displayCount = 18;
+  els.deck.innerHTML = Array.from({ length: displayCount }, (_, index) => `
+    <button class="tarot-card" aria-label="选择第 ${index + 1} 张牌" data-slot="${index}"></button>
+  `).join("");
+}
+
+function normalizeUserName(name) {
+  return (name || "访客").trim().replace(/\s+/g, "_").slice(0, 40) || "访客";
+}
+
+function normalizeAccount(value) {
+  return (value || "").trim().toLowerCase();
+}
+
+function getAccounts() {
+  try {
+    return JSON.parse(localStorage.getItem("lunaArcanaAccounts") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem("lunaArcanaAccounts", JSON.stringify(accounts));
+}
+
+async function hashPassword(password, salt) {
+  const source = `${salt}:${password}`;
+  if (window.crypto?.subtle) {
+    const data = new TextEncoder().encode(source);
+    const digest = await window.crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  return btoa(unescape(encodeURIComponent(source)));
+}
+
+function getPendingCodes() {
+  try {
+    return JSON.parse(localStorage.getItem("lunaArcanaPendingCodes") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function savePendingCodes(codes) {
+  localStorage.setItem("lunaArcanaPendingCodes", JSON.stringify(codes));
+}
+
+function verifyLocalCode(account, code) {
+  const pending = getPendingCodes()[account];
+  if (!pending || Date.now() > pending.expiresAt) return false;
+  return pending.code === (code || "").trim();
+}
+
+function getCurrentUser() {
+  const stored = localStorage.getItem("lunaArcanaCurrentUser");
+  return normalizeUserName(stored || "访客");
+}
+
+function isLoggedIn() {
+  return getCurrentUser() !== "访客";
+}
+
+function userStorageKey(base) {
+  return `${base}:${getCurrentUser()}`;
+}
+
+function renderLoginState() {
+  const user = getCurrentUser();
+  if (els.loginName) {
+    els.loginName.value = user === "访客" ? "" : user;
+  }
+  if (els.currentUserLabel) {
+    els.currentUserLabel.textContent = `当前用户：${user}`;
+  }
+  if (els.authScreen && els.appDashboard) {
+    els.authScreen.hidden = isLoggedIn();
+    els.appDashboard.hidden = !isLoggedIn();
+  }
+}
+
+function setAuthStatus(message) {
+  if (els.authStatus) {
+    els.authStatus.textContent = message;
+  }
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatReadingText(text) {
+  const cleaned = String(text || "")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/^\s*[-*]\s+/gm, "")
+    .replace(/^\s*>+\s*/gm, "")
+    .trim();
+  return escapeHtml(cleaned)
+    .split(/\n{2,}/)
+    .filter(Boolean)
+    .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
+async function sendVerificationCode() {
+  const account = normalizeAccount(els.loginName.value);
+  if (!account) {
+    setAuthStatus("请先填写邮箱或账号。");
+    els.loginName.focus();
+    return;
+  }
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const pending = getPendingCodes();
+  pending[account] = {
+    code,
+    expiresAt: Date.now() + 10 * 60 * 1000
+  };
+  savePendingCodes(pending);
+
+  try {
+    const response = await fetch("/.netlify/functions/send-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: account, code })
+    });
+    if (!response.ok) throw new Error("send failed");
+    setAuthStatus("验证码已发送，请查看邮箱。");
+  } catch {
+    setAuthStatus(`本地演示验证码：${code}。部署后配置邮件服务即可真实收信。`);
+  }
+}
+
+async function registerAccount() {
+  const account = normalizeAccount(els.loginName.value);
+  const password = els.loginPassword.value;
+  const code = els.loginCode.value;
+  if (!account || !password) {
+    setAuthStatus("请填写邮箱/账号和密码。");
+    return;
+  }
+  if (password.length < 6) {
+    setAuthStatus("密码至少需要 6 位。");
+    return;
+  }
+  if (!verifyLocalCode(account, code)) {
+    setAuthStatus("验证码不正确或已过期，请重新发送。");
+    return;
+  }
+  const accounts = getAccounts();
+  if (accounts[account]) {
+    setAuthStatus("这个账号已经注册，请直接登录。");
+    return;
+  }
+  const salt = `${account}:${Date.now()}`;
+  accounts[account] = {
+    email: account,
+    salt,
+    passwordHash: await hashPassword(password, salt),
+    createdAt: new Date().toISOString()
+  };
+  saveAccounts(accounts);
+  localStorage.setItem("lunaArcanaCurrentUser", account);
+  renderLoginState();
+  renderProfile();
+  renderHistory();
+  setAuthStatus("注册成功，已进入你的个人账号。");
+}
+
+async function loginAccount() {
+  const account = normalizeAccount(els.loginName.value);
+  const password = els.loginPassword.value;
+  const accounts = getAccounts();
+  const record = accounts[account];
+  if (!account || !password) {
+    setAuthStatus("请填写邮箱/账号和密码。");
+    return;
+  }
+  if (!record) {
+    setAuthStatus("这个账号还没有注册，请先发送验证码并注册。");
+    return;
+  }
+  const passwordHash = await hashPassword(password, record.salt);
+  if (passwordHash !== record.passwordHash) {
+    setAuthStatus("密码不正确。");
+    return;
+  }
+  localStorage.setItem("lunaArcanaCurrentUser", account);
+  renderLoginState();
+  renderProfile();
+  renderHistory();
+  setAuthStatus("登录成功，已切换到你的个人记录。");
+}
+
+function persistProfileFromFields() {
+  const current = getProfile();
+  saveProfile({
+    ...current,
+    name: els.profileName.value.trim(),
+    birthDate: els.birthDate.value,
+    birthTime: els.birthTime.value,
+    birthCity: els.birthCity.value.trim(),
+    currentCity: els.currentCity.value.trim()
+  });
+  renderProfile();
+}
+
+function persistProfileFromAstrologyFields() {
+  const current = getProfile();
+  saveProfile({
+    ...current,
+    birthDate: els.astroBirthDate.value,
+    birthTime: els.astroBirthTime.value,
+    birthCity: els.astroBirthCity.value.trim(),
+    astroChartType: els.astroChartType.value,
+    astroPartner: {
+      name: els.astroPartnerName.value.trim(),
+      birthDate: els.astroPartnerBirthDate.value,
+      birthTime: els.astroPartnerBirthTime.value,
+      birthCity: els.astroPartnerBirthCity.value.trim()
+    },
+    astroTargetDate: els.astroTargetDate.value
+  });
+  renderProfile();
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function normalizeNumberInput(value, fallback = "") {
+  if (value === undefined || value === null || value === "") return fallback;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return String(number);
+}
+
+function normalizeSecond(value) {
+  if (value === undefined || value === null || value === "") return "";
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "";
+  return String(Math.max(0, Math.min(59.999999, number)));
+}
+
+function timeSecondFromValue(timeValue) {
+  const parts = String(timeValue || "").split(":");
+  return parts.length >= 3 ? normalizeSecond(parts[2]) : "";
+}
+
+function dmsPartsToString(degree, direction, minute, second) {
+  const deg = Number(degree);
+  if (!Number.isFinite(deg)) return "";
+  const min = Number(minute || 0);
+  const sec = Number(second || 0);
+  return `${Math.abs(Math.trunc(deg))}${direction || "E"}${pad2(Math.max(0, Math.min(59, Math.trunc(min))))}'${pad2(Math.max(0, Math.min(59, Math.round(sec))))}"`;
+}
+
+function parseDmsString(value, axis) {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  const match = text.match(/(\d+(?:\.\d+)?)\s*([NSEW])\s*(?:(\d+(?:\.\d+)?)')?\s*(?:(\d+(?:\.\d+)?)")?/i)
+    || text.match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)?\D*(\d+(?:\.\d+)?)?\D*([NSEW])/i);
+  if (!match) return null;
+  const directionAtEnd = /[NSEW]$/i.test(match[0]);
+  const degree = match[1] || "";
+  const direction = directionAtEnd ? match[4] : match[2];
+  const minute = directionAtEnd ? (match[2] || "0") : (match[3] || "0");
+  const second = directionAtEnd ? (match[3] || "0") : (match[4] || "0");
+  const allowed = axis === "lat" ? ["N", "S"] : ["E", "W"];
+  return {
+    degree,
+    direction: allowed.includes(String(direction).toUpperCase()) ? String(direction).toUpperCase() : allowed[0],
+    minute,
+    second
+  };
+}
+
+function timezonePartsToString(hour, minute, direction) {
+  const h = Number(hour);
+  if (!Number.isFinite(h)) return "";
+  const m = Number(minute || 0);
+  const sign = direction === "W" ? "-" : "+";
+  return `UTC${sign}${pad2(Math.abs(Math.trunc(h)))}:${pad2(Math.max(0, Math.min(59, Math.trunc(m))))}`;
+}
+
+function parseTimezoneString(value) {
+  const text = String(value || "").trim();
+  const match = text.match(/UTC\s*([+-])\s*(\d{1,2})(?::?(\d{2}))?/i);
+  if (!match) return null;
+  return {
+    direction: match[1] === "-" ? "W" : "E",
+    hour: match[2] || "0",
+    minute: match[3] || "0"
+  };
+}
+
+function syncIndianAdvancedToCanonical() {
+  if (els.indianBirthSecond && !els.indianBirthSecond.value) {
+    els.indianBirthSecond.value = timeSecondFromValue(els.indianBirthTime?.value);
+  }
+  const longitude = dmsPartsToString(
+    els.indianLongitudeDegree?.value,
+    els.indianLongitudeDirection?.value || "E",
+    els.indianLongitudeMinute?.value,
+    els.indianLongitudeSecond?.value
+  );
+  const latitude = dmsPartsToString(
+    els.indianLatitudeDegree?.value,
+    els.indianLatitudeDirection?.value || "N",
+    els.indianLatitudeMinute?.value,
+    els.indianLatitudeSecond?.value
+  );
+  const timezone = timezonePartsToString(
+    els.indianTimezoneHour?.value,
+    els.indianTimezoneMinute?.value,
+    els.indianTimezoneDirection?.value || "E"
+  );
+  if (longitude) els.indianLongitude.value = longitude;
+  if (latitude) els.indianLatitude.value = latitude;
+  if (timezone) els.indianTimezone.value = timezone;
+}
+
+function syncIndianCanonicalToAdvanced(profile = getProfile()) {
+  const lon = parseDmsString(profile.longitude || els.indianLongitude?.value, "lon");
+  const lat = parseDmsString(profile.latitude || els.indianLatitude?.value, "lat");
+  const tz = parseTimezoneString(profile.timezone || els.indianTimezone?.value);
+  if (lon && els.indianLongitudeDegree) {
+    els.indianLongitudeDegree.value = lon.degree;
+    els.indianLongitudeDirection.value = lon.direction;
+    els.indianLongitudeMinute.value = lon.minute;
+    els.indianLongitudeSecond.value = lon.second;
+  }
+  if (lat && els.indianLatitudeDegree) {
+    els.indianLatitudeDegree.value = lat.degree;
+    els.indianLatitudeDirection.value = lat.direction;
+    els.indianLatitudeMinute.value = lat.minute;
+    els.indianLatitudeSecond.value = lat.second;
+  }
+  if (tz && els.indianTimezoneHour) {
+    els.indianTimezoneHour.value = tz.hour;
+    els.indianTimezoneMinute.value = tz.minute;
+    els.indianTimezoneDirection.value = tz.direction;
+  }
+  if (els.indianBirthSecond) els.indianBirthSecond.value = profile.birthSecond || timeSecondFromValue(profile.birthTime) || "";
+  if (els.indianDaylightSaving) els.indianDaylightSaving.checked = Boolean(profile.daylightSaving);
+  if (els.indianUseLmt) els.indianUseLmt.checked = Boolean(profile.useLmt);
+  if (els.indianAltitude) els.indianAltitude.value = profile.altitude || "";
+  if (els.indianPressure) els.indianPressure.value = profile.atmosphericPressure || "";
+  if (els.indianTemperature) els.indianTemperature.value = profile.atmosphericTemperature || "";
+}
+
+function getIndianPrecisionData() {
+  syncIndianAdvancedToCanonical();
+  return {
+    birthSecond: normalizeSecond(els.indianBirthSecond?.value),
+    timezoneHour: normalizeNumberInput(els.indianTimezoneHour?.value),
+    timezoneMinute: normalizeNumberInput(els.indianTimezoneMinute?.value, "0"),
+    timezoneDirection: els.indianTimezoneDirection?.value || "E",
+    daylightSaving: Boolean(els.indianDaylightSaving?.checked),
+    useLmt: Boolean(els.indianUseLmt?.checked),
+    longitudeDegree: normalizeNumberInput(els.indianLongitudeDegree?.value),
+    longitudeDirection: els.indianLongitudeDirection?.value || "E",
+    longitudeMinute: normalizeNumberInput(els.indianLongitudeMinute?.value, "0"),
+    longitudeSecond: normalizeSecond(els.indianLongitudeSecond?.value),
+    latitudeDegree: normalizeNumberInput(els.indianLatitudeDegree?.value),
+    latitudeDirection: els.indianLatitudeDirection?.value || "N",
+    latitudeMinute: normalizeNumberInput(els.indianLatitudeMinute?.value, "0"),
+    latitudeSecond: normalizeSecond(els.indianLatitudeSecond?.value),
+    altitude: normalizeNumberInput(els.indianAltitude?.value),
+    atmosphericPressure: normalizeNumberInput(els.indianPressure?.value),
+    atmosphericTemperature: normalizeNumberInput(els.indianTemperature?.value)
+  };
+}
+
+function persistProfileFromIndianFields() {
+  const precision = getIndianPrecisionData();
+  const current = getProfile();
+  saveProfile({
+    ...current,
+    birthDate: els.indianBirthDate.value,
+    birthTime: els.indianBirthTime.value,
+    birthSecond: precision.birthSecond,
+    birthCity: els.indianBirthCity.value.trim(),
+    latitude: els.indianLatitude.value.trim(),
+    longitude: els.indianLongitude.value.trim(),
+    timezone: els.indianTimezone.value.trim(),
+    ayanamsa: els.indianAyanamsa.value.trim() || "Lahiri",
+    ...precision,
+    indianSource: current.indianSource || ""
+  });
+  renderProfile();
+}
+
+function loadPdfIndianSample() {
+  els.indianBirthDate.value = "2002-10-25";
+  els.indianBirthTime.value = "07:05";
+  els.indianBirthSecond.value = "34";
+  els.indianBirthCity.value = "Qinghaihu, China";
+  els.indianLatitude.value = "36N50'00\"";
+  els.indianLongitude.value = "101E49'10\"";
+  els.indianTimezone.value = "UTC+08:00";
+  els.indianAyanamsa.value = "Lahiri";
+  syncIndianCanonicalToAdvanced({
+    birthTime: els.indianBirthTime.value,
+    birthSecond: els.indianBirthSecond.value,
+    latitude: els.indianLatitude.value,
+    longitude: els.indianLongitude.value,
+    timezone: els.indianTimezone.value,
+    ayanamsa: "Lahiri"
+  });
+  const precision = getIndianPrecisionData();
+  const current = getProfile();
+  saveProfile({
+    ...current,
+    birthDate: els.indianBirthDate.value,
+    birthTime: els.indianBirthTime.value,
+    birthSecond: precision.birthSecond,
+    birthCity: els.indianBirthCity.value,
+    latitude: els.indianLatitude.value,
+    longitude: els.indianLongitude.value,
+    timezone: els.indianTimezone.value,
+    ayanamsa: els.indianAyanamsa.value,
+    ...precision,
+    indianSource: "1025.pdf"
+  });
+  renderIndianPage();
+}
+
+function loadJhoraSouthGraftonSample() {
+  els.indianBirthDate.value = "2026-06-25";
+  els.indianBirthTime.value = "09:11";
+  els.indianBirthSecond.value = "23.999991";
+  els.indianBirthCity.value = "South Grafton, Massachusetts, USA";
+  els.indianLatitude.value = "42N12'10\"";
+  els.indianLongitude.value = "71W41'10\"";
+  els.indianTimezone.value = "UTC-04:00";
+  els.indianAyanamsa.value = els.indianAyanamsa.value || "Lahiri";
+  els.indianTimezoneHour.value = "4";
+  els.indianTimezoneMinute.value = "0";
+  els.indianTimezoneDirection.value = "W";
+  els.indianDaylightSaving.checked = true;
+  els.indianUseLmt.checked = false;
+  els.indianLongitudeDegree.value = "71";
+  els.indianLongitudeDirection.value = "W";
+  els.indianLongitudeMinute.value = "41";
+  els.indianLongitudeSecond.value = "10";
+  els.indianLatitudeDegree.value = "42";
+  els.indianLatitudeDirection.value = "N";
+  els.indianLatitudeMinute.value = "12";
+  els.indianLatitudeSecond.value = "10";
+  els.indianAltitude.value = "425";
+  els.indianPressure.value = "1013.25";
+  els.indianTemperature.value = "20";
+  setIndianLocationStatus("已填入截图示例：South Grafton / UTC-04:00 / 71W41'10\" / 42N12'10\"");
+  persistProfileFromIndianFields();
+  saveProfile({
+    ...getProfile(),
+    indianSource: "jhora-south-grafton"
+  });
+  renderProfile();
+  renderIndianPage();
+}
+
+const locationPresets = {
+  "south grafton": { city: "South Grafton, Massachusetts, USA", latitude: "42N12'10\"", longitude: "71W41'10\"", timezone: "UTC-04:00", birthSecond: "23.999991", timezoneHour: "4", timezoneMinute: "0", timezoneDirection: "W", daylightSaving: true, altitude: "425", atmosphericPressure: "1013.25", atmosphericTemperature: "20" },
+  "south grafton ma": { city: "South Grafton, Massachusetts, USA", latitude: "42N12'10\"", longitude: "71W41'10\"", timezone: "UTC-04:00", birthSecond: "23.999991", timezoneHour: "4", timezoneMinute: "0", timezoneDirection: "W", daylightSaving: true, altitude: "425", atmosphericPressure: "1013.25", atmosphericTemperature: "20" },
+  "qinghaihu": { city: "Qinghaihu, China", latitude: "36N50'00\"", longitude: "101E49'10\"", timezone: "UTC+08:00" },
+  "青海湖": { city: "Qinghaihu, China", latitude: "36N50'00\"", longitude: "101E49'10\"", timezone: "UTC+08:00" },
+  "西宁": { city: "西宁, China", latitude: "36N37'00\"", longitude: "101E46'00\"", timezone: "UTC+08:00" },
+  "xining": { city: "Xining, China", latitude: "36N37'00\"", longitude: "101E46'00\"", timezone: "UTC+08:00" },
+  "上海": { city: "上海, China", latitude: "31N13'43\"", longitude: "121E28'29\"", timezone: "UTC+08:00" },
+  "北京": { city: "北京, China", latitude: "39N54'20\"", longitude: "116E24'29\"", timezone: "UTC+08:00" },
+  "广州": { city: "广州, China", latitude: "23N07'53\"", longitude: "113E15'53\"", timezone: "UTC+08:00" },
+  "深圳": { city: "深圳, China", latitude: "22N32'43\"", longitude: "114E03'10\"", timezone: "UTC+08:00" },
+  "杭州": { city: "杭州, China", latitude: "30N16'00\"", longitude: "120E09'00\"", timezone: "UTC+08:00" },
+  "成都": { city: "成都, China", latitude: "30N39'49\"", longitude: "104E04'00\"", timezone: "UTC+08:00" },
+  "重庆": { city: "重庆, China", latitude: "29N33'00\"", longitude: "106E33'00\"", timezone: "UTC+08:00" },
+  "武汉": { city: "武汉, China", latitude: "30N35'00\"", longitude: "114E18'00\"", timezone: "UTC+08:00" },
+  "西安": { city: "西安, China", latitude: "34N16'00\"", longitude: "108E56'00\"", timezone: "UTC+08:00" },
+  "南京": { city: "南京, China", latitude: "32N03'00\"", longitude: "118E47'00\"", timezone: "UTC+08:00" },
+  "香港": { city: "香港, China", latitude: "22N18'00\"", longitude: "114E10'00\"", timezone: "UTC+08:00" },
+  "台北": { city: "台北, China", latitude: "25N02'00\"", longitude: "121E34'00\"", timezone: "UTC+08:00" }
+};
+
+function decimalToDms(value, axis) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "";
+  const direction = axis === "lat"
+    ? (number >= 0 ? "N" : "S")
+    : (number >= 0 ? "E" : "W");
+  const absolute = Math.abs(number);
+  const degrees = Math.floor(absolute);
+  const minutesFloat = (absolute - degrees) * 60;
+  const minutes = Math.floor(minutesFloat);
+  const seconds = Math.round((minutesFloat - minutes) * 60);
+  return `${degrees}${direction}${String(minutes).padStart(2, "0")}'${String(seconds).padStart(2, "0")}"`;
+}
+
+function timezoneFromLongitude(longitude) {
+  const number = Number(longitude);
+  if (!Number.isFinite(number)) return "UTC+08:00";
+  const offset = Math.max(-12, Math.min(14, Math.round(number / 15)));
+  const sign = offset >= 0 ? "+" : "-";
+  return `UTC${sign}${String(Math.abs(offset)).padStart(2, "0")}:00`;
+}
+
+function setIndianLocationStatus(text) {
+  if (els.indianLocationStatus) {
+    els.indianLocationStatus.textContent = text;
+  }
+}
+
+async function resolveIndianLocation({ silent = false, rerender = true } = {}) {
+  const raw = els.indianBirthCity.value.trim().toLowerCase();
+  const matchedKey = Object.keys(locationPresets).find((key) => raw.includes(key.toLowerCase()));
+  if (matchedKey) {
+    const item = locationPresets[matchedKey];
+    els.indianBirthCity.value = item.city;
+    els.indianLatitude.value = item.latitude;
+    els.indianLongitude.value = item.longitude;
+    els.indianTimezone.value = item.timezone;
+    els.indianAyanamsa.value = els.indianAyanamsa.value || "Lahiri";
+    if (item.birthSecond && !els.indianBirthSecond.value) els.indianBirthSecond.value = item.birthSecond;
+    if (item.timezoneHour) els.indianTimezoneHour.value = item.timezoneHour;
+    if (item.timezoneMinute) els.indianTimezoneMinute.value = item.timezoneMinute;
+    if (item.timezoneDirection) els.indianTimezoneDirection.value = item.timezoneDirection;
+    if (item.daylightSaving !== undefined) els.indianDaylightSaving.checked = Boolean(item.daylightSaving);
+    if (item.altitude) els.indianAltitude.value = item.altitude;
+    if (item.atmosphericPressure) els.indianPressure.value = item.atmosphericPressure;
+    if (item.atmosphericTemperature) els.indianTemperature.value = item.atmosphericTemperature;
+    syncIndianCanonicalToAdvanced({
+      ...getProfile(),
+      birthSecond: els.indianBirthSecond.value,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      timezone: item.timezone,
+      daylightSaving: Boolean(item.daylightSaving),
+      altitude: item.altitude || "",
+      atmosphericPressure: item.atmosphericPressure || "",
+      atmosphericTemperature: item.atmosphericTemperature || ""
+    });
+    setIndianLocationStatus(`已自动生成：${item.latitude} / ${item.longitude} / ${item.timezone}`);
+    if (rerender) renderIndianPage();
+    return true;
+  }
+
+  if (!raw) return false;
+
+  try {
+    if (!silent) setIndianLocationStatus("正在根据地址生成经纬度……");
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(raw)}`);
+    if (!response.ok) throw new Error("geocoding failed");
+    const [place] = await response.json();
+    if (!place) throw new Error("no place");
+    const latitude = decimalToDms(place.lat, "lat");
+    const longitude = decimalToDms(place.lon, "lon");
+    els.indianBirthCity.value = place.display_name.split(",").slice(0, 3).join(", ");
+    els.indianLatitude.value = latitude;
+    els.indianLongitude.value = longitude;
+    els.indianTimezone.value = timezoneFromLongitude(place.lon);
+    els.indianAyanamsa.value = els.indianAyanamsa.value || "Lahiri";
+    syncIndianCanonicalToAdvanced({
+      ...getProfile(),
+      latitude,
+      longitude,
+      timezone: els.indianTimezone.value
+    });
+    setIndianLocationStatus(`已自动生成：${latitude} / ${longitude} / ${els.indianTimezone.value}`);
+    if (rerender) renderIndianPage();
+    return true;
+  } catch {
+    if (!silent) {
+      setIndianLocationStatus("暂时没有匹配到这个地址，可以换成城市名，例如：上海、北京、广州。");
+    }
+    return false;
+  }
+}
+
+async function renderAstrologyPage() {
+  persistProfileFromAstrologyFields();
+  const profile = getProfile();
+  const partner = {
+    name: els.astroPartnerName.value.trim(),
+    birthDate: els.astroPartnerBirthDate.value,
+    birthTime: els.astroPartnerBirthTime.value,
+    birthCity: els.astroPartnerBirthCity.value.trim()
+  };
+  if (!window.AstrologySkill) {
+    els.astrologyReading.innerHTML = "<p>星盘 skill 未加载。</p>";
+    return;
+  }
+  const options = {
+    chartType: els.astroChartType.value,
+    partner,
+    targetDate: els.astroTargetDate.value
+  };
+  const chart = options.chartType === "composite"
+    ? window.AstrologySkill.buildComposite(profile, partner)
+    : window.AstrologySkill.buildChart(profile, options);
+  els.astrologyReading.innerHTML = `
+    ${window.AstrologySkill.reading(profile, options)}
+    <div class="deepseek-reading" id="deepseekAstrologyReading">
+      <h3>DeepSeek 专业星盘解读</h3>
+      <p>正在连接 DeepSeek 生成更深入的星盘解读……</p>
+    </div>
+  `;
+  const deepseekBox = document.querySelector("#deepseekAstrologyReading");
+  if (!chart || !deepseekBox) return;
+  try {
+    const response = await fetch("/.netlify/functions/deepseek-astrology", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, chart, options })
+    });
+    if (!response.ok) throw new Error("DeepSeek unavailable");
+    const data = await response.json();
+    deepseekBox.innerHTML = `
+      <h3>DeepSeek 专业星盘解读</h3>
+      ${formatReadingText(data.reading)}
+    `;
+  } catch {
+    deepseekBox.innerHTML = `
+      <h3>DeepSeek 专业星盘解读</h3>
+      <p>当前本地预览还没有读取到模型配置，所以先显示本地结构化解读。使用 ccswitch 时，请确保本地服务能读取 <strong>OPENAI_API_KEY / OPENAI_BASE_URL</strong> 或 <strong>CCSWITCH_API_KEY / CCSWITCH_BASE_URL</strong>；部署到 Netlify 时也要配置对应环境变量。</p>
+    `;
+  }
+}
+
+function getIndianModuleForFocus(focusArea, partner) {
+  const focus = String(focusArea || "").toLowerCase();
+  const hasPartner = Boolean(partner?.birthDate && partner?.birthTime && partner?.birthCity);
+  if (hasPartner || /合盘|婚配|关系对比|synastry|partner|matching/.test(focus)) return "synastry";
+  if (/事业|职业|工作|跳槽|转行|创业|财富|钱|收入|career|wealth|business/.test(focus)) return "career";
+  if (/婚姻|感情|恋爱|桃花|复合|伴侣|爱情|love|relationship|marriage/.test(focus)) return "love";
+  if (/校时|校准|矫正|出生时间不准|rectifier|rectification/.test(focus)) return "rectifier";
+  return "core";
+}
+
+function getIndianSkillModules(vedicModule) {
+  const modules = ["vedic-calculator", "vedic-reader", "vedic-core"];
+  const map = {
+    career: "vedic-career",
+    love: "vedic-love",
+    rectifier: "vedic-rectifier",
+    synastry: "vedic-synastry",
+    core: "vedic-core",
+    reader: "vedic-reader"
+  };
+  const skillName = map[vedicModule] || "vedic-core";
+  if (!modules.includes(skillName)) modules.push(skillName);
+  if (vedicModule === "synastry" && !modules.includes("vedic-love")) modules.push("vedic-love");
+  return modules;
+}
+
+function getIndianOptions() {
+  const partner = {
+    name: els.vedicPartnerName?.value.trim() || "",
+    birthDate: els.vedicPartnerBirthDate?.value || "",
+    birthTime: els.vedicPartnerBirthTime?.value || "",
+    birthCity: els.vedicPartnerBirthCity?.value.trim() || ""
+  };
+  const focusArea = els.indianConcernSelect?.value || "事业";
+  const vedicModule = getIndianModuleForFocus(focusArea, partner);
+  return {
+    vedicModule,
+    focusArea,
+    activeSkillModules: getIndianSkillModules(vedicModule),
+    partner
+  };
+}
+
+async function fetchVedicSkillResult(profile, options, chart) {
+  try {
+    const response = await fetch("/.netlify/functions/vedic-skill-bridge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, options, chart })
+    });
+    if (!response.ok) {
+      return {
+        ok: false,
+        bridge: { source: "web-fallback", calculatorReady: false, reason: "专业排盘接口暂时不可用。" },
+        structuredDataMarkdown: "",
+        calculationMeta: null
+      };
+    }
+    return response.json();
+  } catch {
+    return {
+      ok: false,
+      bridge: { source: "web-fallback", calculatorReady: false, reason: "当前页面无法连接本机 Python 排盘服务。" },
+      structuredDataMarkdown: "",
+      calculationMeta: null
+    };
+  }
+}
+
+function parseVedicMeta(markdown) {
+  const text = String(markdown || "");
+  const pick = (label) => {
+    const match = text.match(new RegExp(`${label}:\\s*([^\\n]+)`));
+    return match ? match[1].trim() : "";
+  };
+  return {
+    birth: pick("出生日期"),
+    time: pick("出生时间"),
+    place: pick("出生地点"),
+    precision: pick("时间精度"),
+    effectivePrecision: pick("有效精度"),
+    method: pick("读盘方式"),
+    ayanamsa: pick("Ayanamsa"),
+    nodeMode: pick("Node模式")
+  };
+}
+
+function parseVedicD1Positions(markdown) {
+  const text = String(markdown || "");
+  const section = text.match(/### 行星位置([\s\S]*?)(?:\n### |\n## |$)/);
+  if (!section) return [];
+  return section[1]
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && !/---|行星\s*\|/.test(line))
+    .map((line) => line.split("|").map((cell) => cell.trim()).filter(Boolean))
+    .filter((cells) => cells.length >= 5)
+    .map(([body, sign, house, degree, retrograde]) => ({ body, sign, house, degree, retrograde }));
+}
+
+function renderProfessionalVedicPanel(skillResult) {
+  const bridge = skillResult?.bridge || {};
+  const meta = skillResult?.calculationMeta || {};
+  const markdown = skillResult?.structuredDataMarkdown || "";
+  const structuredMeta = parseVedicMeta(markdown);
+  const positions = parseVedicD1Positions(markdown);
+  const warnings = [
+    ...(Array.isArray(meta.warnings) ? meta.warnings : []),
+    bridge.calculatorReady ? "" : bridge.reason
+  ].filter(Boolean);
+  const status = bridge.calculatorReady
+    ? "Python / Swiss Ephemeris 已接通"
+    : "当前为网页备用排盘";
+  const sourceClass = bridge.calculatorReady ? "ready" : "fallback";
+
+  return `
+    <div class="vedic-data-panel professional-ephemeris" data-vedic-professional-panel>
+      <div class="vedic-panel-head">
+        <div>
+          <p class="kicker">专业星历排盘</p>
+          <h3>D1 本命盘真实数据</h3>
+        </div>
+        <span class="vedic-status-pill ${sourceClass}">${escapeHtml(status)}</span>
+      </div>
+      <div class="vedic-data-grid">
+        <span>出生资料<strong>${escapeHtml(structuredMeta.birth || "未生成")} ${escapeHtml(structuredMeta.time || "")}</strong></span>
+        <span>时区<strong>${escapeHtml(meta.timezone || structuredMeta.place || "待识别")}</strong></span>
+        <span>经纬度<strong>${escapeHtml(Number.isFinite(meta.lon) ? `${meta.lon.toFixed(6)}, ${meta.lat.toFixed(6)}` : "待生成")}</strong></span>
+        <span>Ayanamsa<strong>${escapeHtml(structuredMeta.ayanamsa || "Lahiri")}</strong></span>
+        <span>秒数<strong>${escapeHtml(meta.second ?? "0")}</strong></span>
+        <span>精度<strong>${escapeHtml(structuredMeta.effectivePrecision || structuredMeta.precision || "待校验")}</strong></span>
+      </div>
+      ${positions.length ? `
+        <div class="vedic-ephemeris-table" aria-label="D1 行星位置">
+          <div class="vedic-ephemeris-row header">
+            <span>行星</span><span>星座</span><span>宫位</span><span>度数</span><span>逆行</span>
+          </div>
+          ${positions.map((item) => `
+            <div class="vedic-ephemeris-row">
+              <strong>${escapeHtml(item.body)}</strong>
+              <span>${escapeHtml(item.sign)}</span>
+              <span>${escapeHtml(item.house)}宫</span>
+              <span>${escapeHtml(item.degree)}</span>
+              <span>${escapeHtml(item.retrograde)}</span>
+            </div>
+          `).join("")}
+        </div>
+      ` : `
+        <p class="disclaimer">尚未拿到 Python structured_data.md，当前只显示网页备用盘。请确认本机服务正在运行。</p>
+      `}
+      ${warnings.length ? `
+        <div class="vedic-warning-list">
+          ${warnings.slice(0, 3).map((item) => `<p>${escapeHtml(item)}</p>`).join("")}
+        </div>
+      ` : ""}
+      <p class="disclaimer">解读会优先读取这份 D1 真实星历数据；若 SAV/BAV、Shadbala 或部分分盘有警示，DeepSeek 不会把占位值当成真实强弱判断。</p>
+    </div>
+  `;
+}
+
+function renderProfessionalVedicLoading() {
+  return `
+    <div class="vedic-data-panel professional-ephemeris loading" data-vedic-professional-panel>
+      <div class="vedic-panel-head">
+        <div>
+          <p class="kicker">专业星历排盘</p>
+          <h3>正在调用 Python 星历引擎</h3>
+        </div>
+        <span class="vedic-status-pill">计算中</span>
+      </div>
+      <p>正在根据出生秒数、时区、经纬度和 Lahiri Ayanamsa 生成真实 D1 本命盘……</p>
+    </div>
+  `;
+}
+
+async function renderIndianPage() {
+  if (els.indianBirthCity.value.trim() && (!els.indianLatitude.value || !els.indianLongitude.value)) {
+    await resolveIndianLocation({ silent: true, rerender: false });
+  }
+  persistProfileFromIndianFields();
+  const profile = getProfile();
+  if (!window.IndianAstrologySkill) {
+    els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
+    return;
+  }
+  const options = getIndianOptions();
+  const chart = window.IndianAstrologySkill.buildChart(profile, options);
+  els.indianReading.innerHTML = window.IndianAstrologySkill.chartView(profile, options);
+  if (!chart) return;
+  const requestId = Date.now();
+  state.indianSkillRequestId = requestId;
+  state.indianSkillResult = null;
+  state.indianSkillPromise = fetchVedicSkillResult(profile, options, chart);
+  const actions = els.indianReading.querySelector(".chart-actions");
+  actions?.insertAdjacentHTML("afterend", renderProfessionalVedicLoading());
+  const skillResult = await state.indianSkillPromise;
+  if (state.indianSkillRequestId !== requestId) return;
+  state.indianSkillResult = skillResult;
+  const panel = els.indianReading.querySelector("[data-vedic-professional-panel]");
+  if (panel) {
+    panel.outerHTML = renderProfessionalVedicPanel(skillResult);
+  }
+}
+
+async function renderIndianInterpretation() {
+  persistProfileFromIndianFields();
+  const profile = getProfile();
+  if (!window.IndianAstrologySkill) {
+    els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
+    return;
+  }
+  const options = getIndianOptions();
+  const chart = window.IndianAstrologySkill.buildChart(profile, options);
+  const deepseekBox = document.querySelector("#deepseekIndianReading");
+  if (!chart || !deepseekBox) return;
+  deepseekBox.hidden = false;
+  deepseekBox.innerHTML = `
+    <h3>印度占星解读</h3>
+    <p>正在根据你的印度星盘生成完整专业报告，内容较长，请稍等……</p>
+  `;
+  let skillResult = null;
+  try {
+    skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null);
+    if (!skillResult) {
+      skillResult = await fetchVedicSkillResult(profile, options, chart);
+      state.indianSkillResult = skillResult;
+    }
+
+    const response = await fetch("/.netlify/functions/deepseek-vedic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        profile,
+        chart,
+        options,
+        skillResult,
+        pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
+      })
+    });
+    if (!response.ok) throw new Error("DeepSeek unavailable");
+    const data = await response.json();
+    state.indianContext = { profile, chart, options, skillResult };
+    state.indianChatHistory = [];
+    deepseekBox.innerHTML = `
+      <h3>印度占星解读</h3>
+      ${formatReadingText(data.reading)}
+      ${indianChatMarkup()}
+    `;
+  } catch {
+    state.indianContext = { profile, chart, options, skillResult };
+    state.indianChatHistory = [];
+    deepseekBox.innerHTML = `
+      <h3>印度占星解读</h3>
+      ${window.IndianAstrologySkill.reading(profile, options)}
+      ${indianChatMarkup()}
+    `;
+  }
+}
+
+function indianChatMarkup() {
+  return `
+    <div class="vedic-chat">
+      <h4>继续追问</h4>
+      <div class="vedic-chat-messages" id="indianChatMessages"></div>
+      <div class="vedic-chat-input">
+        <input id="indianQuestionInput" type="text" placeholder="例如：我的事业方向怎么看？感情什么时候更稳定？" />
+        <button class="button secondary" id="sendIndianQuestionButton" type="button">发送</button>
+      </div>
+      <p class="disclaimer">追问会继续基于这张印度星盘回答，不会重新生成一张盘。</p>
+    </div>
+  `;
+}
+
+function renderIndianChatMessages() {
+  const box = document.querySelector("#indianChatMessages");
+  if (!box) return;
+  box.innerHTML = state.indianChatHistory.map((item) => `
+    <article class="vedic-chat-message ${item.role}">
+      <strong>${item.role === "user" ? "你" : "占星师"}</strong>
+      ${formatReadingText(item.content)}
+    </article>
+  `).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendIndianQuestion() {
+  const input = document.querySelector("#indianQuestionInput");
+  const button = document.querySelector("#sendIndianQuestionButton");
+  if (!input || !button || !state.indianContext) return;
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = "";
+  state.indianChatHistory.push({ role: "user", content: question });
+  state.indianChatHistory.push({ role: "assistant", content: "正在看这张盘里和你问题有关的线索……" });
+  renderIndianChatMessages();
+  button.disabled = true;
+  try {
+    const response = await fetch("/.netlify/functions/deepseek-vedic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...state.indianContext,
+        question,
+        history: state.indianChatHistory.slice(0, -1),
+        mode: "qa",
+        pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
+      })
+    });
+    if (!response.ok) throw new Error("DeepSeek unavailable");
+    const data = await response.json();
+    state.indianChatHistory[state.indianChatHistory.length - 1] = {
+      role: "assistant",
+      content: data.reading || "这次没有生成有效回答，请换一种问法再试。"
+    };
+  } catch {
+    state.indianChatHistory[state.indianChatHistory.length - 1] = {
+      role: "assistant",
+      content: "当前 DeepSeek 没有返回结果。我仍建议你围绕上升、月亮、Rahu/Ketu 轴和土星所在宫位来追问，这样答案会更聚焦。"
+    };
+  } finally {
+    button.disabled = false;
+    renderIndianChatMessages();
+  }
+}
+
+function showAstrologyFlow() {
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再查看个人星盘。");
+    showHomeFlow();
+    return;
+  }
+  persistProfileFromFields();
+  renderAstrologyPage();
+  els.home.hidden = true;
+  els.drawSection.hidden = true;
+  els.resultSection.hidden = true;
+  els.indianAstrologySection.hidden = true;
+  els.astrologySection.hidden = false;
+  location.hash = "astrology";
+}
+
+function showIndianFlow() {
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再查看印度占星。");
+    showHomeFlow();
+    return;
+  }
+  persistProfileFromFields();
+  renderIndianPage();
+  els.home.hidden = true;
+  els.drawSection.hidden = true;
+  els.resultSection.hidden = true;
+  els.astrologySection.hidden = true;
+  els.indianAstrologySection.hidden = false;
+  location.hash = "indianAstrology";
+}
+
+function showHomeFlow() {
+  els.home.hidden = false;
+  els.drawSection.hidden = true;
+  els.resultSection.hidden = true;
+  els.astrologySection.hidden = true;
+  els.indianAstrologySection.hidden = true;
+  els.historySection.hidden = true;
+  renderLoginState();
+  location.hash = "home";
+}
+
+function showHistoryFlow() {
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再查看历史记录。");
+    showHomeFlow();
+    return;
+  }
+  renderHistory();
+  els.home.hidden = true;
+  els.drawSection.hidden = true;
+  els.resultSection.hidden = true;
+  els.astrologySection.hidden = true;
+  els.indianAstrologySection.hidden = true;
+  els.historySection.hidden = false;
+  location.hash = "history";
+}
+
+function showTarotFlow() {
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再开始塔罗占卜。");
+    showHomeFlow();
+    return;
+  }
+  els.home.hidden = true;
+  els.astrologySection.hidden = true;
+  els.indianAstrologySection.hidden = true;
+  els.historySection.hidden = true;
+  els.drawSection.hidden = false;
+  els.resultSection.hidden = true;
+  state.selectedCards = [];
+  state.currentReading = null;
+  state.shuffled = false;
+  renderDeck();
+  location.hash = "draw";
+}
+
+function enterDrawFlow() {
+  const question = els.questionInput.value.trim();
+  if (!question) {
+    els.ritualStatus.textContent = "请先写下一个具体问题，再进入抽牌。";
+    els.questionInput.focus();
+    return;
+  }
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再开始塔罗占卜。");
+    showHomeFlow();
+    return;
+  }
+  persistProfileFromFields();
+  els.home.hidden = true;
+  els.astrologySection.hidden = true;
+  els.indianAstrologySection.hidden = true;
+  els.drawSection.hidden = false;
+  els.resultSection.hidden = true;
+  state.selectedCards = [];
+  state.currentReading = null;
+  state.shuffled = false;
+  renderDeck();
+  location.hash = "draw";
+}
+
+function returnHomeFlow() {
+  showHomeFlow();
+}
+
+function shuffleDeck() {
+  state.shuffled = false;
+  state.selectedCards = [];
+  state.currentReading = null;
+  els.result.hidden = true;
+  document.querySelectorAll(".tarot-card").forEach((card) => card.classList.remove("selected"));
+  els.shuffleButton.disabled = true;
+  els.shuffleStage.classList.add("active");
+  els.ritualStatus.textContent = "正在洗牌，请把注意力放回你的问题。";
+
+  window.setTimeout(() => {
+    state.shuffled = true;
+    els.shuffleButton.disabled = false;
+    els.shuffleStage.classList.remove("active");
+    els.ritualStatus.textContent = "洗牌完成。现在可以静心 5 秒，然后抽牌。";
+  }, 1500);
+}
+
+function startRitual() {
+  const question = els.questionInput.value.trim();
+  if (!question) {
+    els.ritualStatus.textContent = "请先写下一个具体问题，让牌面有可以回应的方向。";
+    return;
+  }
+
+  if (!state.shuffled) {
+    shuffleDeck();
+    return;
+  }
+
+  state.selectedCards = [];
+  state.currentReading = null;
+  state.favorite = false;
+  els.result.hidden = true;
+  document.querySelectorAll(".tarot-card").forEach((card) => card.classList.remove("selected"));
+
+  let count = 5;
+  els.prepareButton.disabled = true;
+  els.ritualStatus.textContent = `请慢慢呼吸，静心 ${count} 秒。`;
+  const timer = window.setInterval(() => {
+    count -= 1;
+    if (count > 0) {
+      els.ritualStatus.textContent = `正在聆听牌面的回声…… ${count}`;
+      return;
+    }
+    window.clearInterval(timer);
+    els.prepareButton.disabled = false;
+    els.ritualStatus.textContent = `现在请从牌组中选择 ${state.spread.positions.length} 张牌。`;
+  }, 1000);
+}
+
+function drawCard(button) {
+  if (!els.questionInput.value.trim()) {
+    els.ritualStatus.textContent = "请先写下问题并完成静心。";
+    return;
+  }
+  if (!state.shuffled) {
+    els.ritualStatus.textContent = "请先洗牌，让本次牌组重新归位。";
+    return;
+  }
+  if (state.selectedCards.length >= state.spread.positions.length || button.classList.contains("selected")) {
+    return;
+  }
+
+  const remaining = tarotCards.filter((card) => !state.selectedCards.some((item) => item.card.id === card.id));
+  const card = remaining[Math.floor(Math.random() * remaining.length)];
+  const orientation = Math.random() > 0.32 ? "upright" : "reversed";
+  const position = state.spread.positions[state.selectedCards.length];
+  state.selectedCards.push({ card, orientation, position });
+  button.classList.add("selected");
+
+  const left = state.spread.positions.length - state.selectedCards.length;
+  els.ritualStatus.textContent = left ? `已选择 ${state.selectedCards.length} 张，还需 ${left} 张。` : "牌面已齐，正在整理解读。";
+
+  if (!left) {
+    window.setTimeout(showResult, 500);
+  }
+}
+
+const topicLens = {
+  love: {
+    field: "关系互动",
+    focus: "真实需求、情绪边界与双方靠近的方式",
+    advice: "先用不指责的语言表达一个具体感受，再观察对方的回应质量"
+  },
+  career: {
+    field: "事业方向",
+    focus: "资源配置、角色定位与下一步推进节奏",
+    advice: "把目标拆成一个可交付的小成果，用结果验证方向"
+  },
+  wealth: {
+    field: "财富机会",
+    focus: "风险承受度、资源流动与长期稳定性",
+    advice: "先核对成本、时间和最坏情况，再决定是否投入更多资源"
+  },
+  growth: {
+    field: "自我成长",
+    focus: "内在模式、习惯反应与自我支持方式",
+    advice: "记录一次情绪触发点，分清事实、解释和真正的需要"
+  },
+  daily: {
+    field: "今日能量",
+    focus: "当天最值得留意的提醒、节奏与心态",
+    advice: "今天只选择一个最重要的小行动，把注意力收回来"
+  },
+  choice: {
+    field: "重大选择",
+    focus: "不同路径的代价、隐藏条件与价值排序",
+    advice: "写下每个选项会带来的三个收益和三个代价，再看哪个更接近长期价值"
+  }
+};
+
+const positionLens = {
+  "核心指引": "它像本次问题的中心线索，提醒你先抓住最关键的判断依据。",
+  "过去影响": "它指向过去留下的惯性，可能仍在影响你此刻的反应。",
+  "当前状态": "它描述现在最活跃的能量，也是你最容易感受到的部分。",
+  "未来趋势": "它不是绝对预言，而是指出若当前模式延续，局势可能靠近的方向。",
+  "我的状态": "它映照你在这段关系或互动中的位置，尤其是你没有说出口的需求。",
+  "对方状态": "它提示对方可能呈现出的倾向，但仍需要通过现实沟通验证。",
+  "关系现状": "它总结双方之间正在形成的动态，包括连接与拉扯。",
+  "潜在阻碍": "它指出容易被忽略的卡点，通常不是表面事件，而是背后的模式。",
+  "行动建议": "它给出下一步的落点，重点是温和、具体、可执行。",
+  "选项 A": "它呈现选项 A 的能量与代价，适合用来观察这条路的真实质地。",
+  "选项 B": "它呈现选项 B 的能量与代价，帮助你比较另一条路的可能性。",
+  "隐藏因素": "它提示尚未完全浮出水面的变量，做决定前值得再确认。"
+};
+
+const cardAdvice = {
+  "the-fool": ["允许一次新的尝试，但先设定一个安全边界。", "把未知拆小，先走出第一步，而不是要求自己一次看完全部答案。"],
+  "the-magician": ["盘点手边已有资源，选择最容易启动的一项马上行动。", "把想法写成计划表，避免灵感停留在脑中。"],
+  "the-high-priestess": ["暂缓逼问答案，给直觉和事实各留一个位置。", "留意细节和沉默，它们可能比表面表达更接近真相。"],
+  "the-empress": ["优先滋养真正有生命力的部分，减少无效消耗。", "问自己：这件事是在让我生长，还是只是在让我付出？"],
+  "the-emperor": ["建立规则、期限或边界，让局势有可以依靠的结构。", "用清晰安排代替反复担心。"],
+  "the-hierophant": ["寻找可信的经验、导师或规则，但保留自己的判断。", "确认承诺是否来自真心，而不是来自习惯或压力。"],
+  "the-lovers": ["回到价值观层面做选择，不只看短期情绪。", "把真正重要的标准说清楚，关系才有机会诚实前进。"],
+  "the-chariot": ["保持方向感，不要被旁枝问题拉走。", "选择一个目标，坚持推进到能看到反馈。"],
+  "strength": ["用温柔但坚定的方式处理冲突。", "别急着证明自己，稳定本身就是力量。"],
+  "the-hermit": ["给自己一段安静时间，答案需要从噪音中分离出来。", "减少外界意见，听见你自己的判断。"],
+  "wheel-of-fortune": ["接受变化正在发生，先观察周期而不是急着控制。", "把计划做得更有弹性，为转机留空间。"],
+  "justice": ["回到事实、责任和边界，不让情绪替你判案。", "把模糊约定写清楚，减少误解。"],
+  "the-hanged-man": ["换一个角度看问题，暂停可能比硬推更有效。", "问自己：如果不急着证明对错，我还能看见什么？"],
+  "death": ["允许旧模式结束，新的空间才会出现。", "做一次整理，放下已经不能支持你的东西。"],
+  "temperance": ["选择协调与渐进，不必用极端方式解决问题。", "把节奏放慢一点，让不同需求有机会融合。"],
+  "the-devil": ["诚实看见依赖、执念或交换条件。", "减少让你失去自由感的选择。"],
+  "the-tower": ["面对已经松动的结构，重建会比粉饰更有力量。", "先处理最明显的真相，不必一次解决全部震动。"],
+  "the-star": ["保留希望，但把希望落到具体行动。", "做一件能恢复信心的小事。"],
+  "the-moon": ["先核对事实，不让焦虑填补未知。", "把不确定写下来，逐项确认。"],
+  "the-sun": ["选择更坦诚、明亮的表达方式。", "把已经清楚的好消息或进展看见。"],
+  "judgement": ["复盘过去的选择，听见内在真正的召唤。", "给自己一次重新回应生活的机会。"],
+  "the-world": ["完成收尾，整合经验，再进入下一阶段。", "把成果固定下来，不要在最后一步反复拖延。"]
+};
+
+const majorDepth = {
+  "the-fool": {
+    essence: "愚者不是单纯冒险，它代表尚未被经验限制的生命力。牌面在提醒你，问题的关键可能不是准备到完美，而是能否带着觉察进入新阶段。",
+    shadow: "阴影面是轻率、逃避后果，或把自由误解成不需要承担。",
+    cue: "问自己：如果我允许自己从零开始，第一步会是什么？"
+  },
+  "the-magician": {
+    essence: "魔术师强调把意志、语言、资源和行动连接起来。它通常表示你并不缺少条件，真正的考验是能否集中力量。",
+    shadow: "阴影面是说得太多、做得太散，或用技巧掩盖真实动机。",
+    cue: "把手上已有的资源列出来，只选一个最能启动局面的工具。"
+  },
+  "the-high-priestess": {
+    essence: "女祭司指向尚未公开的信息、直觉与潜意识。她提醒你，不是所有答案都适合马上逼出来。",
+    shadow: "阴影面是过度沉默、被动等待，或把猜测误当成直觉。",
+    cue: "给自己一点安静时间，同时记录事实证据，不让直觉孤立存在。"
+  },
+  "the-empress": {
+    essence: "女皇关乎滋养、身体感受、创造力与关系中的承接。它表示某件事需要被好好照料，而不是被催促。",
+    shadow: "阴影面是过度付出、边界变软，或用照顾换取安全感。",
+    cue: "观察这件事是否让你变得更丰盛，还是只让你被消耗。"
+  },
+  "the-emperor": {
+    essence: "皇帝代表结构、责任和可执行的秩序。它要求你从情绪波动里站出来，建立规则与边界。",
+    shadow: "阴影面是控制欲、僵硬标准，或把脆弱藏在强势后面。",
+    cue: "为这件事定一个清楚的边界、时间表或判断标准。"
+  },
+  "the-hierophant": {
+    essence: "教皇指向传统、承诺、系统性学习和被认可的路径。它常提示你向经验与专业框架借力。",
+    shadow: "阴影面是盲从权威，或为了符合期待而压下真实判断。",
+    cue: "分清哪些规则能保护你，哪些规则只是让你不敢选择。"
+  },
+  "the-lovers": {
+    essence: "恋人真正讨论的是价值选择，而不只是浪漫关系。它要求你在吸引、承诺和真实标准之间做诚实校准。",
+    shadow: "阴影面是犹豫、讨好，或把短暂心动误认为长期契合。",
+    cue: "写下你不能妥协的三个价值标准。"
+  },
+  "the-chariot": {
+    essence: "战车代表目标感、意志力和把矛盾力量拉向同一方向的能力。它适合主动推进，但不适合失控冲刺。",
+    shadow: "阴影面是过度用力、只想赢，或忽略身体与关系的承受度。",
+    cue: "确认方向后，把行动控制在可持续的节奏里。"
+  },
+  strength: {
+    essence: "力量牌不是压制，而是温柔驯服本能。它表示真正有效的力量来自稳定、耐心和内在安全感。",
+    shadow: "阴影面是硬撑、讨好式温柔，或压抑愤怒到失去边界。",
+    cue: "用坚定但不攻击的方式表达你的底线。"
+  },
+  "the-hermit": {
+    essence: "隐士代表向内寻找答案。它通常说明外界意见已经太多，你需要回到自己的经验和智慧。",
+    shadow: "阴影面是孤立、退缩，或用独处逃避必要沟通。",
+    cue: "暂时减少噪音，问自己真正知道但一直回避的答案是什么。"
+  },
+  "wheel-of-fortune": {
+    essence: "命运之轮显示周期变化和外部变量。它提醒你顺势而为，同时保留对变化的敏感度。",
+    shadow: "阴影面是完全被动，或把短期波动看成命运定论。",
+    cue: "观察局势正在转向哪里，而不是只抓住原计划。"
+  },
+  justice: {
+    essence: "正义要求你回到事实、责任和因果。它不是情绪审判，而是冷静看见每个选择带来的结果。",
+    shadow: "阴影面是逃避责任、信息不透明，或只想证明自己正确。",
+    cue: "把事实、感受和猜测分成三列。"
+  },
+  "the-hanged-man": {
+    essence: "倒吊人代表暂停、换位和主动放下控制。它说明暂时不动，可能是为了看见更深的答案。",
+    shadow: "阴影面是拖延、牺牲感，或把无力误认为顺其自然。",
+    cue: "换一个立场看问题，尤其是你最不愿承认的那个角度。"
+  },
+  death: {
+    essence: "死神代表必要的结束和更新。它并不等于坏事，而是旧结构已经无法继续承载新阶段。",
+    shadow: "阴影面是抗拒告别，或反复给已经结束的东西续命。",
+    cue: "明确写下需要停止的一件事。"
+  },
+  temperance: {
+    essence: "节制代表调和、疗愈和逐步融合。它提示你用中道与耐心处理复杂关系或复杂目标。",
+    shadow: "阴影面是拖太久、稀释真实需求，或为了和平放弃原则。",
+    cue: "找一个能同时照顾两边需求的最小调整。"
+  },
+  "the-devil": {
+    essence: "恶魔揭示执念、依赖、欲望和不自由的交换。它要求你诚实看见自己被什么牵动。",
+    shadow: "阴影面是明知不健康却继续合理化，或把短期满足当成安全感。",
+    cue: "指出一个让你失去自由感的诱因。"
+  },
+  "the-tower": {
+    essence: "高塔代表真相打破旧结构。它通常来得突然，但它拆掉的是已经不稳的部分。",
+    shadow: "阴影面是拒绝面对现实，直到局势用更剧烈的方式提醒你。",
+    cue: "先承认最明显的事实，再谈重建。"
+  },
+  "the-star": {
+    essence: "星星代表疗愈、希望和长远愿景。它不像太阳那样立刻明亮，而是恢复信任的过程。",
+    shadow: "阴影面是过度理想化，或只许愿不行动。",
+    cue: "做一件能让你恢复信心的小事。"
+  },
+  "the-moon": {
+    essence: "月亮代表迷雾、投射和潜意识波动。它提醒你现在的信息可能不完整，情绪也会放大想象。",
+    shadow: "阴影面是焦虑、误读信号，或被不确定牵着走。",
+    cue: "先核实事实，再解释动机。"
+  },
+  "the-sun": {
+    essence: "太阳代表清晰、显现和生命力。它通常说明真相会变得更明朗，坦诚表达有助于打开局面。",
+    shadow: "阴影面是过度乐观，或忽略阴影处仍需处理的问题。",
+    cue: "把已经确定的好消息、资源或支持看见。"
+  },
+  judgement: {
+    essence: "审判代表觉醒、复盘和回应召唤。它说明旧经验正在被重新理解，你需要用现在的自己做判断。",
+    shadow: "阴影面是自责、旧评价，或迟迟不肯回应内心真正知道的方向。",
+    cue: "问自己：这件事在召唤我成为怎样的人？"
+  },
+  "the-world": {
+    essence: "世界代表完成、整合和成熟。它说明一个周期接近闭合，重点是收尾、确认成果并准备进入下一阶段。",
+    shadow: "阴影面是完美主义、拖延收尾，或不敢承认自己已经走到终点。",
+    cue: "完成最后一个收尾动作，让阶段真正结束。"
+  }
+};
+
+const minorSuitDepth = {
+  权杖: {
+    lens: "这张权杖牌把问题带到行动力、主动性、欲望和创造冲动上。",
+    risk: "需要留意热情是否超过了现实承载，或行动是否缺少持续策略。",
+    question: "我现在是在真正行动，还是只是在被冲动推着走？"
+  },
+  圣杯: {
+    lens: "这张圣杯牌把焦点放在情感流动、关系需求、直觉和内在安全感上。",
+    risk: "需要留意自己是否把感受当成全部事实，或把期待投射到他人身上。",
+    question: "我真正需要被理解的感受是什么？"
+  },
+  宝剑: {
+    lens: "这张宝剑牌强调想法、沟通、判断、冲突和信息的清晰度。",
+    risk: "需要留意过度分析、言语锋利，或在脑中反复推演却不落地。",
+    question: "哪些是事实，哪些只是我的解释？"
+  },
+  星币: {
+    lens: "这张星币牌指向现实资源、金钱、时间、身体状态和长期建设。",
+    risk: "需要留意现实条件是否匹配期待，以及投入是否可持续。",
+    question: "这件事在现实层面需要哪些资源才能稳定发生？"
+  }
+};
+
+const rankDepth = {
+  ace: "一号牌是能量的种子，代表新机会刚刚出现，适合开启但不宜急着要求结果。",
+  two: "二号牌强调选择与平衡，问题的核心常在两股力量之间的取舍。",
+  three: "三号牌代表初步扩展，合作、表达和外部反馈会变得重要。",
+  four: "四号牌带来稳定和结构，但也可能显示舒适区或暂时停顿。",
+  five: "五号牌通常显示冲突、损失或调整期，它揭露真正需要修复的地方。",
+  six: "六号牌带有修复、互助和过渡感，说明局势有机会回到较平衡的位置。",
+  seven: "七号牌意味着考验、防守和评估，你需要确认自己坚持的理由。",
+  eight: "八号牌代表速度、练习或持续推进，重点是方法是否有效。",
+  nine: "九号牌接近周期尾声，显示积累、临界点和心理韧性。",
+  ten: "十号牌代表一个阶段的结果，也会暴露责任、负担和完成后的代价。",
+  page: "侍从带来学习、消息和探索，它常表示事情仍在初级阶段，需要保持开放。",
+  knight: "骑士强调追求和移动，行动力强，但方向和节奏必须被校准。",
+  queen: "王后代表成熟的承接力、感受力和内在掌控，适合用柔软方式管理局势。",
+  king: "国王代表成熟决策、责任和外在掌控，要求你以更稳定的姿态承担结果。"
+};
+
+const rankAction = {
+  ace: "先开启一个低风险的新尝试，不急着要求完整结果。",
+  two: "把两个选择并排写下，比较它们分别需要你付出的代价。",
+  three: "找一个可以合作、表达或获得反馈的对象，让事情走出独自消化。",
+  four: "先整理基础结构，确认什么需要保留，什么只是让你停住。",
+  five: "停止扩大冲突，先处理最核心的损失、分歧或不满。",
+  six: "接受可用的支持，也主动修复一个仍有价值的连接。",
+  seven: "守住重要边界，但同时检查自己是不是防御过度。",
+  eight: "重复练习一个有效动作，用连续反馈代替空想。",
+  nine: "先恢复体力和心理空间，再决定是否继续坚持。",
+  ten: "做减法，把不属于你的责任从清单里移出去。",
+  page: "把自己放回学习者位置，先收集信息、试探表达。",
+  knight: "行动前确认方向和节奏，避免只凭一股冲劲推进。",
+  queen: "用成熟的承接力照顾局面，同时保留清楚边界。",
+  king: "做一个明确决定，并准备承担它带来的现实结果。"
+};
+
+function getDeepMeaning(item) {
+  const base = item.orientation === "upright" ? item.card.upright : item.card.reversed;
+  if (item.card.arcana === "major") {
+    const depth = majorDepth[item.card.id];
+    if (!depth) return base;
+    return item.orientation === "upright"
+      ? `${depth.essence}${base}`
+      : `${depth.essence}${depth.shadow}${base}`;
+  }
+
+  const suit = minorSuitDepth[item.card.suit] || {};
+  const rank = rankDepth[item.card.rank] || "";
+  const reversed = item.orientation === "reversed" ? `逆位时，${suit.risk || "这股能量需要被重新校准"}` : "";
+  return `${suit.lens || ""}${rank}${base}${reversed}`;
+}
+
+function getPositionReading(item) {
+  const base = positionLens[item.position] || "它补充了本次牌阵中的关键语境。";
+  if (item.position.includes("过去")) return `${base}${item.card.name}显示过去的核心影响不是事件本身，而是它留下的反应模式。`;
+  if (item.position.includes("当前")) return `${base}${item.card.name}说明此刻最需要处理的是正在发生的现实，而不是想象中的最终结果。`;
+  if (item.position.includes("未来")) return `${base}${item.card.name}提示后续趋势会取决于你是否愿意调整现在的处理方式。`;
+  if (item.position.includes("阻碍")) return `${base}${item.card.name}指出卡点可能藏在习惯性反应里，而不是表面的某一句话或某个事件。`;
+  if (item.position.includes("建议")) return `${base}${item.card.name}给出的建议是把注意力放回可执行动作，少一点猜测，多一点验证。`;
+  if (item.position.includes("选项 A")) return `${base}${item.card.name}说明选项 A 的优势与代价会同时出现，需要看你是否愿意承担它的节奏。`;
+  if (item.position.includes("选项 B")) return `${base}${item.card.name}说明选项 B 可能提供另一种路径，但也有它自己的条件和限制。`;
+  if (item.position.includes("隐藏")) return `${base}${item.card.name}提示你还有信息没有看完整，尤其要核对动机、资源或未说出口的期待。`;
+  return `${base}${item.card.name}在这里更像一个核心提示，帮助你抓住最值得先处理的部分。`;
+}
+
+function pickFrom(list, seed) {
+  return list[Math.abs(seed) % list.length];
+}
+
+function seedFor(text) {
+  return Array.from(text).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+function getProfile() {
+  try {
+    const scoped = localStorage.getItem(userStorageKey("lunaArcanaProfile"));
+    if (scoped) return JSON.parse(scoped);
+    if (getCurrentUser() === "访客") {
+      return JSON.parse(localStorage.getItem("lunaArcanaProfile") || "{}");
+    }
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+function saveProfile(profile) {
+  localStorage.setItem(userStorageKey("lunaArcanaProfile"), JSON.stringify(profile));
+}
+
+function getWesternSign(dateString) {
+  if (!dateString) return "";
+  const [, monthRaw, dayRaw] = dateString.split("-").map(Number);
+  const m = monthRaw;
+  const d = dayRaw;
+  const signs = [
+    ["摩羯座", 1, 20], ["水瓶座", 2, 19], ["双鱼座", 3, 21], ["白羊座", 4, 20],
+    ["金牛座", 5, 21], ["双子座", 6, 22], ["巨蟹座", 7, 23], ["狮子座", 8, 23],
+    ["处女座", 9, 23], ["天秤座", 10, 24], ["天蝎座", 11, 23], ["射手座", 12, 22], ["摩羯座", 13, 1]
+  ];
+  return signs.find(([, month, day]) => m < month || (m === month && d < day))?.[0] || "摩羯座";
+}
+
+function getChineseZodiac(dateString) {
+  if (!dateString) return "";
+  const year = Number(dateString.slice(0, 4));
+  const animals = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"];
+  return animals[(year - 4) % 12];
+}
+
+function getYearElement(dateString) {
+  if (!dateString) return "";
+  const year = Number(dateString.slice(0, 4));
+  const stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+  const elements = {
+    甲: "木", 乙: "木", 丙: "火", 丁: "火", 戊: "土", 己: "土", 庚: "金", 辛: "金", 壬: "水", 癸: "水"
+  };
+  const stem = stems[(year - 4) % 10];
+  return `${stem}${elements[stem]}`;
+}
+
+function profileMeta(profile = getProfile()) {
+  if (!profile.birthDate) return null;
+  const sign = getWesternSign(profile.birthDate);
+  const zodiac = getChineseZodiac(profile.birthDate);
+  const element = getYearElement(profile.birthDate);
+  const astroText = window.AstrologySkill?.shortText ? `，${window.AstrologySkill.shortText(profile)}` : "";
+  return {
+    sign,
+    zodiac,
+    element,
+    text: `${profile.name ? `${profile.name}，` : ""}${sign}，生肖${zodiac}，年柱五行倾向${element}${astroText}${profile.birthTime ? `，出生时间 ${profile.birthTime}` : ""}${profile.birthCity ? `，出生城市 ${profile.birthCity}` : ""}${profile.currentCity ? `，现居 ${profile.currentCity}` : ""}`
+  };
+}
+
+function renderProfile() {
+  const profile = getProfile();
+  renderLoginState();
+  els.profileName.value = profile.name || "";
+  els.birthDate.value = profile.birthDate || "";
+  els.birthTime.value = profile.birthTime || "";
+  els.birthCity.value = profile.birthCity || "";
+  els.currentCity.value = profile.currentCity || "";
+  els.astroBirthDate.value = profile.birthDate || "";
+  els.astroBirthTime.value = profile.birthTime || "";
+  els.astroBirthCity.value = profile.birthCity || "";
+  els.astroChartType.value = profile.astroChartType || "natal";
+  els.astroPartnerName.value = profile.astroPartner?.name || "";
+  els.astroPartnerBirthDate.value = profile.astroPartner?.birthDate || "";
+  els.astroPartnerBirthTime.value = profile.astroPartner?.birthTime || "";
+  els.astroPartnerBirthCity.value = profile.astroPartner?.birthCity || "";
+  els.astroTargetDate.value = profile.astroTargetDate || new Date().toISOString().slice(0, 10);
+  els.indianBirthDate.value = profile.birthDate || "";
+  els.indianBirthTime.value = profile.birthTime || "";
+  els.indianBirthCity.value = profile.birthCity || "";
+  els.indianLatitude.value = profile.latitude || "";
+  els.indianLongitude.value = profile.longitude || "";
+  els.indianTimezone.value = profile.timezone || "";
+  els.indianAyanamsa.value = profile.ayanamsa || "";
+  syncIndianCanonicalToAdvanced(profile);
+
+  const meta = profileMeta(profile);
+  if (!meta) {
+    els.profileReading.innerHTML = "<p>填写生日、出生时间和城市后，这里会生成基础星座、生肖和五行倾向。</p>";
+    return;
+  }
+  els.profileReading.innerHTML = `
+    <div class="astro-tags">
+      <span>${meta.sign}</span>
+      <span>生肖${meta.zodiac}</span>
+      <span>${meta.element}</span>
+    </div>
+    <p><strong>档案摘要：</strong>${meta.text}。</p>
+    <div class="astro-reading-block">
+      <h3>基础星盘</h3>
+      ${window.AstrologySkill ? window.AstrologySkill.reading(profile) : "<p>星盘 skill 未加载。</p>"}
+    </div>
+    <p><strong>关于星盘与八字：</strong>当前版本是基础推算，会用于增强塔罗解读语境。真正精确的星盘需要天文星历，完整八字还需要农历节气换算；后续可以接专业库或 API 来做更精确的命盘。</p>
+  `;
+}
+
+function analyzeQuestion(question) {
+  const text = `${question} ${els.focusInput.value || ""} ${els.backgroundInput.value || ""}`;
+  const rules = [
+    { type: "reconcile", label: "复合 / 修复关系", words: ["复合", "和好", "回来", "挽回", "修复", "前任"], core: "对方是否仍愿意靠近，以及你们之间的问题是否真的被处理" },
+    { type: "contact", label: "是否主动联系", words: ["主动", "联系", "发消息", "表白", "沟通", "找他", "找她"], core: "主动之后会打开局面，还是只会让你陷入更被动的位置" },
+    { type: "relationship", label: "关系发展", words: ["关系", "喜欢", "爱", "暧昧", "感情", "婚姻", "他", "她"], core: "双方需求、现实阻碍和互动质量是否一致" },
+    { type: "career", label: "事业 / 工作", words: ["工作", "事业", "跳槽", "offer", "领导", "同事", "职业", "项目"], core: "当前机会是否匹配你的长期发展和现实资源" },
+    { type: "money", label: "财富 / 投资", words: ["钱", "财富", "投资", "赚钱", "收入", "副业", "买", "卖"], core: "收益、风险、成本和时间投入是否平衡" },
+    { type: "choice", label: "二选一 / 决策", words: ["选择", "选", "要不要", "该不该", "是否", "能不能", "可以吗"], core: "哪个选项更接近你的真实价值和可承担代价" },
+    { type: "timing", label: "时机 / 等待", words: ["什么时候", "多久", "近期", "未来", "等待", "时机"], core: "当前条件是否成熟，以及什么时候适合行动" }
+  ];
+  return rules.find((rule) => rule.words.some((word) => text.includes(word))) || {
+    type: state.topic.id,
+    label: state.topic.name,
+    core: (topicLens[state.topic.id] || topicLens.love).focus
+  };
+}
+
+const directAnswerByCard = {
+  positive: ["the-sun", "the-star", "the-world", "the-magician", "the-chariot", "strength", "temperance", "wands-ace", "wands-three", "wands-eight", "cups-two", "cups-six", "cups-ten", "pentacles-ace", "pentacles-six", "pentacles-nine", "pentacles-ten"],
+  caution: ["the-moon", "the-hanged-man", "wheel-of-fortune", "justice", "the-high-priestess", "cups-four", "cups-seven", "swords-two", "swords-seven", "pentacles-two", "pentacles-seven"],
+  negative: ["the-devil", "the-tower", "death", "swords-three", "swords-five", "swords-ten", "cups-five", "wands-five", "pentacles-five", "wands-ten"]
+};
+
+function cardTone(item) {
+  if (item.orientation === "reversed") {
+    if (directAnswerByCard.positive.includes(item.card.id)) return "caution";
+    return "negative";
+  }
+  if (directAnswerByCard.positive.includes(item.card.id)) return "positive";
+  if (directAnswerByCard.negative.includes(item.card.id)) return "negative";
+  if (directAnswerByCard.caution.includes(item.card.id)) return "caution";
+  return item.card.yesNo === "yes" ? "positive" : item.card.yesNo === "no" ? "negative" : "caution";
+}
+
+function directAnswer(item, q) {
+  const meta = profileMeta();
+  if (window.ProfessionalTarotSkill) {
+    return window.ProfessionalTarotSkill.directAnswer({
+      card: item.card,
+      orientation: item.orientation,
+      position: item.position,
+      question: els.questionInput.value.trim(),
+      background: els.backgroundInput.value.trim(),
+      focus: els.focusInput.value.trim(),
+      timeframe: els.timeframeSelect.value,
+      profileText: meta?.text || ""
+    });
+  }
+  const tone = cardTone(item);
+  const position = item.position;
+  const orientation = item.orientation === "upright" ? "正位" : "逆位";
+  const focus = q.core;
+  const byTone = {
+    positive: {
+      base: `这张牌给出偏肯定的信号：${focus}有推进空间。`,
+      action: "可以行动，但要让行动具体、温和，并观察对方或现实的反馈。"
+    },
+    caution: {
+      base: `这张牌不是直接肯定，而是在提醒：${focus}里还有条件没看清。`,
+      action: "先补信息、等反馈或做小范围试探，不适合一下子下最终判断。"
+    },
+    negative: {
+      base: `这张牌给出明显警示：${focus}目前阻力较大，贸然推进容易消耗。`,
+      action: "先停下来处理核心问题，或把期待降低到现实可承受的范围。"
+    }
+  };
+  const positionAdds = {
+    "过去影响": `放在过去位置，它说明旧经历正在影响你现在的判断。`,
+    "当前状态": `放在当前状态，它直接描述现在的局面质量。`,
+    "未来趋势": `放在未来趋势，它显示如果维持现在做法，后续可能靠近这个方向。`,
+    "潜在阻碍": `放在阻碍位置，它指出真正卡住你的点。`,
+    "行动建议": `放在建议位置，它更像下一步操作说明。`,
+    "我的状态": `放在你的状态，它反映你真实的期待、顾虑或行动方式。`,
+    "对方状态": `放在对方状态，它只能表示对方倾向，仍需要现实验证。`,
+    "关系现状": `放在关系现状，它描述双方互动目前的温度和稳定度。`,
+    "选项 A": `放在选项 A，它是在评估这条路径的可行性。`,
+    "选项 B": `放在选项 B，它是在评估另一条路径的代价和潜力。`,
+    "隐藏因素": `放在隐藏因素，它提醒你有未说清或未看见的变量。`,
+    "核心指引": `作为核心指引，它直接给出本题最该优先看的方向。`,
+    "是或否倾向": `作为 Yes / No，它给的是当前条件下的倾向，不是不可改变的结局。`
+  };
+  return `${byTone[tone].base}${positionAdds[position] || ""}${item.card.name}${orientation}的重点是“${item.card.keywords.slice(0, 2).join("、")}”。${byTone[tone].action}`;
+}
+
+function compactOutcome(question) {
+  const q = analyzeQuestion(question);
+  const scores = state.selectedCards.map((item) => ({ positive: 1, caution: 0, negative: -1 }[cardTone(item)]));
+  const total = scores.reduce((sum, value) => sum + value, 0);
+  const reversedCount = state.selectedCards.filter((item) => item.orientation === "reversed").length;
+  const label = total > 0 && reversedCount < state.selectedCards.length ? "可以推进，但要有边界" : total < 0 ? "暂不建议强推" : "先观察，条件还没完全成熟";
+  const reason = state.selectedCards.map((item) => `${item.position}：${item.card.name}${item.orientation === "upright" ? "正位" : "逆位"}偏${cardTone(item) === "positive" ? "支持" : cardTone(item) === "negative" ? "警示" : "观望"}`).join("；");
+  return { q, label, reason };
+}
+
+function buildCardInsight(item, question) {
+  const lens = topicLens[state.topic.id] || topicLens.love;
+  const q = analyzeQuestion(question);
+  const meta = profileMeta();
+  const background = els.backgroundInput.value.trim();
+  const focus = els.focusInput.value.trim();
+  const timeframe = els.timeframeSelect.value;
+  const contextLine = [
+    background ? `你补充的背景是“${background}”` : "",
+    focus ? `最想确认的是“${focus}”` : "",
+    timeframe ? `时间范围落在${timeframe}` : ""
+  ].filter(Boolean).join("；");
+  const arcanaNote = item.card.arcana === "major"
+    ? "大阿卡那通常指向更深层的生命课题、关键转折或心理原型。"
+    : `${item.card.suit}属于${item.card.element}元素，更常落在日常事件、具体互动和可调整的现实层面。`;
+  const direction = item.orientation === "upright"
+    ? `这张牌以正位出现，说明“${item.card.keywords[0]}”这股能量较容易被你主动使用。`
+    : `这张牌以逆位出现，说明“${item.card.keywords[0]}”可能被压住、过度使用，或需要重新校准。`;
+  const position = positionLens[item.position] || "它补充了本次牌阵中的关键语境。";
+  const seed = seedFor(`${question}${item.card.id}${item.position}${state.topic.id}`);
+  const generatedMinorAdvice = item.card.arcana === "minor"
+    ? `${rankAction[item.card.rank] || "先做一个具体、可验证的小行动。"}${item.card.suitAdvice || ""}`
+    : null;
+  const advice = pickFrom(cardAdvice[item.card.id] || [generatedMinorAdvice, item.card.suitAdvice, lens.advice].filter(Boolean), seed);
+  const depth = item.card.arcana === "major" ? majorDepth[item.card.id] : minorSuitDepth[item.card.suit];
+  const cue = item.card.arcana === "major"
+    ? depth?.cue
+    : `${depth?.question || "我需要怎样把这件事落到现实里？"} ${rankDepth[item.card.rank] || ""}`;
+  const skillInput = {
+    card: item.card,
+    orientation: item.orientation,
+    position: item.position,
+    question,
+    background,
+    focus,
+    timeframe,
+    profileText: meta?.text || ""
+  };
+
+  return {
+    meaning: getDeepMeaning(item),
+    direct: window.ProfessionalTarotSkill ? window.ProfessionalTarotSkill.directAnswer(skillInput) : directAnswer(item, q),
+    professional: window.ProfessionalTarotSkill ? window.ProfessionalTarotSkill.positionInsight(skillInput) : `${arcanaNote}${direction}${getPositionReading(item)}这张牌对应的是“${q.label}”问题里的${q.core}，所以它回答的不是泛泛运势，而是你这个问题的具体卡点。`,
+    revelation: `针对“${question}”，${meta ? `结合你的个人档案：${meta.text}。` : ""}${contextLine ? `${contextLine}。` : ""}${item.card.name}给出的具体提示是：${cue || `留意“${item.card.keywords.join("、")}”如何在现实中出现。`}这会直接影响${q.core}。`,
+    action: window.ProfessionalTarotSkill ? window.ProfessionalTarotSkill.action(skillInput) : `${advice}${item.orientation === "reversed" ? " 先降低动作幅度，用一次小验证代替立刻定论。" : " 做完后观察现实反馈，再决定是否扩大投入。"}`
+  };
+}
+
+function getYesNoReading() {
+  const item = state.selectedCards[0];
+  if (!item) {
+    return null;
+  }
+
+  let tendency = item.card.yesNo;
+  if (item.orientation === "reversed") {
+    tendency = tendency === "yes" ? "maybe" : tendency === "maybe" ? "no" : "no";
+  }
+
+  const labels = {
+    yes: "倾向 Yes",
+    no: "倾向 No",
+    maybe: "条件尚未成熟"
+  };
+  const reasons = {
+    yes: "牌面能量较顺，说明这件事具备推进空间，但仍需要你用现实行动承接。",
+    no: "牌面显示阻力、代价或时机问题较明显，目前不适合贸然推进。",
+    maybe: "牌面没有给出干脆的肯定或否定，更像是在提醒你先补足信息、条件或内在确认。"
+  };
+
+  return {
+    tendency,
+    label: labels[tendency],
+    reason: reasons[tendency],
+    cardName: item.card.name,
+    orientationText: item.orientation === "upright" ? "正位" : "逆位"
+  };
+}
+
+function buildSummary(question) {
+  const lens = topicLens[state.topic.id] || topicLens.love;
+  const outcome = compactOutcome(question);
+  const meta = profileMeta();
+  const background = els.backgroundInput.value.trim();
+  const focus = els.focusInput.value.trim();
+  const timeframe = els.timeframeSelect.value;
+  const first = state.selectedCards[0];
+  const last = state.selectedCards[state.selectedCards.length - 1];
+  const reversedCount = state.selectedCards.filter((item) => item.orientation === "reversed").length;
+  const names = state.selectedCards.map((item) => `${item.position}的${item.card.name}`).join("、");
+  const yesNo = state.spread.id === "yesno" ? getYesNoReading() : null;
+  const skillSummary = window.ProfessionalTarotSkill ? window.ProfessionalTarotSkill.summary({
+    question,
+    background,
+    focus,
+    timeframe,
+    profileText: meta?.text || "",
+    cards: state.selectedCards
+  }) : null;
+  const skillNarrative = window.ProfessionalTarotSkill?.narrative ? window.ProfessionalTarotSkill.narrative({
+    question,
+    background,
+    focus,
+    timeframe,
+    profileText: meta?.text || "",
+    cards: state.selectedCards
+  }) : "";
+  const hidden = reversedCount
+    ? `本次有 ${reversedCount} 张逆位牌，说明问题里可能存在尚未说清、尚未整理，或正在被压抑的部分。`
+    : "本次牌面多以正位呈现，说明可用资源相对清晰，关键在于把理解转为行动。";
+
+  if (yesNo) {
+    return `
+      <h3>Yes / No 倾向判断</h3>
+      <p class="answer-pill"><strong>${yesNo.label}</strong></p>
+      <p>围绕“${question}”，本次抽到的是${yesNo.cardName}${yesNo.orientationText}。${yesNo.reason}</p>
+      ${background || focus ? `<p><strong>结合背景：</strong>${background ? `当前背景是“${background}”。` : ""}${focus ? `你最想确认“${focus}”。` : ""}因此这个判断更适合看作${timeframe}内的行动倾向。</p>` : ""}
+      ${meta ? `<p><strong>个人档案：</strong>${meta.text}。本次解读会把它作为性格节奏与时机语境，而不是绝对命定。</p>` : ""}
+      <p><strong>判断依据：</strong>${yesNo.cardName}的关键词是${first.card.keywords.join("、")}。在${state.topic.name}语境下，它主要指向${lens.focus}，因此答案不是宿命式结论，而是当前条件下的倾向。</p>
+      <p><strong>隐藏影响因素：</strong>${hidden}</p>
+      <p><strong>可执行建议：</strong>${lens.advice}。</p>
+    `;
+  }
+
+  return `
+    <h3>直接结论</h3>
+    <p class="answer-pill"><strong>${skillSummary?.label || outcome.label}</strong></p>
+    <p>你的问题被识别为“${skillSummary?.intent.label || outcome.q.label}”。围绕“${question}”，本次牌面出现了${names}。重点不是泛泛运势，而是${skillSummary?.intent.lens || outcome.q.core}。</p>
+    <p><strong>判断依据：</strong>${skillSummary?.reason || outcome.reason}。</p>
+    ${background || focus ? `<p><strong>结合背景：</strong>${background ? `你描述的背景是“${background}”。` : ""}${focus ? `本次最需要确认的是“${focus}”。` : ""}所以解读会优先放在${timeframe}内能观察和行动的部分。</p>` : ""}
+    ${meta ? `<p><strong>个人档案：</strong>${meta.text}。这会作为解读的性格与时机语境，不作为绝对判断。</p>` : ""}
+    <p><strong>隐藏影响因素：</strong>${hidden}${first ? `尤其是${first.card.name}带出的“${first.card.keywords[0]}”，可能是最先需要面对的入口。` : ""}</p>
+    <p><strong>未来趋势：</strong>${last ? `${last.card.name}位于“${last.position}”，提示后续走向会受到“${last.card.keywords[0]}”这股能量影响。` : ""}如果你能持续校准节奏，局势可能从情绪化判断走向更可处理的现实选择。</p>
+    <p><strong>可执行建议：</strong>${skillSummary?.advice || lens.advice}。</p>
+    ${skillNarrative ? `<details class="narrative-reading"><summary>查看完整塔罗师式解读</summary>${skillNarrative}</details>` : ""}
+  `;
+}
+
+function showResult() {
+  const question = els.questionInput.value.trim();
+  state.currentReading = {
+    id: `reading-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    topicId: state.topic.id,
+    topicName: state.topic.name,
+    spreadId: state.spread.id,
+    spreadName: state.spread.name,
+    question,
+    mood: els.moodSelect.value,
+    timeframe: els.timeframeSelect.value,
+    background: els.backgroundInput.value.trim(),
+    focus: els.focusInput.value.trim(),
+    favorite: state.favorite,
+    cards: state.selectedCards
+  };
+
+  els.resultSummary.innerHTML = buildSummary(question);
+
+  els.positionTabs.innerHTML = state.selectedCards.map((item, index) => `
+    <button class="position-tab ${index === 0 ? "active" : ""}" data-result-index="${index}">
+      ${item.position}
+    </button>
+  `).join("");
+
+  els.resultList.innerHTML = state.selectedCards.map((item, index) => {
+    const orientationText = item.orientation === "upright" ? "正位" : "逆位";
+    const insight = buildCardInsight(item, question);
+    return `
+      <details class="result-card ${index === 0 ? "active" : ""}" open data-result-card="${index}">
+        <summary>
+          <span class="mobile-card-mini">${item.card.name}</span>
+          <span class="mobile-card-title">
+            <strong>${item.card.name}</strong>
+            ${item.position} · ${orientationText}
+          </span>
+        </summary>
+        <div class="result-card-body">
+          <div class="card-face">
+            <div>
+              <strong>${item.card.name}</strong>
+              <p>${orientationText}</p>
+            </div>
+          </div>
+          <div>
+          <p class="card-meta">${item.position} · ${orientationText}</p>
+          <h3>${item.card.name}</h3>
+          <p class="direct-answer"><strong>直接回答：</strong>${insight.direct}</p>
+          <p><strong>核心关键词：</strong>${item.card.keywords.join(" / ")}</p>
+          <p><strong>专业解释：</strong>${insight.meaning}</p>
+          <p><strong>牌位解说：</strong>${insight.professional}</p>
+          <p><strong>对问题的启示：</strong>${insight.revelation}</p>
+          <p><strong>建议行动：</strong>${insight.action}</p>
+          </div>
+        </div>
+      </details>
+    `;
+  }).join("");
+
+  els.favoriteButton.textContent = "收藏";
+  els.noteInput.value = "";
+  els.result.hidden = false;
+  els.drawSection.hidden = true;
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    els.resultList.querySelectorAll(".result-card").forEach((card, index) => {
+      card.open = index === 0;
+    });
+  }
+  location.hash = "result";
+}
+
+function saveReading() {
+  if (!state.currentReading) {
+    return;
+  }
+  if (getCurrentUser() === "访客") {
+    els.ritualStatus.textContent = "请先登录账号，再保存本次占卜。";
+    showHomeFlow();
+    setAuthStatus("登录后，历史记录只会保存在你的账号下。");
+    return;
+  }
+
+  const readings = getHistory();
+  const saved = {
+    ...state.currentReading,
+    user: getCurrentUser(),
+    favorite: state.favorite,
+    note: els.noteInput.value.trim()
+  };
+  localStorage.setItem(userStorageKey("lunaArcanaReadings"), JSON.stringify([saved, ...readings.filter((item) => item.id !== saved.id)].slice(0, 24)));
+  els.ritualStatus.textContent = "本次占卜已保存到历史记录。";
+  renderHistory();
+  els.historySection.hidden = false;
+  location.hash = "history";
+}
+
+function getHistory() {
+  try {
+    const scoped = localStorage.getItem(userStorageKey("lunaArcanaReadings"));
+    if (scoped) return JSON.parse(scoped);
+    if (getCurrentUser() === "访客") {
+      return JSON.parse(localStorage.getItem("lunaArcanaReadings") || "[]");
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function historyCardsMarkup(readings, limit = readings.length) {
+  if (!readings.length) {
+    return `<article class="history-card"><p>当前用户：${getCurrentUser()}。还没有保存记录。完成一次占卜后，可以在这里复盘你的问题、心情与牌面。</p></article>`;
+  }
+  return readings.slice(0, limit).map((reading) => {
+    const date = new Date(reading.createdAt).toLocaleString("zh-CN", { dateStyle: "medium", timeStyle: "short" });
+    const cards = reading.cards.map((item) => `${item.position}：${item.card.name}${item.orientation === "upright" ? "正位" : "逆位"}`).join("；");
+    return `
+      <article class="history-card">
+        <header>
+          <strong>${reading.favorite ? "已收藏 · " : ""}${reading.topicName} · ${reading.spreadName}</strong>
+          <span>${date}</span>
+        </header>
+        <p><strong>用户：</strong>${reading.user || getCurrentUser()}</p>
+        <p><strong>问题：</strong>${reading.question}</p>
+        <p><strong>心情：</strong>${reading.mood}</p>
+        ${reading.timeframe ? `<p><strong>时间：</strong>${reading.timeframe}</p>` : ""}
+        ${reading.background ? `<p><strong>背景：</strong>${reading.background}</p>` : ""}
+        ${reading.focus ? `<p><strong>关注点：</strong>${reading.focus}</p>` : ""}
+        <p><strong>牌面：</strong>${cards}</p>
+        ${reading.note ? `<p><strong>备注：</strong>${reading.note}</p>` : ""}
+      </article>
+    `;
+  }).join("");
+}
+
+function renderHistory() {
+  const readings = getHistory();
+  els.historyList.innerHTML = historyCardsMarkup(readings);
+  if (els.homeHistoryList) {
+    els.homeHistoryList.innerHTML = historyCardsMarkup(readings, 3);
+  }
+}
+
+els.topicGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-topic]");
+  if (!button) return;
+  state.topic = topics.find((topic) => topic.id === button.dataset.topic);
+  state.shuffled = false;
+  renderTopics();
+});
+
+els.spreadGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-spread]");
+  if (!button) return;
+  state.spread = spreads.find((spread) => spread.id === button.dataset.spread);
+  state.selectedCards = [];
+  state.shuffled = false;
+  renderSpreads();
+  renderDeck();
+});
+
+els.prepareButton.addEventListener("click", startRitual);
+els.shuffleButton.addEventListener("click", shuffleDeck);
+els.enterDrawButton.addEventListener("click", enterDrawFlow);
+els.showTarotButton.addEventListener("click", showTarotFlow);
+els.backToHomeButton.addEventListener("click", returnHomeFlow);
+els.showAstrologyButton.addEventListener("click", showAstrologyFlow);
+els.showIndianButton.addEventListener("click", showIndianFlow);
+els.backFromAstrologyButton.addEventListener("click", showHomeFlow);
+els.backFromIndianButton.addEventListener("click", showHomeFlow);
+els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
+els.refreshIndianButton.addEventListener("click", renderIndianPage);
+els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
+els.loadJhoraSouthGraftonButton.addEventListener("click", loadJhoraSouthGraftonSample);
+els.resolveIndianLocationButton.addEventListener("click", resolveIndianLocation);
+[
+  "indianBirthSecond",
+  "indianTimezoneHour",
+  "indianTimezoneMinute",
+  "indianTimezoneDirection",
+  "indianDaylightSaving",
+  "indianUseLmt",
+  "indianLongitudeDegree",
+  "indianLongitudeDirection",
+  "indianLongitudeMinute",
+  "indianLongitudeSecond",
+  "indianLatitudeDegree",
+  "indianLatitudeDirection",
+  "indianLatitudeMinute",
+  "indianLatitudeSecond",
+  "indianAltitude",
+  "indianPressure",
+  "indianTemperature"
+].forEach((key) => {
+  els[key]?.addEventListener("input", syncIndianAdvancedToCanonical);
+  els[key]?.addEventListener("change", syncIndianAdvancedToCanonical);
+});
+els.indianBirthTime.addEventListener("change", () => {
+  const second = timeSecondFromValue(els.indianBirthTime.value);
+  if (second) els.indianBirthSecond.value = second;
+});
+els.indianReading.addEventListener("click", (event) => {
+  if (event.target.closest("#startIndianReadingButton")) {
+    renderIndianInterpretation();
+  }
+  if (event.target.closest("#sendIndianQuestionButton")) {
+    sendIndianQuestion();
+  }
+});
+els.indianReading.addEventListener("keydown", (event) => {
+  if (event.target.closest("#indianQuestionInput") && event.key === "Enter") {
+    event.preventDefault();
+    sendIndianQuestion();
+  }
+});
+let indianLocationTimer = null;
+els.indianBirthCity.addEventListener("input", () => {
+  window.clearTimeout(indianLocationTimer);
+  indianLocationTimer = window.setTimeout(() => {
+    resolveIndianLocation({ silent: true, rerender: false });
+  }, 450);
+});
+els.indianBirthCity.addEventListener("change", () => {
+  if (!els.indianLatitude.value || !els.indianLongitude.value) {
+    resolveIndianLocation({ silent: false, rerender: false });
+  }
+});
+els.deck.addEventListener("click", (event) => {
+  const button = event.target.closest(".tarot-card");
+  if (button) drawCard(button);
+});
+els.favoriteButton.addEventListener("click", () => {
+  state.favorite = !state.favorite;
+  els.favoriteButton.textContent = state.favorite ? "已收藏" : "收藏";
+});
+els.saveButton.addEventListener("click", saveReading);
+els.positionTabs.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-result-index]");
+  if (!button) return;
+  const index = button.dataset.resultIndex;
+  els.positionTabs.querySelectorAll(".position-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab === button);
+  });
+  els.resultList.querySelectorAll("[data-result-card]").forEach((card) => {
+    card.classList.toggle("active", card.dataset.resultCard === index);
+  });
+});
+els.profileForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  persistProfileFromFields();
+  els.profileReading.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+els.loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await loginAccount();
+  state.selectedCards = [];
+  state.currentReading = null;
+  state.favorite = false;
+});
+
+els.sendCodeButton.addEventListener("click", sendVerificationCode);
+els.registerButton.addEventListener("click", registerAccount);
+els.showHistoryButton.addEventListener("click", showHistoryFlow);
+els.showProfileButton.addEventListener("click", () => {
+  els.profileDrawer.open = !els.profileDrawer.open;
+  if (els.profileDrawer.open) {
+    els.profileDrawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+});
+els.logoutButton.addEventListener("click", () => {
+  localStorage.setItem("lunaArcanaCurrentUser", "访客");
+  state.selectedCards = [];
+  state.currentReading = null;
+  state.favorite = false;
+  renderLoginState();
+  renderHistory();
+  setAuthStatus("已退出登录。");
+  showHomeFlow();
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  });
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  state.installPrompt = event;
+  if (!localStorage.getItem("lunaArcanaInstallDismissed")) {
+    els.installBanner.hidden = false;
+  }
+});
+
+els.installButton.addEventListener("click", async () => {
+  if (!state.installPrompt) return;
+  state.installPrompt.prompt();
+  await state.installPrompt.userChoice;
+  state.installPrompt = null;
+  els.installBanner.hidden = true;
+});
+
+els.dismissInstallButton.addEventListener("click", () => {
+  localStorage.setItem("lunaArcanaInstallDismissed", "1");
+  els.installBanner.hidden = true;
+});
+
+document.querySelectorAll('a[href="#history"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showHistoryFlow();
+  });
+});
+
+renderTopics();
+renderSpreads();
+renderDeck();
+renderHistory();
+renderProfile();

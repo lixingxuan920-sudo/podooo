@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Luna Arcana Tarot">
+  <rect width="512" height="512" rx="108" fill="#171415"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#d99aaa" stroke-width="18"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#c6a66c" stroke-width="8" opacity=".82"/>
+  <path d="M286 116c-56 24-94 78-94 140s38 116 94 140c-18 8-38 12-60 12-84 0-152-68-152-152s68-152 152-152c22 0 42 4 60 12Z" fill="#f3cbd4"/>
+  <path d="M256 146l24 74 78 1-63 45 23 75-62-45-63 45 24-75-63-45 78-1 24-74Z" fill="#c6a66c"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#f6efe7">Luna</text>
+</svg>
+
