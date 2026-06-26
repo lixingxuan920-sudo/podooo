@@ -5,5 +5,6 @@ node_modules/
 .env.*
 .DS_Store
 Thumbs.db
+__pycache__/
 vedic-python-api/.venv/
 vedic-python-api/__pycache__/

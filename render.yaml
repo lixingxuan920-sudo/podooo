@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: luna-vedic-python-api
+    name: podooo
     env: docker
     plan: free
-    dockerfilePath: ../Dockerfile
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     autoDeploy: true
     envVars:

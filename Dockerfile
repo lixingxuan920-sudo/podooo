@@ -14,7 +14,8 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir --only-binary=pyswisseph,pydantic-core -r requirements.txt
 
-COPY main.py .
+COPY main.py ./main.py
+COPY vedic-python-api ./vedic-python-api
 
 EXPOSE 8000
 

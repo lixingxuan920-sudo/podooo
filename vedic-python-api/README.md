@@ -29,33 +29,41 @@ uvicorn main:app --reload --port 8000
 curl http://localhost:8000/health
 ```
 
-## Render 部署
+## Render 部署（推荐 Docker）
 
 1. 把整个项目上传到 GitHub。
 2. 在 Render 创建 Web Service。
-3. Root Directory 填：
+3. Environment 选择 `Docker`。
+4. Root Directory 留空。
+5. Dockerfile Path 填：
 
 ```text
-vedic-python-api
+./Dockerfile
 ```
 
-4. Build Command：
+6. Health Check Path 填：
 
-```bash
-pip install -r requirements.txt
+```text
+/health
 ```
 
-5. Start Command：
-
-```bash
-uvicorn main:app --host 0.0.0.0 --port $PORT
-```
-
-6. 部署后拿到类似：
+7. 部署后拿到类似：
 
 ```text
 https://luna-vedic-python-api.onrender.com
 ```
+
+如果你已经在 Render 里创建了旧服务，请把 Environment 改成 Docker，或重新建一个 Docker Web Service。
+
+## Render Python 环境备用方案
+
+项目也保留了 `runtime.txt`，固定：
+
+```text
+python-3.11.9
+```
+
+但由于 `pyswisseph` 对 Python 版本和 wheel 支持比较敏感，公网部署优先使用 Docker。
 
 ## 接到 Netlify
 

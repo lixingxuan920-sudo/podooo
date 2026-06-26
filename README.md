@@ -20,7 +20,44 @@ PWA App：网站已经支持添加到手机主屏幕。重新部署后，用手�
 
 星盘 skill：`astrology-skill.js` 会根据生日、出生时间生成基础星盘视图，包括太阳、月亮、上升的近似位置、元素倾向和占星解读。当前为本地近似推算，不等同于专业天文星历排盘。
 
-印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面，会生成近似北印度式命盘、上升 Lagna、月亮 Chandra、月宿 Nakshatra、Rahu/Ketu 业力轴和逐项解说。历史记录现在可以从导航随时查看。
+印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面。公网专业排盘由 `vedic-python-api` 提供，使用 Swiss Ephemeris、Lahiri Ayanamsa、Python 3.11.9、FastAPI 和 pyswisseph 生成 D1 本命盘、上升 Lagna、九曜、月宿 Nakshatra、Rahu/Ketu 和 Vimshottari Dasha。网页本地近似盘只作为后端不可用时的备用显示。
+
+## Render 部署印度占星后端
+
+推荐使用 Docker 部署，避免 Render 默认 Python 版本或 `pyswisseph` 编译环境不稳定。
+
+在 Render 创建 Web Service 时使用：
+
+```text
+Environment: Docker
+Root Directory: 留空
+Dockerfile Path: ./Dockerfile
+Health Check Path: /health
+```
+
+部署成功后访问：
+
+```text
+https://你的服务名.onrender.com/health
+```
+
+应返回：
+
+```json
+{"ok":"true","engine":"vedic-python-api"}
+```
+
+Swagger 文档地址：
+
+```text
+https://你的服务名.onrender.com/docs
+```
+
+然后在 Netlify 环境变量里设置：
+
+```text
+VEDIC_API_URL=https://你的服务名.onrender.com
+```
 
 ## 电脑打开
 

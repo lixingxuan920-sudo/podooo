@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 import swisseph as swe
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 SIGNS = [
@@ -57,9 +57,9 @@ DASHA_ORDER = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Satur
 
 
 class VedicRequest(BaseModel):
-    profile: dict[str, Any] = {}
-    options: dict[str, Any] = {}
-    chart: dict[str, Any] = {}
+    profile: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
+    chart: dict[str, Any] = Field(default_factory=dict)
 
 
 app = FastAPI(title="Luna Vedic Ephemeris API", version="1.0.0")
@@ -161,7 +161,7 @@ def deg_string(longitude: float) -> str:
     if minute == 60:
         degree += 1
         minute = 0
-    return f"{degree}°{minute:02d}'{second:02d}\""
+    return f"{degree}d{minute:02d}m{second:02d}s"
 
 
 def nakshatra_for(longitude: float) -> dict[str, Any]:
@@ -182,9 +182,30 @@ def calc_julian_day(local_dt: datetime) -> float:
     return swe.julday(utc.year, utc.month, utc.day, hour)
 
 
+def calc_ut_values(jd: float, planet_id: int) -> tuple[float, float, float, float]:
+    result = swe.calc_ut(jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SPEED)
+    values: list[float] = []
+
+    def collect_numbers(item: Any) -> None:
+        if len(values) >= 4:
+            return
+        if isinstance(item, (list, tuple)):
+            for child in item:
+                collect_numbers(child)
+                if len(values) >= 4:
+                    return
+        elif isinstance(item, (int, float)):
+            values.append(float(item))
+
+    collect_numbers(result)
+    if len(values) < 4:
+        raise RuntimeError(f"Unexpected swisseph.calc_ut result shape: {result!r}")
+    return values[0], values[1], values[2], values[3]
+
+
 def calc_planet(jd: float, planet_id: int, ayanamsa: float, lagna_sign: int) -> dict[str, Any]:
-    data, _flags = swe.calc_ut(jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SPEED)
-    lon = sidereal_longitude(data[0], ayanamsa)
+    tropical_lon, _lat, _distance, speed = calc_ut_values(jd, planet_id)
+    lon = sidereal_longitude(tropical_lon, ayanamsa)
     sidx = sign_index(lon)
     return {
         "longitude": round(lon, 8),
@@ -192,7 +213,7 @@ def calc_planet(jd: float, planet_id: int, ayanamsa: float, lagna_sign: int) -> 
         "sign_index": sidx,
         "house": house_from_lagna(sidx, lagna_sign),
         "deg_str": deg_string(lon),
-        "retrograde": data[3] < 0,
+        "retrograde": speed < 0,
         "nakshatra": nakshatra_for(lon),
     }
 
@@ -265,7 +286,7 @@ def chart_to_markdown(profile: dict[str, Any], local_dt: datetime, lat: float, l
     lines.append("| 行星 | 星座 | 宫位 | 度数 | 逆行 |")
     lines.append("|------|------|------|------|------|")
     lagna = chart["lagna"]
-    lines.append(f"| Lagna | {lagna['sign']} | 1 | {lagna['deg_str']} | — |")
+    lines.append(f"| Lagna | {lagna['sign']} | 1 | {lagna['deg_str']} | - |")
     for name in ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"]:
         planet = chart["planets"][name]
         lines.append(f"| {name} | {planet['sign']} | {planet['house']} | {planet['deg_str']} | {'R' if planet['retrograde'] else 'D'} |")
@@ -302,8 +323,8 @@ def calculate_chart(profile: dict[str, Any]) -> dict[str, Any]:
     planets: dict[str, Any] = {}
     for name, planet_id in PLANETS:
         planets[name] = calc_planet(jd, planet_id, ayanamsa, lagna["sign_index"])
-    rahu_data, _flags = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SPEED)
-    rahu_lon = sidereal_longitude(rahu_data[0], ayanamsa)
+    rahu_tropical_lon, _lat, _distance, _speed = calc_ut_values(jd, swe.MEAN_NODE)
+    rahu_lon = sidereal_longitude(rahu_tropical_lon, ayanamsa)
     ketu_lon = (rahu_lon + 180) % 360
     for name, lon_value in [("Rahu", rahu_lon), ("Ketu", ketu_lon)]:
         sidx = sign_index(lon_value)
