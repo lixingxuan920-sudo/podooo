@@ -90,6 +90,39 @@ input {
   color: var(--rose-soft);
 }
 
+.fixed-app-icon {
+  position: fixed;
+  z-index: 46;
+  left: 14px;
+  top: calc(84px + env(safe-area-inset-top));
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 232, 226, 0.36);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 245, 239, 0.22), rgba(255, 255, 255, 0.08)),
+    rgba(62, 42, 42, 0.62);
+  box-shadow:
+    0 18px 40px rgba(24, 14, 14, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: translateZ(0);
+}
+
+.fixed-app-icon img {
+  width: 25px;
+  height: 25px;
+  display: block;
+  filter: drop-shadow(0 5px 12px rgba(244, 183, 184, 0.28));
+}
+
+.fixed-app-icon:active {
+  transform: scale(0.96);
+}
+
 .section {
   padding: clamp(64px, 8vw, 112px) clamp(18px, 5vw, 72px);
 }
@@ -1191,6 +1224,50 @@ body:not(.astraea-landing-active) .app-main::after {
     repeating-linear-gradient(115deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 9px);
 }
 
+body:not(.astraea-landing-active) .home-app {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 221, 226, 0.23), transparent 16rem),
+    radial-gradient(circle at 84% 30%, rgba(178, 216, 226, 0.14), transparent 18rem),
+    linear-gradient(145deg, rgba(43, 34, 32, 0.9), rgba(65, 43, 43, 0.9));
+}
+
+body:not(.astraea-landing-active) .home-app::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: -120px;
+  top: 58px;
+  width: min(520px, 92vw);
+  aspect-ratio: 0.7;
+  border-radius: 48% 52% 38% 62%;
+  background:
+    radial-gradient(circle at 48% 20%, rgba(255, 244, 232, 0.28), transparent 10rem),
+    radial-gradient(circle at 38% 50%, rgba(227, 164, 158, 0.32), transparent 13rem),
+    linear-gradient(130deg, rgba(255, 219, 213, 0.2), rgba(114, 76, 78, 0.08));
+  filter: blur(1.4px);
+  transform: rotate(-17deg);
+}
+
+body:not(.astraea-landing-active) .home-app::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  opacity: 0.42;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='.52'/%3E%3C/svg%3E"),
+    repeating-radial-gradient(circle at 68% 22%, transparent 0 34px, rgba(255, 232, 226, 0.06) 35px 36px, transparent 37px 62px);
+}
+
+body:not(.astraea-landing-active) .home-app > * {
+  position: relative;
+  z-index: 1;
+}
+
 body:not(.astraea-landing-active) .section:not(.home-app) {
   position: relative;
   overflow: hidden;
@@ -1241,6 +1318,7 @@ body:not(.astraea-landing-active) .section:not(.home-app) > * {
 }
 
 body:not(.astraea-landing-active) .module-chooser-page,
+body:not(.astraea-landing-active) .login-panel,
 body:not(.astraea-landing-active) .question-panel,
 body:not(.astraea-landing-active) .deck-panel,
 body:not(.astraea-landing-active) .result-summary,
@@ -1264,6 +1342,7 @@ body:not(.astraea-landing-active) .profile-drawer {
 }
 
 body:not(.astraea-landing-active) .module-chooser-page,
+body:not(.astraea-landing-active) .login-panel,
 body:not(.astraea-landing-active) .question-panel,
 body:not(.astraea-landing-active) .profile-form,
 body:not(.astraea-landing-active) .profile-reading {
@@ -2578,6 +2657,10 @@ body.astraea-landing-active .site-header {
   display: none;
 }
 
+body.astraea-landing-active .fixed-app-icon {
+  display: none;
+}
+
 body.astraea-landing-active .app-main {
   height: 100dvh;
   padding-top: 0;
@@ -2870,6 +2953,23 @@ body.astraea-landing-active .app-dashboard {
 }
 
 @media (max-width: 520px) {
+  .fixed-app-icon {
+    top: calc(76px + env(safe-area-inset-top));
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+  }
+
+  .fixed-app-icon img {
+    width: 22px;
+    height: 22px;
+  }
+
+  body:not(.astraea-landing-active) .section:not(.home-app) {
+    padding-top: 42px;
+  }
+
   .section {
     padding-left: 16px;
     padding-right: 16px;

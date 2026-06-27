@@ -1,4 +1,4 @@
-const CACHE_NAME = "luna-arcana-tarot-v34";
+const CACHE_NAME = "luna-arcana-tarot-v35";
 const APP_SHELL = [
   "/",
   "/index.html",
