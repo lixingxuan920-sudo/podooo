@@ -13,3 +13,5 @@ services:
         value: "https://api.deepseek.com"
       - key: OPENAI_MODEL
         value: "deepseek-chat"
+      - key: OPENAI_API_KEY
+        sync: false

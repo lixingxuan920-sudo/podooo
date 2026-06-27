@@ -1356,7 +1356,7 @@ async function renderIndianInterpretation() {
     saveConversationMemory(masterRecord.id, []);
     window.clearInterval(progressTimer);
     renderIndianBlueprint(masterRecord, "这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。");
-  } catch {
+  } catch (error) {
     window.clearInterval(progressTimer);
     const fallbackReading = window.IndianAstrologySkill.reading(profile, options);
     const masterRecord = {
@@ -1376,9 +1376,10 @@ async function renderIndianInterpretation() {
     state.indianMasterReading = masterRecord;
     state.indianContext = { profile, chart, options, skillResult: chartData?.skillResult || null, chartData, masterReading: masterRecord.masterReading };
     state.indianChatHistory = [];
+    const reason = error?.message ? `原因：${error.message}` : "原因：长任务暂时没有返回。";
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
-      <p class="disclaimer">DeepSeek 长报告接口这次超时或未返回，先显示本地基础蓝图，避免页面卡住。等部署环境稳定后可重新生成专业版。</p>
+      <p class="disclaimer">Render 长任务没有生成专业版，先显示本地基础蓝图，避免页面卡住。${escapeHtml(reason)}</p>
       ${fallbackReading}
       ${indianChatMarkup()}
     `;
