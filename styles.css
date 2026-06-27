@@ -24,10 +24,13 @@
 
 html {
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
+  height: 100%;
   margin: 0;
+  overflow: hidden;
   color: var(--ivory);
   background:
     radial-gradient(circle at 12% 18%, rgba(217, 154, 170, 0.16), transparent 28rem),
@@ -48,10 +51,11 @@ input {
 
 .site-header {
   position: fixed;
-  z-index: 20;
+  z-index: 40;
   top: 0;
   left: 0;
   right: 0;
+  height: 72px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -59,6 +63,15 @@ input {
   background: rgba(23, 20, 21, 0.72);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
+}
+
+.app-main {
+  height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: 72px;
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  scroll-padding-top: 88px;
 }
 
 .brand {
@@ -94,7 +107,6 @@ input {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  padding-top: 108px;
 }
 
 .home-app .hero-bg {
@@ -1455,13 +1467,32 @@ input:focus {
   color: var(--rose-soft);
 }
 
-.footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 28px clamp(18px, 5vw, 72px);
-  color: var(--muted);
+.app-tabbar {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(70px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-top: 1px solid var(--line);
+  background: rgba(23, 20, 21, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.app-tabbar a {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.app-tabbar a.active {
+  color: var(--rose-soft);
+  background: rgba(217, 154, 170, 0.09);
 }
 
 .install-banner {
@@ -1469,7 +1500,7 @@ input:focus {
   z-index: 30;
   left: 16px;
   right: 16px;
-  bottom: 16px;
+  bottom: 84px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1516,7 +1547,6 @@ input:focus {
 
   .home-app {
     min-height: auto;
-    padding-top: 88px;
   }
 
   .auth-screen {
@@ -1724,9 +1754,6 @@ input:focus {
     display: none;
   }
 
-  .footer {
-    flex-direction: column;
-  }
 }
 
 @media (max-width: 520px) {

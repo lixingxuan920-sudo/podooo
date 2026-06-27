@@ -1368,6 +1368,12 @@ function renderIndianChatMessages() {
   box.scrollTop = box.scrollHeight;
 }
 
+function updateActiveTab(target) {
+  document.querySelectorAll("[data-tab-target]").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.tabTarget === target);
+  });
+}
+
 async function sendIndianQuestion(presetQuestion = "") {
   const input = document.querySelector("#indianQuestionInput");
   const button = document.querySelector("#sendIndianQuestionButton");
@@ -1421,6 +1427,7 @@ function showAstrologyFlow() {
   els.indianAstrologySection.hidden = true;
   els.astrologySection.hidden = false;
   location.hash = "astrology";
+  updateActiveTab("astrology");
 }
 
 function showIndianFlow() {
@@ -1437,6 +1444,7 @@ function showIndianFlow() {
   els.astrologySection.hidden = true;
   els.indianAstrologySection.hidden = false;
   location.hash = "indianAstrology";
+  updateActiveTab("indianAstrology");
 }
 
 function showHomeFlow() {
@@ -1448,6 +1456,7 @@ function showHomeFlow() {
   els.historySection.hidden = true;
   renderLoginState();
   location.hash = "home";
+  updateActiveTab("home");
 }
 
 function showHistoryFlow() {
@@ -1464,6 +1473,7 @@ function showHistoryFlow() {
   els.indianAstrologySection.hidden = true;
   els.historySection.hidden = false;
   location.hash = "history";
+  updateActiveTab("history");
 }
 
 function showTarotFlow() {
@@ -1483,6 +1493,7 @@ function showTarotFlow() {
   state.shuffled = false;
   renderDeck();
   location.hash = "draw";
+  updateActiveTab("draw");
 }
 
 function enterDrawFlow() {
@@ -1508,6 +1519,7 @@ function enterDrawFlow() {
   state.shuffled = false;
   renderDeck();
   location.hash = "draw";
+  updateActiveTab("draw");
 }
 
 function returnHomeFlow() {
@@ -2284,6 +2296,7 @@ function showResult() {
     });
   }
   location.hash = "result";
+  updateActiveTab("draw");
 }
 
 function saveReading() {
@@ -2385,6 +2398,17 @@ els.showAstrologyButton.addEventListener("click", showAstrologyFlow);
 els.showIndianButton.addEventListener("click", showIndianFlow);
 els.backFromAstrologyButton.addEventListener("click", showHomeFlow);
 els.backFromIndianButton.addEventListener("click", showHomeFlow);
+document.querySelectorAll("[data-tab-target]").forEach((tab) => {
+  tab.addEventListener("click", (event) => {
+    event.preventDefault();
+    const target = tab.dataset.tabTarget;
+    if (target === "home") showHomeFlow();
+    if (target === "draw") showTarotFlow();
+    if (target === "astrology") showAstrologyFlow();
+    if (target === "indianAstrology") showIndianFlow();
+    if (target === "history") showHistoryFlow();
+  });
+});
 els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
 els.refreshIndianButton.addEventListener("click", renderIndianPage);
 els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
@@ -2533,9 +2557,22 @@ document.querySelectorAll('a[href="#history"]').forEach((link) => {
     showHistoryFlow();
   });
 });
+document.querySelectorAll('a[href="#home"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showHomeFlow();
+  });
+});
+document.querySelectorAll('a[href="#draw"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showTarotFlow();
+  });
+});
 
 renderTopics();
 renderSpreads();
 renderDeck();
 renderHistory();
 renderProfile();
+updateActiveTab(location.hash.replace("#", "") || "home");
