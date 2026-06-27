@@ -215,6 +215,10 @@ els.backToHomeButton = document.querySelector("#backToHomeButton");
 els.showTarotButton = document.querySelector("#showTarotButton");
 els.showAstrologyButton = document.querySelector("#showAstrologyButton");
 els.showIndianButton = document.querySelector("#showIndianButton");
+els.astraeaHomePage = document.querySelector("#astraeaHomePage");
+els.moduleChooserPage = document.querySelector("#moduleChooserPage");
+els.openModuleChooserButton = document.querySelector("#openModuleChooserButton");
+els.astraeaProfileButton = document.querySelector("#astraeaProfileButton");
 els.backFromAstrologyButton = document.querySelector("#backFromAstrologyButton");
 els.backFromIndianButton = document.querySelector("#backFromIndianButton");
 els.refreshAstrologyButton = document.querySelector("#refreshAstrologyButton");
@@ -379,6 +383,24 @@ function renderLoginState() {
   if (els.authScreen && els.appDashboard) {
     els.authScreen.hidden = isLoggedIn();
     els.appDashboard.hidden = !isLoggedIn();
+  }
+}
+
+function showAstraeaLanding() {
+  if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
+  if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
+}
+
+function showModuleChooser() {
+  if (!isLoggedIn()) {
+    setAuthStatus("请先登录账号，再进入占卜功能。");
+    showHomeFlow();
+    return;
+  }
+  if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
+  if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
+  if (els.moduleChooserPage) {
+    els.moduleChooserPage.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -1455,6 +1477,7 @@ function showHomeFlow() {
   els.indianAstrologySection.hidden = true;
   els.historySection.hidden = true;
   renderLoginState();
+  if (isLoggedIn()) showAstraeaLanding();
   location.hash = "home";
   updateActiveTab("home");
 }
@@ -2392,6 +2415,14 @@ els.spreadGrid.addEventListener("click", (event) => {
 els.prepareButton.addEventListener("click", startRitual);
 els.shuffleButton.addEventListener("click", shuffleDeck);
 els.enterDrawButton.addEventListener("click", enterDrawFlow);
+els.openModuleChooserButton.addEventListener("click", showModuleChooser);
+els.astraeaProfileButton.addEventListener("click", showModuleChooser);
+document.querySelectorAll("[data-home-shortcut]").forEach((button) => {
+  button.addEventListener("click", () => {
+    console.log(`Astraea shortcut: ${button.dataset.homeShortcut}`);
+    showModuleChooser();
+  });
+});
 els.showTarotButton.addEventListener("click", showTarotFlow);
 els.backToHomeButton.addEventListener("click", returnHomeFlow);
 els.showAstrologyButton.addEventListener("click", showAstrologyFlow);
@@ -2499,6 +2530,7 @@ els.profileForm.addEventListener("submit", (event) => {
 els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   await loginAccount();
+  if (isLoggedIn()) showAstraeaLanding();
   state.selectedCards = [];
   state.currentReading = null;
   state.favorite = false;

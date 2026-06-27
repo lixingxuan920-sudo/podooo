@@ -11,6 +11,9 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="assets/app-icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -57,6 +60,74 @@
         </div>
 
         <div class="app-dashboard" id="appDashboard" hidden>
+          <section class="astraea-home-page" id="astraeaHomePage" aria-label="Astraea tarot landing">
+            <div class="astraea-topbar">
+              <button class="astraea-icon-button" type="button" aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
+              <div class="astraea-crest" aria-hidden="true">A</div>
+              <button class="astraea-user-button" id="astraeaProfileButton" type="button" aria-label="Open profile">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.2"></circle>
+                  <path d="M5.8 20c1.1-4 11.3-4 12.4 0"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="astraea-brand">
+              <h1>ASTRAEA'S GUIDANCE</h1>
+              <p>BY ASTRAEA TAROT</p>
+            </div>
+
+            <div class="astraea-ritual-nav" aria-label="Tarot reading shortcuts">
+              <button class="astraea-ritual-item" type="button" data-home-shortcut="daily-draw">
+                <span class="astraea-nav-icon astraea-sun-icon" aria-hidden="true"></span>
+                <span>DAILY<br />DRAW</span>
+              </button>
+              <button class="astraea-ritual-item" type="button" data-home-shortcut="relationship-spread">
+                <span class="astraea-nav-icon astraea-figures-icon" aria-hidden="true"></span>
+                <span>RELATIONSHIP<br />SPREAD</span>
+              </button>
+              <button class="astraea-ritual-item" type="button" data-home-shortcut="career-path">
+                <span class="astraea-nav-icon astraea-compass-icon" aria-hidden="true"></span>
+                <span>CAREER<br />PATH</span>
+              </button>
+              <button class="astraea-ritual-item" type="button" data-home-shortcut="open-inquiry">
+                <span class="astraea-nav-icon astraea-crystal-icon" aria-hidden="true"></span>
+                <span>OPEN<br />INQUIRY</span>
+              </button>
+            </div>
+
+            <article class="astraea-oracle-card">
+              <div class="astraea-corner astraea-corner-tl"></div>
+              <div class="astraea-corner astraea-corner-tr"></div>
+              <div class="astraea-corner astraea-corner-bl"></div>
+              <div class="astraea-corner astraea-corner-br"></div>
+              <h2>THE HERMIT'S ANSWER</h2>
+              <div class="astraea-card-stage">
+                <button class="astraea-round-arrow" type="button" aria-label="Previous card">&lsaquo;</button>
+                <div class="astraea-card-stack">
+                  <div class="astraea-side-card astraea-side-left" aria-hidden="true"></div>
+                  <div class="astraea-tarot-mini astraea-mini-back" aria-hidden="true"></div>
+                  <div class="astraea-tarot-mini astraea-mini-main" aria-hidden="true">
+                    <span>Ace of Pentacles</span>
+                  </div>
+                  <div class="astraea-side-card astraea-side-right" aria-hidden="true"></div>
+                </div>
+                <button class="astraea-round-arrow" type="button" aria-label="Next card">&rsaquo;</button>
+              </div>
+              <p class="astraea-oracle-copy">以安静、专业的方式进入你的占卜空间。下一步选择塔罗、个人星盘或印度占星。</p>
+              <div class="astraea-dots" aria-hidden="true">
+                <span></span><span class="active"></span><span></span>
+              </div>
+            </article>
+
+            <button class="astraea-draw-button" id="openModuleChooserButton" type="button">DRAW A CARD</button>
+          </section>
+
+          <section class="module-chooser-page" id="moduleChooserPage" hidden>
           <div class="dashboard-top">
             <div>
               <p class="kicker">Luna Arcana</p>
@@ -120,6 +191,7 @@
               <p>填写生日、出生时间和城市后，这里会生成基础星座、生肖和五行倾向。</p>
             </div>
           </details>
+          </section>
         </div>
       </section>
 
@@ -482,9 +554,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=29"></script>
-    <script src="indian-astrology-skill.js?v=29"></script>
-    <script src="tarot-skill.js?v=29"></script>
-    <script src="app.js?v=29"></script>
+    <script src="astrology-skill.js?v=30"></script>
+    <script src="indian-astrology-skill.js?v=30"></script>
+    <script src="tarot-skill.js?v=30"></script>
+    <script src="app.js?v=30"></script>
   </body>
 </html>
