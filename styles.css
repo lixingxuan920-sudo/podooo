@@ -592,50 +592,6 @@ input {
   margin-top: 0;
 }
 
-.vedic-panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.vedic-panel-head .kicker {
-  margin-bottom: 4px;
-}
-
-.vedic-status-pill {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  border: 1px solid rgba(198, 166, 108, 0.35);
-  border-radius: 999px;
-  color: var(--muted);
-  background: rgba(23, 20, 21, 0.6);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.vedic-status-pill.ready {
-  color: var(--rose-soft);
-  border-color: rgba(217, 154, 170, 0.5);
-}
-
-.vedic-status-pill.fallback {
-  color: var(--gold);
-}
-
-.professional-ephemeris {
-  border-color: rgba(198, 166, 108, 0.38);
-  background:
-    linear-gradient(135deg, rgba(217, 154, 170, 0.08), rgba(198, 166, 108, 0.04)),
-    rgba(255, 255, 255, 0.035);
-}
-
-.professional-ephemeris.loading p {
-  color: var(--muted);
-  margin-bottom: 0;
-}
-
 .vedic-data-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -682,49 +638,6 @@ input {
 
 .vedic-position-table strong {
   color: var(--rose-soft);
-}
-
-.vedic-ephemeris-table {
-  display: grid;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.vedic-ephemeris-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 0.7fr 1.25fr 0.7fr;
-  gap: 8px;
-  align-items: center;
-  padding: 8px 10px;
-  border: 1px solid rgba(217, 154, 170, 0.16);
-  background: rgba(23, 20, 21, 0.34);
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.vedic-ephemeris-row.header {
-  color: var(--ivory);
-  background: rgba(198, 166, 108, 0.08);
-  font-size: 12px;
-}
-
-.vedic-ephemeris-row strong {
-  color: var(--rose-soft);
-}
-
-.vedic-warning-list {
-  display: grid;
-  gap: 6px;
-  margin: 12px 0;
-}
-
-.vedic-warning-list p {
-  margin: 0;
-  padding: 8px 10px;
-  border-left: 2px solid rgba(198, 166, 108, 0.7);
-  background: rgba(198, 166, 108, 0.08);
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .vedic-module-list {
@@ -1612,23 +1525,6 @@ input:focus {
 
   .vedic-position-table div {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .vedic-panel-head {
-    display: grid;
-  }
-
-  .vedic-status-pill {
-    justify-self: start;
-  }
-
-  .vedic-ephemeris-row {
-    grid-template-columns: 1fr 1fr;
-    font-size: 12px;
-  }
-
-  .vedic-ephemeris-row.header {
-    display: none;
   }
 
   .mode-switch {

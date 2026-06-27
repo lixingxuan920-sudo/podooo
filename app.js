@@ -1003,110 +1003,18 @@ async function fetchVedicSkillResult(profile, options, chart) {
   }
 }
 
-function parseVedicMeta(markdown) {
-  const text = String(markdown || "");
-  const pick = (label) => {
-    const match = text.match(new RegExp(`${label}:\\s*([^\\n]+)`));
-    return match ? match[1].trim() : "";
-  };
-  return {
-    birth: pick("出生日期"),
-    time: pick("出生时间"),
-    place: pick("出生地点"),
-    precision: pick("时间精度"),
-    effectivePrecision: pick("有效精度"),
-    method: pick("读盘方式"),
-    ayanamsa: pick("Ayanamsa"),
-    nodeMode: pick("Node模式")
-  };
-}
-
-function parseVedicD1Positions(markdown) {
-  const text = String(markdown || "");
-  const section = text.match(/### 行星位置([\s\S]*?)(?:\n### |\n## |$)/);
-  if (!section) return [];
-  return section[1]
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("|") && !/---|行星\s*\|/.test(line))
-    .map((line) => line.split("|").map((cell) => cell.trim()).filter(Boolean))
-    .filter((cells) => cells.length >= 5)
-    .map(([body, sign, house, degree, retrograde]) => ({ body, sign, house, degree, retrograde }));
-}
-
-function renderProfessionalVedicPanel(skillResult) {
-  const bridge = skillResult?.bridge || {};
-  const meta = skillResult?.calculationMeta || {};
-  const markdown = skillResult?.structuredDataMarkdown || "";
-  const structuredMeta = parseVedicMeta(markdown);
-  const positions = parseVedicD1Positions(markdown);
-  const warnings = [
-    ...(Array.isArray(meta.warnings) ? meta.warnings : []),
-    bridge.calculatorReady ? "" : bridge.reason
-  ].filter(Boolean);
-  const status = bridge.calculatorReady
-    ? "Python / Swiss Ephemeris 已接通"
-    : "当前为网页备用排盘";
-  const sourceClass = bridge.calculatorReady ? "ready" : "fallback";
-
-  return `
-    <div class="vedic-data-panel professional-ephemeris" data-vedic-professional-panel>
-      <div class="vedic-panel-head">
-        <div>
-          <p class="kicker">专业星历排盘</p>
-          <h3>D1 本命盘真实数据</h3>
-        </div>
-        <span class="vedic-status-pill ${sourceClass}">${escapeHtml(status)}</span>
-      </div>
-      <div class="vedic-data-grid">
-        <span>出生资料<strong>${escapeHtml(structuredMeta.birth || "未生成")} ${escapeHtml(structuredMeta.time || "")}</strong></span>
-        <span>时区<strong>${escapeHtml(meta.timezone || structuredMeta.place || "待识别")}</strong></span>
-        <span>经纬度<strong>${escapeHtml(Number.isFinite(meta.lon) ? `${meta.lon.toFixed(6)}, ${meta.lat.toFixed(6)}` : "待生成")}</strong></span>
-        <span>Ayanamsa<strong>${escapeHtml(structuredMeta.ayanamsa || "Lahiri")}</strong></span>
-        <span>秒数<strong>${escapeHtml(meta.second ?? "0")}</strong></span>
-        <span>精度<strong>${escapeHtml(structuredMeta.effectivePrecision || structuredMeta.precision || "待校验")}</strong></span>
-      </div>
-      ${positions.length ? `
-        <div class="vedic-ephemeris-table" aria-label="D1 行星位置">
-          <div class="vedic-ephemeris-row header">
-            <span>行星</span><span>星座</span><span>宫位</span><span>度数</span><span>逆行</span>
-          </div>
-          ${positions.map((item) => `
-            <div class="vedic-ephemeris-row">
-              <strong>${escapeHtml(item.body)}</strong>
-              <span>${escapeHtml(item.sign)}</span>
-              <span>${escapeHtml(item.house)}宫</span>
-              <span>${escapeHtml(item.degree)}</span>
-              <span>${escapeHtml(item.retrograde)}</span>
-            </div>
-          `).join("")}
-        </div>
-      ` : `
-        <p class="disclaimer">尚未拿到 Python structured_data.md，当前只显示网页备用盘。请确认本机服务正在运行。</p>
-      `}
-      ${warnings.length ? `
-        <div class="vedic-warning-list">
-          ${warnings.slice(0, 3).map((item) => `<p>${escapeHtml(item)}</p>`).join("")}
-        </div>
-      ` : ""}
-      <p class="disclaimer">解读会优先读取这份 D1 真实星历数据；若 SAV/BAV、Shadbala 或部分分盘有警示，DeepSeek 不会把占位值当成真实强弱判断。</p>
-    </div>
-  `;
-}
-
-function renderProfessionalVedicLoading() {
-  return `
-    <div class="vedic-data-panel professional-ephemeris loading" data-vedic-professional-panel>
-      <div class="vedic-panel-head">
-        <div>
-          <p class="kicker">专业星历排盘</p>
-          <h3>正在调用 Python 星历引擎</h3>
-        </div>
-        <span class="vedic-status-pill">计算中</span>
-      </div>
-      <p>正在根据出生秒数、时区、经纬度和 Lahiri Ayanamsa 生成真实 D1 本命盘……</p>
-    </div>
-  `;
+function warmVedicSkillResult(profile, options, chart) {
+  const requestId = Date.now();
+  state.indianSkillRequestId = requestId;
+  state.indianSkillResult = null;
+  state.indianSkillPromise = fetchVedicSkillResult(profile, options, chart)
+    .then((skillResult) => {
+      if (state.indianSkillRequestId === requestId) {
+        state.indianSkillResult = skillResult;
+      }
+      return skillResult;
+    });
+  return state.indianSkillPromise;
 }
 
 async function renderIndianPage() {
@@ -1123,19 +1031,7 @@ async function renderIndianPage() {
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   els.indianReading.innerHTML = window.IndianAstrologySkill.chartView(profile, options);
   if (!chart) return;
-  const requestId = Date.now();
-  state.indianSkillRequestId = requestId;
-  state.indianSkillResult = null;
-  state.indianSkillPromise = fetchVedicSkillResult(profile, options, chart);
-  const actions = els.indianReading.querySelector(".chart-actions");
-  actions?.insertAdjacentHTML("afterend", renderProfessionalVedicLoading());
-  const skillResult = await state.indianSkillPromise;
-  if (state.indianSkillRequestId !== requestId) return;
-  state.indianSkillResult = skillResult;
-  const panel = els.indianReading.querySelector("[data-vedic-professional-panel]");
-  if (panel) {
-    panel.outerHTML = renderProfessionalVedicPanel(skillResult);
-  }
+  warmVedicSkillResult(profile, options, chart);
 }
 
 async function renderIndianInterpretation() {
