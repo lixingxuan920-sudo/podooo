@@ -255,13 +255,14 @@ input {
 
 .astraea-home-page {
   position: relative;
-  width: min(390px, 100%);
-  min-height: min(720px, calc(100vh - 170px));
+  width: min(390px, 100vw);
+  height: min(844px, 100dvh);
+  min-height: 680px;
   margin: 0 auto;
   overflow: hidden;
-  border: 1px solid rgba(120, 74, 62, 0.28);
-  border-radius: 28px;
-  padding: 20px 14px 28px;
+  border: 1px solid rgba(120, 74, 62, 0.24);
+  border-radius: 0;
+  padding: 34px 14px 14px;
   color: #4a2d25;
   background:
     linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
@@ -277,15 +278,40 @@ input {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(182, 123, 116, 0.66) 0 74px, transparent 74px),
-    radial-gradient(circle at 50% 2px, rgba(255, 248, 232, 0.96) 0 46px, transparent 47px);
+    linear-gradient(180deg, rgba(188, 131, 122, 0.74) 0 95px, transparent 95px),
+    radial-gradient(circle at 50% 18px, rgba(255, 248, 232, 0.96) 0 44px, transparent 45px);
+}
+
+.astraea-home-page::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 94px;
+  height: 1px;
+  background: rgba(120, 74, 62, 0.24);
+  box-shadow: 0 2px 0 rgba(255, 248, 232, 0.7);
+  pointer-events: none;
+}
+
+.astraea-notch {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 50%;
+  width: 142px;
+  height: 27px;
+  border-radius: 0 0 18px 18px;
+  background: #111;
+  transform: translateX(-50%);
 }
 
 .astraea-topbar,
 .astraea-brand,
 .astraea-ritual-nav,
 .astraea-oracle-card,
-.astraea-draw-button {
+.astraea-draw-button,
+.astraea-bottom-nav {
   position: relative;
   z-index: 1;
 }
@@ -294,6 +320,7 @@ input {
   display: grid;
   grid-template-columns: 42px 1fr 42px;
   align-items: center;
+  height: 34px;
 }
 
 .astraea-icon-button,
@@ -335,19 +362,20 @@ input {
 
 .astraea-crest {
   justify-self: center;
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
   color: rgba(255, 248, 232, 0.95);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 42px;
+  font-size: 43px;
   line-height: 1;
   text-shadow: 0 1px 0 rgba(87, 49, 40, 0.32);
+  transform: translateY(-2px);
 }
 
 .astraea-brand {
-  margin-top: 26px;
+  margin-top: 27px;
   text-align: center;
 }
 
@@ -355,7 +383,7 @@ input {
   margin: 0;
   color: #3e2821;
   font-family: Cinzel, "Times New Roman", serif;
-  font-size: clamp(23px, 7vw, 31px);
+  font-size: clamp(22px, 6.6vw, 29px);
   font-weight: 500;
   letter-spacing: 0;
   white-space: nowrap;
@@ -372,8 +400,8 @@ input {
 .astraea-ritual-nav {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 18px 0 14px;
+  gap: 7px;
+  margin: 17px 0 12px;
 }
 
 .astraea-ritual-item {
@@ -391,8 +419,8 @@ input {
 .astraea-nav-icon {
   position: relative;
   display: block;
-  width: 49px;
-  height: 49px;
+  width: 50px;
+  height: 50px;
   margin: 0 auto 5px;
   color: #9d695d;
 }
@@ -488,8 +516,8 @@ input {
 }
 
 .astraea-oracle-card {
-  margin-top: 8px;
-  padding: 15px 12px 14px;
+  margin-top: 6px;
+  padding: 14px 12px 11px;
   overflow: hidden;
   text-align: center;
   border: 1px solid rgba(138, 86, 72, 0.28);
@@ -501,7 +529,7 @@ input {
 }
 
 .astraea-oracle-card h2 {
-  margin: 0 0 11px;
+  margin: 0 0 9px;
   color: #55342b;
   font-family: Cinzel, serif;
   font-size: 18px;
@@ -549,8 +577,9 @@ input {
 
 .astraea-card-stage {
   display: grid;
-  grid-template-columns: 31px 1fr 31px;
+  grid-template-columns: 30px 1fr 30px;
   align-items: center;
+  min-height: 172px;
 }
 
 .astraea-round-arrow {
@@ -568,7 +597,7 @@ input {
 
 .astraea-card-stack {
   position: relative;
-  height: 164px;
+  height: 172px;
   perspective: 900px;
 }
 
@@ -580,8 +609,8 @@ input {
   position: absolute;
   top: 4px;
   left: 50%;
-  width: 84px;
-  height: 132px;
+  width: 82px;
+  height: 128px;
   display: grid;
   align-content: space-between;
   justify-items: center;
@@ -596,13 +625,28 @@ input {
     var(--card-color);
   box-shadow: 0 10px 24px rgba(77, 43, 34, 0.2);
   transform:
-    translateX(calc(-50% + (var(--offset) * 74px)))
-    translateY(calc(var(--distance) * 9px))
-    scale(calc(1 - (var(--distance) * 0.16)))
-    rotate(calc(var(--offset) * 4deg));
+    translateX(calc(-50% + var(--x)))
+    translateY(var(--y))
+    scale(var(--scale))
+    rotate(var(--rotate));
   transform-origin: center;
   transition: transform 420ms ease, opacity 420ms ease, filter 420ms ease;
   z-index: var(--z);
+}
+
+.astraea-card-front {
+  color: #5b382c;
+  background:
+    radial-gradient(circle at 50% 37%, rgba(253, 232, 164, 0.84), transparent 27px),
+    linear-gradient(180deg, #ead4aa, #b98554);
+}
+
+.astraea-card-back {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 248, 232, 0.72) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 28%, rgba(255, 248, 232, 0.58) 0 2px, transparent 3px),
+    radial-gradient(circle at 48% 58%, rgba(255, 248, 232, 0.5) 0 2px, transparent 3px),
+    linear-gradient(180deg, #9e8064, #6f5a4f);
 }
 
 .astraea-tarot-mini:not(.active) {
@@ -640,6 +684,28 @@ input {
   border: 1px solid rgba(255, 248, 232, 0.48);
 }
 
+.astraea-card-front .astraea-mini-symbol {
+  border-color: rgba(91, 56, 44, 0.36);
+  border-radius: 50%;
+  transform: none;
+}
+
+.astraea-card-front .astraea-mini-symbol::before {
+  inset: 8px;
+  border-color: rgba(91, 56, 44, 0.52);
+  transform: rotate(45deg);
+}
+
+.astraea-card-back .astraea-mini-symbol {
+  border-radius: 0;
+  transform: rotate(8deg);
+}
+
+.astraea-card-back .astraea-mini-symbol::before {
+  inset: 7px;
+  border-color: rgba(255, 248, 232, 0.58);
+}
+
 .astraea-tarot-mini strong {
   max-width: 68px;
   color: rgba(255, 248, 232, 0.84);
@@ -650,18 +716,24 @@ input {
   text-align: center;
 }
 
+.astraea-card-front strong,
+.astraea-card-front .astraea-mini-number {
+  color: rgba(74, 45, 37, 0.86);
+}
+
 .astraea-card-caption {
-  min-height: 42px;
+  min-height: 37px;
   display: grid;
   align-content: center;
   justify-items: center;
+  margin-top: -11px;
 }
 
 .astraea-card-caption h3 {
   margin: 0;
   color: #4f3128;
   font-family: Cinzel, serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.08em;
 }
@@ -670,15 +742,15 @@ input {
   margin: 3px 0 0;
   color: #5f3d33;
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 11px;
+  font-size: 10px;
   font-style: italic;
 }
 
 .astraea-dots {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 7px;
+  margin-top: 7px;
 }
 
 .astraea-dots button {
@@ -699,9 +771,9 @@ input {
 }
 
 .astraea-draw-button {
-  width: min(230px, 82%);
-  min-height: 52px;
-  margin: -4px auto 0;
+  width: min(215px, 78%);
+  min-height: 49px;
+  margin: -8px auto 0;
   display: block;
   color: #fff8ee;
   border: 1px solid rgba(255, 255, 255, 0.54);
@@ -709,7 +781,7 @@ input {
   background: linear-gradient(135deg, #d9a093, #9e665d);
   box-shadow: 0 16px 26px rgba(98, 52, 43, 0.32);
   font-family: Cinzel, serif;
-  font-size: 18px;
+  font-size: 17px;
   cursor: pointer;
 }
 
@@ -724,7 +796,7 @@ input {
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   margin-top: 16px;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid rgba(92, 70, 64, 0.1);
 }
 
@@ -745,8 +817,11 @@ input {
 }
 
 .astraea-bottom-nav span {
-  font-size: 17px;
-  line-height: 1;
+  position: relative;
+  width: 24px;
+  height: 20px;
+  display: block;
+  color: currentColor;
 }
 
 .astraea-bottom-nav small {
@@ -754,6 +829,103 @@ input {
   font-size: 9px;
   line-height: 1.1;
   white-space: nowrap;
+}
+
+.astraea-tab-home::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 7px;
+  width: 15px;
+  height: 11px;
+  border: 1px solid currentColor;
+  border-top: 0;
+}
+
+.astraea-tab-home::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border-left: 1px solid currentColor;
+  border-top: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.astraea-tab-spreads::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background:
+    linear-gradient(currentColor 0 0) left 0 top 0 / 8px 7px no-repeat,
+    linear-gradient(currentColor 0 0) right 0 top 0 / 8px 7px no-repeat,
+    linear-gradient(currentColor 0 0) left 0 bottom 0 / 8px 7px no-repeat,
+    linear-gradient(currentColor 0 0) right 0 bottom 0 / 8px 7px no-repeat;
+  opacity: 0.9;
+  mask:
+    linear-gradient(#000 0 0) left 1px top 1px / 6px 5px no-repeat,
+    linear-gradient(#000 0 0) right 1px top 1px / 6px 5px no-repeat,
+    linear-gradient(#000 0 0) left 1px bottom 1px / 6px 5px no-repeat,
+    linear-gradient(#000 0 0) right 1px bottom 1px / 6px 5px no-repeat;
+}
+
+.astraea-tab-spreads::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid currentColor;
+}
+
+.astraea-tab-explore::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.astraea-tab-explore::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border-left: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.astraea-tab-settings::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  box-shadow:
+    0 -4px 0 -2px currentColor,
+    0 4px 0 -2px currentColor,
+    4px 0 0 -2px currentColor,
+    -4px 0 0 -2px currentColor;
+}
+
+.astraea-tab-settings::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
 }
 
 @keyframes astraeaFlip {
@@ -2017,8 +2189,36 @@ body.astraea-landing-active .app-tabbar {
   display: none;
 }
 
+body.astraea-landing-active .site-header {
+  display: none;
+}
+
 body.astraea-landing-active .app-main {
+  height: 100dvh;
+  padding-top: 0;
   padding-bottom: env(safe-area-inset-bottom);
+  background: #222;
+}
+
+body.astraea-landing-active .home-app {
+  min-height: 100dvh;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #222;
+}
+
+body.astraea-landing-active .home-app .hero-bg {
+  display: none;
+}
+
+body.astraea-landing-active .app-dashboard {
+  width: min(390px, 100vw);
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
 }
 
 .install-banner {

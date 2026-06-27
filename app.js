@@ -153,10 +153,10 @@ function buildMinorArcana() {
 const tarotCards = [...majorArcana, ...buildMinorArcana()];
 
 const astraeaCards = [
-  { title: "The Magician", subtitle: "Power & Potential", color: "#d4b2a7", mark: "I" },
-  { title: "The Star", subtitle: "Hope & Inspiration", color: "#c9af9c", mark: "XVII" },
-  { title: "Ace of Pentacles", subtitle: "Abundance & New Beginnings", color: "#bc9d94", mark: "A" },
-  { title: "The Hermit", subtitle: "Inner Guidance", color: "#cbb2a3", mark: "IX" }
+  { title: "The Magician", subtitle: "Power & Potential", color: "#a87162", mark: "I" },
+  { title: "The Star", subtitle: "Hope & Inspiration", color: "#b39173", mark: "XVII" },
+  { title: "Ace of Pentacles", subtitle: "Lorem ipsum dolor sit amet.", color: "#d1ad78", mark: "A" },
+  { title: "The Hermit", subtitle: "Inner Guidance", color: "#8c7465", mark: "IX" }
 ];
 
 const state = {
@@ -173,7 +173,7 @@ const state = {
   indianSkillResult: null,
   indianSkillPromise: null,
   indianSkillRequestId: 0,
-  astraeaIndex: 1
+  astraeaIndex: 2
 };
 
 const els = {
@@ -425,19 +425,28 @@ function renderAstraeaCarousel() {
   if (!els.astraeaCardStack) return;
   els.astraeaCardStack.innerHTML = astraeaCards.map((card, index) => {
     let offset = index - state.astraeaIndex;
-    if (offset < -1) offset += astraeaCards.length;
-    if (offset > 1) offset -= astraeaCards.length;
-    const visible = Math.abs(offset) <= 1;
+    if (offset < -2) offset += astraeaCards.length;
+    if (offset > 2) offset -= astraeaCards.length;
+    const visible = Math.abs(offset) <= 2;
     const active = index === state.astraeaIndex;
+    const layout = {
+      "-2": { x: -184, y: 34, scale: 0.82, rotate: -3, opacity: 0.54, z: 6, role: "peek" },
+      "-1": { x: -34, y: 10, scale: 0.92, rotate: -2, opacity: 0.78, z: 16, role: "back" },
+      "0": { x: 24, y: 26, scale: 1, rotate: 1, opacity: 1, z: 24, role: "front" },
+      "1": { x: 184, y: 34, scale: 0.82, rotate: 3, opacity: 0.54, z: 6, role: "peek" },
+      "2": { x: 184, y: 34, scale: 0.82, rotate: 3, opacity: 0, z: 1, role: "hidden" }
+    }[String(offset)];
     return `
       <article
-        class="astraea-tarot-mini ${active ? "active" : ""}"
+        class="astraea-tarot-mini ${active ? "active" : ""} astraea-card-${layout.role}"
         style="
-          --offset: ${offset};
-          --distance: ${Math.abs(offset)};
+          --x: ${layout.x}px;
+          --y: ${layout.y}px;
+          --scale: ${layout.scale};
+          --rotate: ${layout.rotate}deg;
           --card-color: ${card.color};
-          --z: ${active ? 20 : 10};
-          --opacity: ${active ? 1 : visible ? 0.44 : 0};
+          --z: ${layout.z};
+          --opacity: ${visible ? layout.opacity : 0};
           display: ${visible ? "grid" : "none"};
         "
         aria-label="${card.title}"
