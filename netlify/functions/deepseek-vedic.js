@@ -33,102 +33,6 @@ function cleanReading(text) {
     .trim();
 }
 
-function parseMarkdownTable(markdown, heading) {
-  const text = String(markdown || "");
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const section = text.match(new RegExp(`${escaped}([\\s\\S]*?)(?:\\n### |\\n## |$)`));
-  if (!section) return [];
-  return section[1]
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("|") && !/---/.test(line))
-    .map((line) => line.split("|").map((cell) => cell.trim()).filter(Boolean))
-    .filter((cells) => cells.length > 1);
-}
-
-function parseMeta(markdown) {
-  const text = String(markdown || "");
-  const pick = (label) => {
-    const match = text.match(new RegExp(`${label}:\\s*([^\\n]+)`));
-    return match ? match[1].trim() : "";
-  };
-  return {
-    birthDate: pick("出生日期"),
-    birthTime: pick("出生时间"),
-    birthPlace: pick("出生地点"),
-    precision: pick("有效精度") || pick("时间精度"),
-    method: pick("读盘方式"),
-    ayanamsa: pick("Ayanamsa"),
-    nodeMode: pick("Node模式")
-  };
-}
-
-function buildChartDataDigest(skillResult, profile, options) {
-  const markdown = skillResult?.structuredDataMarkdown || "";
-  const meta = parseMeta(markdown);
-  const positions = parseMarkdownTable(markdown, "### 行星位置")
-    .filter((row) => row[0] !== "行星")
-    .map((row) => ({
-      body: row[0],
-      sign: row[1],
-      house: row[2],
-      degree: row[3],
-      motion: row[4]
-    }));
-  const nakshatras = parseMarkdownTable(markdown, "### Nakshatra")
-    .filter((row) => row[0] !== "行星")
-    .map((row) => ({
-      body: row[0],
-      nakshatra: row[1],
-      pada: row[2],
-      lord: row[3]
-    }));
-  const dashas = parseMarkdownTable(markdown, "### Vimsottari Dasha")
-    .filter((row) => row[1] && row[1] !== "行星")
-    .map((row) => ({
-      marker: row[0],
-      planet: row[1],
-      start: row[2],
-      end: row[3],
-      years: row[4]
-    }));
-  const currentDasha = dashas.find((item) => String(item.marker || "").includes("当前")) || null;
-  const warnings = Array.isArray(skillResult?.calculationMeta?.warnings)
-    ? skillResult.calculationMeta.warnings
-    : [];
-
-  return {
-    userInput: {
-      birthDate: profile.birthDate || meta.birthDate || "未填写",
-      birthTime: profile.birthTime || meta.birthTime || "未填写",
-      birthSecond: profile.birthSecond || "",
-      birthPlace: profile.birthCity || meta.birthPlace || "未填写",
-      latitude: profile.latitude || "",
-      longitude: profile.longitude || "",
-      timezone: profile.timezone || skillResult?.calculationMeta?.timezone || "",
-      gender: profile.gender || "未填写",
-      focusArea: options.focusArea || "未填写"
-    },
-    calculation: {
-      engine: skillResult?.calculationMeta?.engine || "未生成",
-      source: skillResult?.bridge?.source || "",
-      timezone: skillResult?.calculationMeta?.timezone || "",
-      lat: skillResult?.calculationMeta?.lat,
-      lon: skillResult?.calculationMeta?.lon,
-      second: skillResult?.calculationMeta?.second,
-      ayanamsa: meta.ayanamsa || skillResult?.calculationMeta?.ayanamsa || "",
-      nodeMode: meta.nodeMode,
-      precision: meta.precision,
-      method: meta.method
-    },
-    d1Positions: positions,
-    nakshatras,
-    currentDasha,
-    dashas: dashas.slice(0, 12),
-    warnings
-  };
-}
-
 function buildPrompt(payload) {
   const profile = payload.profile || {};
   const chart = payload.chart || {};
@@ -143,7 +47,6 @@ function buildPrompt(payload) {
     modules: options.activeSkillModules || ["vedic-calculator", "vedic-reader", "vedic-core"],
     focusArea: options.focusArea || ""
   };
-  const chartDataDigest = buildChartDataDigest(skillResult, profile, options);
 
   return `
 你是一位专业、稳重、可信赖的印度占星师，熟悉 Jyotish、Parashari、KN Rao 口径、十二宫、九大行星、Nakshatra 月宿、Vimshottari Dasha、Navamsa D9、Dasamsa D10、行星强弱、瑜伽组合、合盘和现实人生咨询。
@@ -184,65 +87,46 @@ ${clip(skillResult.skillGuidance || [], 9000)}
 15. 不要使用 Markdown 标题符号、粗体符号、星号、###、#、---。标题直接写普通中文，例如“1. 命盘整体格局”。
 16. 不要把所有用户都讲成同一个答案。每段必须引用本盘至少一个具体依据，如宫位、行星、星座、月宿、大运、D9/D10 或数据缺失限制。
 17. 如果资料不足以确认某个瑜伽或时间窗口，要明确说“当前数据不足以确认”，不能硬编。
-18. 必须按照用户指定的 1-9 项专业报告结构输出，不要改成其他模板。
-19. 每个章节至少引用一条“核心排盘数据摘要”里的具体数据，例如某行星落座、宫位、月宿、当前大运、Rahu/Ketu 轴或计算警示。
-20. 如果当前数据没有 D9、Shadbala、SAV/BAV 或完整瑜伽校验，不要编造。对应章节必须明确写“当前后端暂未提供完整分盘/量化数据，因此只能基于 D1 与 Dasha 做初步判断”。
-21. 不要空泛说“你适合发展事业”。必须把判断落到职业方向、赚钱方式、关系模式、健康习惯或现实行动。
+18. 回答要像真人占星师，先说用户能听懂的判断，再补充依据。不要堆表格。
+19. 必须使用“咨询式深度解读模板”，不是教科书式条目报告。语气可以温和称呼“亲爱的”，但不要油腻，不要夸张承诺。
+20. 每一个重要判断必须回答用户当前最关心的问题，不允许只解释星体含义。比如用户问事业，就每段都要回到事业选择、职业模式、赚钱方式、行动节奏或风险管理。
+21. 先给明确倾向，再讲原因。不要开头就罗列上升、月亮、太阳。开头必须先像真人咨询师一样给出一句“我的判断/我更倾向于/目前来看”的直接结论。
+22. 写法要接近这个节奏：直接判断 → 整体能量模式 → 当前状态 → 已具备资源 → 未解决卡点 → 发展方向 → 结果推演 → 底层课题 → 现实行动。
+23. 如果当前只有 D1、Nakshatra 和 Dasha，没有完整 D9/D10/Shadbala/SAV，就要明确说“这一块需要完整分盘校验”，但仍然要基于已有真实星历给出可用判断，不要整段空泛回避。
 
-reading 模式必须严格按照下面结构输出
-开头先确认出生日期、出生时间、出生地点、性别、目前最关心的问题。缺失就写“未填写”。如果出生时间、经纬度、时区或夏令时会影响精度，请说明哪些结论受影响。
+reading 模式必须使用下面的模板
+第一段：直接判断
+用 1 到 2 段直接回答用户最关心的问题。必须给出倾向，例如“目前我更倾向于建议你先稳住基本盘，再做有边界的尝试”，或“这张盘更像是适合通过专业能力和长期积累打开事业，而不是短期冲动转向”。不能绝对化，不能吓人。
 
-1. 命盘整体格局
-- 上升星座、月亮星座、太阳星座
-- 命主星状态
-- 命盘的核心性格、人生主题和主要优势
+第二段：整张盘的整体模式
+像你在看一组牌一样，概括命盘里最明显的对话和矛盾。例如火土拉扯、月亮与 Rahu/Ketu 轴、1宫与10宫、2宫与11宫之间的关系。必须引用具体盘面：上升、月亮、太阳、Rahu/Ketu、关键宫位或当前大运。
 
-2. 行星强弱与重点配置
-- 分析九大行星的落宫、落座、尊贵状态、受克或受益情况
-- 指出哪些行星最关键，哪些行星带来挑战
+第三段：当前状态
+解释命主现在最可能处在什么心理/现实状态。必须结合用户关注问题，并引用至少一个盘面依据。
 
-3. 十二宫位解读
-- 重点分析第1宫、第2宫、第4宫、第5宫、第7宫、第9宫、第10宫、第11宫、第12宫
-- 说明这些宫位对性格、财富、事业、婚姻、家庭、贵人和精神成长的影响
+第四段：已具备的资源
+说明命主已经拥有的能力、优势、贵人或可变现资源。必须具体到职业、财富、关系或用户所问领域。
 
-4. 事业与财富
-- 适合的职业方向
-- 赚钱模式
-- 事业高峰期与需要谨慎的阶段
-- 是否适合创业、管理、体制内、技术、商业、艺术、咨询等方向
+第五段：尚未解决的卡点
+指出真正卡住的地方。语气要温和，但要具体。不要说“运势不好”，要说“哪里容易内耗、迟疑、过度理想化、沟通失焦或资源分散”。
 
-5. 婚姻与感情
-- 伴侣特质
-- 婚姻稳定性
-- 感情中的课题
-- 适合结婚的时间段或需要避开的阶段
+第六段：发展方向
+提出未来 3 到 5 年更适合的方向。要结合 Dasha，如果 Dasha 数据不足就用 D1 和月宿给趋势，并声明限制。
 
-6. 大运 Dasha 分析
-- 根据 Vimshottari Dasha 分析当前大运和小运
-- 解释当前阶段的主要主题、机会和风险
-- 预测未来3到5年的趋势
+第七段：关键宫位专题
+根据用户关注问题选择重点宫位。事业财富看 2、6、10、11宫；感情婚姻看 5、7、8、12宫；自我成长看 1、4、9、12宫。不需要把十二宫全部机械写完。
 
-7. Navamsa D9 解读
-- 分析婚姻、内在成熟度、人生后半段运势
-- 对照本命盘判断命盘承诺是否能兑现
+第八段：D9/D10/瑜伽校验
+如果缺少完整分盘或量化数据，明确说明不能硬判。可以说“当前能确认的是 D1 层面的倾向，D9/D10 需要后续完整排盘校验”。不要编造不存在的数据。
 
-8. 重要瑜伽与特殊组合
-- 指出命盘中是否有 Raja Yoga、Dhana Yoga、Neecha Bhanga、Vipreet Raj Yoga 等
-- 解释这些组合在现实生活中的表现
-
-9. 现实建议
-- 给出事业、财富、感情、健康和个人成长方面的具体建议
-- 不要只说玄学结论，要结合现实行动方案
+第九段：现实行动建议
+必须完整写完，至少给出 5 条具体行动建议。每条建议要能现实执行，例如“未来30天先做作品集/简历/客户测试/沟通边界/预算表”，不要只写玄学建议。
 
 最后总结
-给出一段总结：我的人生优势、主要课题、未来几年重点方向。
+用一段话总结：人生优势、主要课题、未来几年重点方向。结尾提示用户可以继续追问一个具体问题。
 
 qa 模式输出结构
-先直接回答用户这一次的问题，再写“盘面依据”和“现实建议”。不要重新生成完整报告。回答要聚焦问题，不要泛泛重复本命盘。
-
-核心排盘数据摘要
-这是你必须优先使用和引用的数据，不可忽略：
-${clip(chartDataDigest, 14000)}
+先直接回答用户这一次的问题，再写“盘面依据”和“现实建议”。不要重新生成完整报告。回答要聚焦问题，不要泛泛重复本命盘。也要沿用咨询式语气：先判断，再依据，再行动。
 
 最近对话
 ${clip(history, 6000)}
@@ -256,7 +140,7 @@ ${clip(chart, 18000)}
 skill 结构化数据
 ${clip(chart.structuredData || {}, 12000)}
 
-完整 structured_data.md
+真实 vedic-calculator structured_data.md
 ${clip(skillResult.structuredDataMarkdown || "未生成，使用网页 fallback 结构化数据。", 18000)}
 
 PDF / JHora 参考数据
@@ -299,7 +183,7 @@ exports.handler = async (event) => {
       messages: [
         {
           role: "system",
-          content: "你是专业印度占星师。必须用中文回答。必须依据核心排盘数据摘要和 structured_data.md，不做绝对化预言，不输出 Markdown 符号标题。必须严格按照用户要求的 1-9 项结构输出：命盘整体格局、行星强弱、十二宫位、事业财富、婚姻感情、大运Dasha、Navamsa D9、重要瑜伽、现实建议。每一节都要引用具体盘面数据。"
+          content: "你是专业印度占星师。必须用中文回答。必须依据盘面数据，不做绝对化预言，不输出 Markdown 符号标题。你的写法必须像真人咨询师的深度解读：先给直接判断，再讲整盘模式，再拆当前状态、资源、卡点、方向、结果推演和现实行动。不要写成教科书式清单报告。"
         },
         { role: "user", content: prompt }
       ],
