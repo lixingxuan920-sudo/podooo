@@ -1130,52 +1130,19 @@ function renderVedicProgress(activeStep = 0) {
         正在生成 Life Blueprint，请保持页面打开
       </span>
     </div>
-    <p class="disclaimer">这一步已交给 Render 长任务处理，通常需要 2-5 分钟。完成后会自动进入电子书式蓝图页面。</p>
+    <p class="disclaimer">这一步已交给 Render 长任务处理，通常需要 2-5 分钟。完成后会生成一份完整专业长报告。</p>
   `;
 }
 
-function splitBlueprintChapters(text) {
-  const source = String(text || "").trim();
-  if (!source) return [];
-  const chapterPattern = /(?=^第[一二三四五六七八九十]+章[^\n]*|^\d{1,2}[.、]\s*[^\n]+|^Executive Summary|^最后总结)/gm;
-  const parts = source.split(chapterPattern).map((part) => part.trim()).filter(Boolean);
-  return parts.map((part, index) => {
-    const lines = part.split("\n").map((line) => line.trim()).filter(Boolean);
-    const title = lines[0] && lines[0].length < 48 ? lines[0] : `章节 ${index + 1}`;
-    const body = title === lines[0] ? lines.slice(1).join("\n\n") : part;
-    return { id: `blueprint-chapter-${index}`, title, body: body || part };
-  });
-}
-
-function renderBlueprintBook(record) {
-  const chapters = splitBlueprintChapters(record.masterReading);
-  const favoriteIds = new Set(record.favoriteChapters || []);
+function renderBlueprintReport(record) {
   return `
-    <div class="blueprint-book">
-      <aside class="blueprint-toc">
-        <strong>目录</strong>
-        ${chapters.map((chapter, index) => `
-          <button type="button" data-blueprint-jump="${chapter.id}">${index + 1}. ${escapeHtml(chapter.title.replace(/^\d+[.、]\s*/, ""))}</button>
-        `).join("")}
-      </aside>
-      <div class="blueprint-pages">
-        <div class="blueprint-toolbar">
-          <span>已自动保存</span>
-          <button class="text-button" type="button" disabled>导出 PDF（后续）</button>
-        </div>
-        ${chapters.map((chapter) => `
-          <details class="blueprint-chapter" id="${chapter.id}" open>
-            <summary>
-              <span>${escapeHtml(chapter.title)}</span>
-              <button class="text-button" type="button" data-blueprint-favorite="${chapter.id}">
-                ${favoriteIds.has(chapter.id) ? "已收藏" : "收藏"}
-              </button>
-            </summary>
-            <div class="typewriter-text">${formatReadingText(chapter.body)}</div>
-          </details>
-        `).join("")}
+    <article class="blueprint-report">
+      <div class="blueprint-toolbar">
+        <span>完整长报告已自动保存</span>
+        <button class="text-button" type="button" disabled>导出 PDF（后续）</button>
       </div>
-    </div>
+      <div class="typewriter-text">${formatReadingText(record.masterReading)}</div>
+    </article>
   `;
 }
 
@@ -1186,7 +1153,7 @@ function renderIndianBlueprint(record, message = "") {
   deepseekBox.innerHTML = `
     <h3>Life Blueprint</h3>
     ${message ? `<p class="disclaimer">${escapeHtml(message)}</p>` : ""}
-    ${renderBlueprintBook(record)}
+    ${renderBlueprintReport(record)}
     ${indianChatMarkup()}
   `;
   renderIndianChatMessages();
@@ -1238,30 +1205,6 @@ async function waitForBlueprintJob(jobId, onProgress) {
     await sleep(attempt < 12 ? 4000 : 7000);
   }
   throw new Error("Blueprint job timed out");
-}
-
-function jumpBlueprintChapter(id) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  target.open = true;
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function toggleBlueprintFavorite(id) {
-  if (!state.indianMasterReading) return;
-  const favorites = new Set(state.indianMasterReading.favoriteChapters || []);
-  if (favorites.has(id)) {
-    favorites.delete(id);
-  } else {
-    favorites.add(id);
-  }
-  state.indianMasterReading = {
-    ...state.indianMasterReading,
-    favoriteChapters: [...favorites],
-    updatedAt: new Date().toISOString()
-  };
-  saveMasterReading(state.indianMasterReading);
-  renderIndianBlueprint(state.indianMasterReading, "已更新章节收藏。");
 }
 
 async function renderIndianPage() {
@@ -1387,9 +1330,22 @@ async function renderIndianInterpretation() {
 }
 
 function indianChatMarkup() {
+  const topics = [
+    ["事业", "请基于我的 Life Blueprint 和印度星盘，重点分析我的事业方向、适合行业、职业节奏、是否适合创业或自由职业。"],
+    ["婚姻", "请基于我的 Life Blueprint 和印度星盘，重点分析我的婚姻模式、伴侣特质、适合结婚阶段和关系课题。"],
+    ["财富", "请基于我的 Life Blueprint 和印度星盘，重点分析我的财富模式、赚钱方式、容易漏财的位置和资产配置建议。"],
+    ["感情", "请基于我的 Life Blueprint 和印度星盘，重点分析我的恋爱模式、吸引类型、业力关系和当前感情建议。"],
+    ["健康", "请基于我的 Life Blueprint 和印度星盘，重点分析我的身心压力模式、健康注意点和生活节律建议。"],
+    ["未来几年", "请基于我的 Life Blueprint 和印度星盘，重点分析未来三到五年的大运趋势、关键年份和现实行动建议。"]
+  ];
   return `
     <div class="vedic-chat">
-      <h4>Continue Consultation</h4>
+      <h4>专题继续咨询</h4>
+      <div class="vedic-topic-actions">
+        ${topics.map(([label, question]) => `
+          <button class="button secondary" type="button" data-indian-topic="${escapeHtml(question)}">${label}</button>
+        `).join("")}
+      </div>
       <div class="vedic-chat-messages" id="indianChatMessages"></div>
       <div class="vedic-chat-input">
         <input id="indianQuestionInput" type="text" placeholder="例如：我什么时候适合换工作？这段关系能不能稳定？" />
@@ -1412,11 +1368,11 @@ function renderIndianChatMessages() {
   box.scrollTop = box.scrollHeight;
 }
 
-async function sendIndianQuestion() {
+async function sendIndianQuestion(presetQuestion = "") {
   const input = document.querySelector("#indianQuestionInput");
   const button = document.querySelector("#sendIndianQuestionButton");
   if (!input || !button || !state.indianContext || !state.indianMasterReading) return;
-  const question = input.value.trim();
+  const question = presetQuestion || input.value.trim();
   if (!question) return;
   input.value = "";
   state.indianChatHistory.push({ role: "user", content: question });
@@ -2464,14 +2420,9 @@ els.indianReading.addEventListener("click", (event) => {
   if (event.target.closest("#startIndianReadingButton")) {
     renderIndianInterpretation();
   }
-  const jumpButton = event.target.closest("[data-blueprint-jump]");
-  if (jumpButton) {
-    jumpBlueprintChapter(jumpButton.dataset.blueprintJump);
-  }
-  const favoriteButton = event.target.closest("[data-blueprint-favorite]");
-  if (favoriteButton) {
-    event.preventDefault();
-    toggleBlueprintFavorite(favoriteButton.dataset.blueprintFavorite);
+  const topicButton = event.target.closest("[data-indian-topic]");
+  if (topicButton) {
+    sendIndianQuestion(topicButton.dataset.indianTopic);
   }
   if (event.target.closest("#sendIndianQuestionButton")) {
     sendIndianQuestion();

@@ -569,47 +569,6 @@ input {
   background: var(--gold);
 }
 
-.blueprint-book {
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-
-.blueprint-toc {
-  position: sticky;
-  top: 14px;
-  display: grid;
-  gap: 8px;
-  max-height: 72vh;
-  overflow: auto;
-  padding: 12px;
-  border: 1px solid rgba(198, 166, 108, 0.28);
-  background: rgba(23, 20, 21, 0.52);
-}
-
-.blueprint-toc strong {
-  color: var(--gold);
-}
-
-.blueprint-toc button {
-  width: 100%;
-  padding: 8px 0;
-  border: 0;
-  border-bottom: 1px solid rgba(217, 154, 170, 0.14);
-  background: transparent;
-  color: var(--ivory);
-  text-align: left;
-  line-height: 1.35;
-  cursor: pointer;
-}
-
-.blueprint-pages {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
-}
-
 .blueprint-toolbar {
   display: flex;
   align-items: center;
@@ -619,36 +578,29 @@ input {
   font-size: 13px;
 }
 
-.blueprint-chapter {
+.blueprint-report {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
   border: 1px solid rgba(217, 154, 170, 0.22);
   background: rgba(23, 20, 21, 0.38);
 }
 
-.blueprint-chapter summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 14px;
-  color: var(--rose-soft);
-  cursor: pointer;
-}
-
-.blueprint-chapter summary span {
-  font-family: var(--serif);
-  font-size: 18px;
-}
-
-.blueprint-chapter summary::marker {
-  color: var(--gold);
-}
-
-.blueprint-chapter .typewriter-text {
-  padding: 0 14px 14px;
-}
-
-.blueprint-chapter p {
+.blueprint-report p {
   margin: 0 0 11px;
+}
+
+.vedic-topic-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.complete-chart-panel summary {
+  color: var(--gold);
+  cursor: pointer;
+  margin-bottom: 12px;
 }
 
 .vedic-chat {
@@ -1557,28 +1509,9 @@ input:focus {
   .reading-shell,
   .home-grid,
   .astrology-layout,
-  .blueprint-book,
   .profile-shell,
   .result-card {
     grid-template-columns: 1fr;
-  }
-
-  .blueprint-toc {
-    position: static;
-    display: flex;
-    overflow-x: auto;
-    max-height: none;
-  }
-
-  .blueprint-toc strong {
-    flex: 0 0 auto;
-    align-self: center;
-  }
-
-  .blueprint-toc button {
-    flex: 0 0 180px;
-    border-bottom: 0;
-    border-right: 1px solid rgba(217, 154, 170, 0.14);
   }
 
   .home-app {
@@ -1812,6 +1745,10 @@ input:focus {
   .profile-reading,
   .question-panel {
     padding: 14px;
+  }
+
+  .vedic-topic-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   h1 {

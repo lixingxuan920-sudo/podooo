@@ -649,6 +649,11 @@
           <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
         </div>
         ${southIndianChart(profile)}
+        <details class="vedic-data-panel complete-chart-panel" open>
+          <summary>完整印度星盘数据</summary>
+          ${chartTable(chart)}
+          ${computedDataPanel(chart)}
+        </details>
         <div class="chart-actions">
           <button class="button primary full" id="startIndianReadingButton" type="button">生成 Life Blueprint</button>
         </div>
