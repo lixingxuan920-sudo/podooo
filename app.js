@@ -1027,8 +1027,7 @@ function stableVedicSignature(profile, options) {
     latitude: profile.latitude || "",
     longitude: profile.longitude || "",
     timezone: profile.timezone || "",
-    ayanamsa: profile.ayanamsa || "Lahiri",
-    focusArea: options.focusArea || ""
+    ayanamsa: profile.ayanamsa || "Lahiri"
   };
   const text = JSON.stringify(payload);
   let hash = 0;
@@ -1036,6 +1035,45 @@ function stableVedicSignature(profile, options) {
     hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
   }
   return `vedic-${Math.abs(hash)}`;
+}
+
+function getChartCache() {
+  try {
+    return JSON.parse(localStorage.getItem(userStorageKey("vedic_chart_cache")) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveChartCache(signature, chartData) {
+  const cache = getChartCache();
+  cache[signature] = {
+    ...chartData,
+    cachedAt: new Date().toISOString()
+  };
+  localStorage.setItem(userStorageKey("vedic_chart_cache"), JSON.stringify(cache));
+}
+
+async function getOrCreateVedicChartData(profile, options, chart) {
+  const signature = stableVedicSignature(profile, options);
+  const cache = getChartCache();
+  if (cache[signature]) return cache[signature];
+  const skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null)
+    || await fetchVedicSkillResult(profile, options, chart);
+  state.indianSkillResult = skillResult;
+  const chartData = {
+    signature,
+    profile,
+    options,
+    chart,
+    skillResult,
+    structuredData: chart?.structuredData || {},
+    structuredDataMarkdown: skillResult?.structuredDataMarkdown || "",
+    calculationMeta: skillResult?.calculationMeta || null,
+    pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
+  };
+  saveChartCache(signature, chartData);
+  return chartData;
 }
 
 function getMasterReadings() {
@@ -1088,24 +1126,106 @@ function renderVedicProgress(activeStep = 0) {
   const steps = [
     "读取出生资料",
     "计算印度星盘",
-    "生成结构化命盘",
-    "行星与宫位分析",
-    "D9 / D10 与大运校验",
-    "业力主题整理",
-    "生成 Life Blueprint",
+    "缓存结构化数据",
+    "发送完整盘给 DeepSeek",
+    "生成深度 Life Blueprint",
+    "自动保存总报告",
+    "准备持续咨询",
     "进入持续咨询"
   ];
   return `
     <div class="vedic-progress">
       ${steps.map((step, index) => `
         <span class="${index <= activeStep ? "active" : ""}">
-          <b>${index < activeStep ? "✓" : index === activeStep ? "•" : ""}</b>
+          <b>${index + 1}</b>
           ${step}
         </span>
       `).join("")}
     </div>
-    <p class="disclaimer">首次生成会比较久，后续追问会直接读取这份 Life Blueprint 和咨询记忆，不会重新生成整份报告。</p>
+    <p class="disclaimer">首次生成会比较久。星盘结构数据和 Life Blueprint 都会保存，后续追问只读取缓存与咨询记忆。</p>
   `;
+}
+
+function splitBlueprintChapters(text) {
+  const source = String(text || "").trim();
+  if (!source) return [];
+  const chapterPattern = /(?=^第[一二三四五六七八九十]+章[^\n]*|^\d{1,2}[.、]\s*[^\n]+|^Executive Summary|^最后总结)/gm;
+  const parts = source.split(chapterPattern).map((part) => part.trim()).filter(Boolean);
+  return parts.map((part, index) => {
+    const lines = part.split("\n").map((line) => line.trim()).filter(Boolean);
+    const title = lines[0] && lines[0].length < 48 ? lines[0] : `章节 ${index + 1}`;
+    const body = title === lines[0] ? lines.slice(1).join("\n\n") : part;
+    return { id: `blueprint-chapter-${index}`, title, body: body || part };
+  });
+}
+
+function renderBlueprintBook(record) {
+  const chapters = splitBlueprintChapters(record.masterReading);
+  const favoriteIds = new Set(record.favoriteChapters || []);
+  return `
+    <div class="blueprint-book">
+      <aside class="blueprint-toc">
+        <strong>目录</strong>
+        ${chapters.map((chapter, index) => `
+          <button type="button" data-blueprint-jump="${chapter.id}">${index + 1}. ${escapeHtml(chapter.title.replace(/^\d+[.、]\s*/, ""))}</button>
+        `).join("")}
+      </aside>
+      <div class="blueprint-pages">
+        <div class="blueprint-toolbar">
+          <span>已自动保存</span>
+          <button class="text-button" type="button" disabled>导出 PDF（后续）</button>
+        </div>
+        ${chapters.map((chapter) => `
+          <details class="blueprint-chapter" id="${chapter.id}" open>
+            <summary>
+              <span>${escapeHtml(chapter.title)}</span>
+              <button class="text-button" type="button" data-blueprint-favorite="${chapter.id}">
+                ${favoriteIds.has(chapter.id) ? "已收藏" : "收藏"}
+              </button>
+            </summary>
+            <div class="typewriter-text">${formatReadingText(chapter.body)}</div>
+          </details>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderIndianBlueprint(record, message = "") {
+  const deepseekBox = document.querySelector("#deepseekIndianReading");
+  if (!deepseekBox) return;
+  deepseekBox.hidden = false;
+  deepseekBox.innerHTML = `
+    <h3>Life Blueprint</h3>
+    ${message ? `<p class="disclaimer">${escapeHtml(message)}</p>` : ""}
+    ${renderBlueprintBook(record)}
+    ${indianChatMarkup()}
+  `;
+  renderIndianChatMessages();
+}
+
+function jumpBlueprintChapter(id) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  target.open = true;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function toggleBlueprintFavorite(id) {
+  if (!state.indianMasterReading) return;
+  const favorites = new Set(state.indianMasterReading.favoriteChapters || []);
+  if (favorites.has(id)) {
+    favorites.delete(id);
+  } else {
+    favorites.add(id);
+  }
+  state.indianMasterReading = {
+    ...state.indianMasterReading,
+    favoriteChapters: [...favorites],
+    updatedAt: new Date().toISOString()
+  };
+  saveMasterReading(state.indianMasterReading);
+  renderIndianBlueprint(state.indianMasterReading, "已更新章节收藏。");
 }
 
 async function renderIndianPage() {
@@ -1140,15 +1260,16 @@ async function renderIndianInterpretation() {
   const cachedMaster = findMasterReading(profile, options);
   if (cachedMaster) {
     state.indianMasterReading = cachedMaster;
-    state.indianContext = { profile, chart, options, skillResult: cachedMaster.skillResult, masterReading: cachedMaster.masterReading };
+    state.indianContext = {
+      profile,
+      chart,
+      options,
+      skillResult: cachedMaster.skillResult,
+      chartData: cachedMaster.chartData || cachedMaster.chartJson,
+      masterReading: cachedMaster.masterReading
+    };
     state.indianChatHistory = getConversationMemory(cachedMaster.id);
-    deepseekBox.innerHTML = `
-      <h3>Life Blueprint</h3>
-      <p class="disclaimer">已读取这个账号保存过的完整印占总报告。后续追问会继续引用这份报告与历史咨询，不会重新生成整盘。</p>
-      ${formatReadingText(cachedMaster.masterReading)}
-      ${indianChatMarkup()}
-    `;
-    renderIndianChatMessages();
+    renderIndianBlueprint(cachedMaster, "已读取这个账号保存过的完整 Life Blueprint。后续追问会继续引用这份报告与历史咨询，不会重新生成整盘。");
     return;
   }
 
@@ -1164,54 +1285,47 @@ async function renderIndianInterpretation() {
       ${renderVedicProgress(activeProgress)}
     `;
   }, 8500);
-  let skillResult = null;
+  let chartData = null;
   try {
-    skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null);
-    if (!skillResult) {
-      skillResult = await fetchVedicSkillResult(profile, options, chart);
-      state.indianSkillResult = skillResult;
-    }
-    activeProgress = 6;
+    chartData = await getOrCreateVedicChartData(profile, options, chart);
+    activeProgress = 3;
 
-    const response = await fetch("/.netlify/functions/deepseek-vedic", {
+    const response = await fetch("/api/generate-blueprint", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        mode: "master",
         profile,
         chart,
+        chartData,
         options,
-        skillResult,
+        skillResult: chartData.skillResult,
         pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
       })
     });
     if (!response.ok) throw new Error("DeepSeek unavailable");
     const data = await response.json();
-    const masterReading = data.reading || "";
+    const masterReading = data.blueprint || "";
     const masterRecord = {
       id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
       signature: stableVedicSignature(profile, options),
       userId: getCurrentUser(),
       birthData: profile,
       chartJson: chart,
-      skillResult,
+      chartData: data.chartData || chartData,
+      skillResult: chartData.skillResult,
       masterReading,
       summary: data.summary || summarizeReading(masterReading),
+      favoriteChapters: [],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: data.createdAt || new Date().toISOString()
     };
     saveMasterReading(masterRecord);
     state.indianMasterReading = masterRecord;
-    state.indianContext = { profile, chart, options, skillResult, masterReading };
+    state.indianContext = { profile, chart, options, skillResult: chartData.skillResult, chartData, masterReading };
     state.indianChatHistory = [];
     saveConversationMemory(masterRecord.id, []);
     window.clearInterval(progressTimer);
-    deepseekBox.innerHTML = `
-      <h3>Life Blueprint</h3>
-      <p class="disclaimer">这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。</p>
-      ${formatReadingText(masterReading)}
-      ${indianChatMarkup()}
-    `;
+    renderIndianBlueprint(masterRecord, "这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。");
   } catch {
     window.clearInterval(progressTimer);
     const fallbackReading = window.IndianAstrologySkill.reading(profile, options);
@@ -1221,14 +1335,16 @@ async function renderIndianInterpretation() {
       userId: getCurrentUser(),
       birthData: profile,
       chartJson: chart,
-      skillResult,
+      chartData,
+      skillResult: chartData?.skillResult || null,
       masterReading: fallbackReading.replace(/<[^>]+>/g, "\n"),
       summary: "DeepSeek 暂时不可用，已显示本地基础解读。配置模型后可重新生成更完整的 Life Blueprint。",
+      favoriteChapters: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     state.indianMasterReading = masterRecord;
-    state.indianContext = { profile, chart, options, skillResult, masterReading: masterRecord.masterReading };
+    state.indianContext = { profile, chart, options, skillResult: chartData?.skillResult || null, chartData, masterReading: masterRecord.masterReading };
     state.indianChatHistory = [];
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
@@ -1277,16 +1393,17 @@ async function sendIndianQuestion() {
   renderIndianChatMessages();
   button.disabled = true;
   try {
-    const response = await fetch("/.netlify/functions/deepseek-vedic", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...state.indianContext,
         question,
+        blueprint: state.indianMasterReading.masterReading,
         history: state.indianChatHistory.slice(0, -1),
+        chartData: state.indianMasterReading.chartData || state.indianContext.chartData,
         masterReading: state.indianMasterReading.masterReading,
         masterSummary: state.indianMasterReading.summary,
-        mode: "qa",
         pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
       })
     });
@@ -1294,7 +1411,7 @@ async function sendIndianQuestion() {
     const data = await response.json();
     state.indianChatHistory[state.indianChatHistory.length - 1] = {
       role: "assistant",
-      content: data.reading || "这次没有生成有效回答，请换一种问法再试。"
+      content: data.answer || "这次没有生成有效回答，请换一种问法再试。"
     };
     saveConversationMemory(state.indianMasterReading.id, state.indianChatHistory);
   } catch {
@@ -2321,6 +2438,15 @@ els.indianBirthTime.addEventListener("change", () => {
 els.indianReading.addEventListener("click", (event) => {
   if (event.target.closest("#startIndianReadingButton")) {
     renderIndianInterpretation();
+  }
+  const jumpButton = event.target.closest("[data-blueprint-jump]");
+  if (jumpButton) {
+    jumpBlueprintChapter(jumpButton.dataset.blueprintJump);
+  }
+  const favoriteButton = event.target.closest("[data-blueprint-favorite]");
+  if (favoriteButton) {
+    event.preventDefault();
+    toggleBlueprintFavorite(favoriteButton.dataset.blueprintFavorite);
   }
   if (event.target.closest("#sendIndianQuestionButton")) {
     sendIndianQuestion();

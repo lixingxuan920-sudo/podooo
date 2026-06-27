@@ -6,6 +6,16 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[redirects]]
+  from = "/api/generate-blueprint"
+  to = "/.netlify/functions/generate-blueprint"
+  status = 200
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
