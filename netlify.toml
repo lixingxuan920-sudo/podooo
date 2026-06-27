@@ -1,6 +1,10 @@
 [build]
+  command = "node --version"
   publish = "."
   functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
 
 [[headers]]
   for = "/*"
