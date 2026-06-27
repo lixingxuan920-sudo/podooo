@@ -1156,6 +1156,238 @@ input {
   margin-bottom: 12px;
 }
 
+body:not(.astraea-landing-active) .app-main {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 222, 229, 0.24), transparent 17rem),
+    radial-gradient(circle at 88% 24%, rgba(157, 198, 218, 0.18), transparent 18rem),
+    linear-gradient(135deg, #2b2220 0%, #3a2928 42%, #211a1a 100%);
+}
+
+body:not(.astraea-landing-active) .app-main::before {
+  content: "";
+  position: fixed;
+  z-index: -2;
+  inset: 72px 0 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 68% 18%, rgba(255, 238, 224, 0.22), transparent 18rem),
+    radial-gradient(ellipse at 24% 74%, rgba(217, 154, 170, 0.22), transparent 17rem),
+    conic-gradient(from 18deg at 72% 22%, transparent 0 18deg, rgba(246, 208, 194, 0.13) 18deg 28deg, transparent 28deg 52deg, rgba(174, 118, 108, 0.12) 52deg 61deg, transparent 61deg 360deg);
+  filter: blur(0.2px) saturate(1.06);
+}
+
+body:not(.astraea-landing-active) .app-main::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 72px 0 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 260 260' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 9px);
+}
+
+body:not(.astraea-landing-active) .section:not(.home-app) {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100dvh - 148px);
+  padding-top: clamp(34px, 6vw, 68px);
+  transform-style: preserve-3d;
+}
+
+body:not(.astraea-landing-active) .section:not(.home-app)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: clamp(-160px, -12vw, -60px);
+  top: 22px;
+  width: min(540px, 88vw);
+  aspect-ratio: 0.76;
+  border-radius: 48% 52% 42% 58%;
+  background:
+    radial-gradient(circle at 52% 22%, rgba(255, 245, 234, 0.3), transparent 11rem),
+    radial-gradient(circle at 42% 46%, rgba(218, 159, 149, 0.32), transparent 14rem),
+    linear-gradient(135deg, rgba(239, 203, 197, 0.18), rgba(144, 98, 98, 0.08));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 0 90px rgba(255, 225, 211, 0.18);
+  filter: blur(1.2px);
+  transform: rotate(-14deg) translateZ(-40px);
+}
+
+body:not(.astraea-landing-active) .section:not(.home-app)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: max(-180px, -18vw);
+  bottom: -120px;
+  width: min(500px, 92vw);
+  aspect-ratio: 1;
+  border: 1px solid rgba(247, 205, 201, 0.12);
+  border-radius: 50%;
+  background:
+    conic-gradient(from 238deg, transparent 0 24deg, rgba(255, 223, 216, 0.12) 24deg 38deg, transparent 38deg 81deg, rgba(180, 128, 122, 0.1) 81deg 95deg, transparent 95deg 360deg);
+  filter: blur(0.8px);
+  transform: rotate(9deg);
+}
+
+body:not(.astraea-landing-active) .section:not(.home-app) > * {
+  position: relative;
+  z-index: 1;
+}
+
+body:not(.astraea-landing-active) .module-chooser-page,
+body:not(.astraea-landing-active) .question-panel,
+body:not(.astraea-landing-active) .deck-panel,
+body:not(.astraea-landing-active) .result-summary,
+body:not(.astraea-landing-active) .result-card,
+body:not(.astraea-landing-active) .profile-form,
+body:not(.astraea-landing-active) .profile-reading,
+body:not(.astraea-landing-active) .history-card,
+body:not(.astraea-landing-active) .feature-card,
+body:not(.astraea-landing-active) .profile-drawer {
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 245, 239, 0.22), rgba(255, 255, 255, 0.08)),
+    rgba(70, 46, 45, 0.54);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 26px 70px rgba(26, 16, 16, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+body:not(.astraea-landing-active) .module-chooser-page,
+body:not(.astraea-landing-active) .question-panel,
+body:not(.astraea-landing-active) .profile-form,
+body:not(.astraea-landing-active) .profile-reading {
+  transform: perspective(1200px) rotateX(1.2deg) translateZ(0);
+}
+
+body:not(.astraea-landing-active) .feature-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 150px;
+  background:
+    linear-gradient(135deg, rgba(255, 226, 224, 0.22), rgba(255, 255, 255, 0.07)),
+    rgba(73, 45, 45, 0.62);
+}
+
+body:not(.astraea-landing-active) .feature-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -60% 12%;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 219, 212, 0.22), transparent 64%);
+  filter: blur(12px);
+}
+
+body:not(.astraea-landing-active) .feature-card:hover,
+body:not(.astraea-landing-active) .feature-card:focus-visible {
+  transform: translateY(-4px) rotateX(2deg);
+  border-color: rgba(244, 196, 194, 0.58);
+}
+
+body:not(.astraea-landing-active) .section-heading {
+  max-width: 980px;
+  color: #fff4ef;
+  text-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+body:not(.astraea-landing-active) .section-heading h2,
+body:not(.astraea-landing-active) .dashboard-top h1,
+body:not(.astraea-landing-active) .feature-card h2,
+body:not(.astraea-landing-active) .profile-form h2,
+body:not(.astraea-landing-active) .question-panel h2,
+body:not(.astraea-landing-active) .deck-panel h2,
+body:not(.astraea-landing-active) .result-summary h3 {
+  font-family: "Noto Serif SC", "Cormorant Garamond", "Songti SC", serif;
+  color: #fff1ed;
+  letter-spacing: 0;
+}
+
+body:not(.astraea-landing-active) .kicker,
+body:not(.astraea-landing-active) label,
+body:not(.astraea-landing-active) .feature-card span {
+  color: #f1b9bd;
+  font-family: Inter, "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.08em;
+}
+
+body:not(.astraea-landing-active) p,
+body:not(.astraea-landing-active) .feature-card p,
+body:not(.astraea-landing-active) .profile-reading,
+body:not(.astraea-landing-active) .result-card p {
+  color: rgba(255, 240, 235, 0.76);
+}
+
+body:not(.astraea-landing-active) input,
+body:not(.astraea-landing-active) textarea,
+body:not(.astraea-landing-active) select {
+  color: #fff7f2;
+  border-color: rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.045)),
+    rgba(30, 21, 21, 0.44);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+body:not(.astraea-landing-active) input::placeholder,
+body:not(.astraea-landing-active) textarea::placeholder {
+  color: rgba(255, 235, 230, 0.44);
+}
+
+body:not(.astraea-landing-active) .button.primary,
+body:not(.astraea-landing-active) .ritual-button {
+  color: #3c2724;
+  border-color: rgba(255, 255, 255, 0.46);
+  background:
+    linear-gradient(135deg, rgba(255, 234, 226, 0.95), rgba(210, 143, 139, 0.95) 52%, rgba(168, 126, 115, 0.98));
+  box-shadow:
+    0 16px 34px rgba(168, 112, 112, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+body:not(.astraea-landing-active) .button.secondary,
+body:not(.astraea-landing-active) .text-button {
+  color: #ffd6d8;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+body:not(.astraea-landing-active) .deck {
+  perspective: 900px;
+}
+
+body:not(.astraea-landing-active) .tarot-card {
+  border-color: rgba(255, 221, 209, 0.5);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 237, 219, 0.2), transparent 42%),
+    linear-gradient(145deg, #b8757c, #5a3436);
+  box-shadow: 0 16px 30px rgba(25, 13, 15, 0.28);
+  transform: translateZ(0);
+}
+
+body:not(.astraea-landing-active) .tarot-card:hover,
+body:not(.astraea-landing-active) .tarot-card.selected {
+  transform: translateY(-8px) rotateX(7deg) scale(1.02);
+}
+
+body:not(.astraea-landing-active) .app-tabbar,
+body:not(.astraea-landing-active) .site-header {
+  background: rgba(43, 34, 32, 0.76);
+  border-color: rgba(255, 216, 211, 0.16);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
 .mode-switch {
   display: flex;
   flex-wrap: wrap;
