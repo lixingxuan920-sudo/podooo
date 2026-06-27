@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="assets/app-icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -106,17 +106,46 @@
               <div class="astraea-corner astraea-corner-tr"></div>
               <div class="astraea-corner astraea-corner-bl"></div>
               <div class="astraea-corner astraea-corner-br"></div>
-              <h2>THE HERMIT'S ANSWER</h2>
-              <div class="astraea-card-stage">
-                <button class="astraea-round-arrow" id="astraeaPrevCard" type="button" aria-label="Previous card">&lsaquo;</button>
-                <div class="astraea-card-stack" id="astraeaCardStack" aria-live="polite"></div>
-                <button class="astraea-round-arrow" id="astraeaNextCard" type="button" aria-label="Next card">&rsaquo;</button>
+              <div class="astraea-panel astraea-panel-home active" id="astraeaHomePanel">
+                <h2>THE HERMIT'S ANSWER</h2>
+                <div class="astraea-card-stage">
+                  <button class="astraea-round-arrow" id="astraeaPrevCard" type="button" aria-label="Previous card">&lsaquo;</button>
+                  <div class="astraea-card-stack" id="astraeaCardStack" aria-live="polite"></div>
+                  <button class="astraea-round-arrow" id="astraeaNextCard" type="button" aria-label="Next card">&rsaquo;</button>
+                </div>
+                <div class="astraea-card-caption">
+                  <h3 id="astraeaCardTitle">The Star</h3>
+                  <p id="astraeaCardSubtitle">Hope & Inspiration</p>
+                </div>
+                <div class="astraea-dots" id="astraeaDots" aria-label="Tarot carousel pagination"></div>
               </div>
-              <div class="astraea-card-caption">
-                <h3 id="astraeaCardTitle">The Star</h3>
-                <p id="astraeaCardSubtitle">Hope & Inspiration</p>
+
+              <div class="astraea-panel astraea-panel-spreads" id="astraeaSpreadsPanel" hidden>
+                <h2>MY SPREADS</h2>
+                <div class="astraea-offering-list">
+                  <button class="astraea-offering-card" type="button" data-offering-target="indian">
+                    <span class="astraea-offering-icon vedic" aria-hidden="true"></span>
+                    <span>
+                      <strong>印度占星</strong>
+                      <small>Vedic Astrology · Life Blueprint 与持续咨询</small>
+                    </span>
+                  </button>
+                  <button class="astraea-offering-card" type="button" data-offering-target="tarot">
+                    <span class="astraea-offering-icon tarot" aria-hidden="true"></span>
+                    <span>
+                      <strong>塔罗占卜</strong>
+                      <small>Tarot Reading · 洗牌、抽牌与问题解读</small>
+                    </span>
+                  </button>
+                  <button class="astraea-offering-card" type="button" data-offering-target="astrology">
+                    <span class="astraea-offering-icon natal" aria-hidden="true"></span>
+                    <span>
+                      <strong>个人星盘解读</strong>
+                      <small>Natal Chart Analysis · 本命盘与关系趋势</small>
+                    </span>
+                  </button>
+                </div>
               </div>
-              <div class="astraea-dots" id="astraeaDots" aria-label="Tarot carousel pagination"></div>
             </article>
 
             <button class="astraea-draw-button" id="openModuleChooserButton" type="button">DRAW A CARD</button>
@@ -568,9 +597,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=32"></script>
-    <script src="indian-astrology-skill.js?v=32"></script>
-    <script src="tarot-skill.js?v=32"></script>
-    <script src="app.js?v=32"></script>
+    <script src="astrology-skill.js?v=33"></script>
+    <script src="indian-astrology-skill.js?v=33"></script>
+    <script src="tarot-skill.js?v=33"></script>
+    <script src="app.js?v=33"></script>
   </body>
 </html>

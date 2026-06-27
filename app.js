@@ -173,7 +173,8 @@ const state = {
   indianSkillResult: null,
   indianSkillPromise: null,
   indianSkillRequestId: 0,
-  astraeaIndex: 2
+  astraeaIndex: 2,
+  astraeaTab: "home"
 };
 
 const els = {
@@ -233,6 +234,8 @@ els.astraeaCardSubtitle = document.querySelector("#astraeaCardSubtitle");
 els.astraeaDots = document.querySelector("#astraeaDots");
 els.astraeaPrevCard = document.querySelector("#astraeaPrevCard");
 els.astraeaNextCard = document.querySelector("#astraeaNextCard");
+els.astraeaHomePanel = document.querySelector("#astraeaHomePanel");
+els.astraeaSpreadsPanel = document.querySelector("#astraeaSpreadsPanel");
 els.backFromAstrologyButton = document.querySelector("#backFromAstrologyButton");
 els.backFromIndianButton = document.querySelector("#backFromIndianButton");
 els.refreshAstrologyButton = document.querySelector("#refreshAstrologyButton");
@@ -404,6 +407,7 @@ function showAstraeaLanding() {
   document.body.classList.add("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
+  setAstraeaTab(state.astraeaTab || "home");
   renderAstraeaCarousel();
 }
 
@@ -419,6 +423,26 @@ function showModuleChooser() {
   if (els.moduleChooserPage) {
     els.moduleChooserPage.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+function setAstraeaTab(tab) {
+  state.astraeaTab = tab;
+  const isHome = tab === "home";
+  if (els.astraeaHomePanel) {
+    els.astraeaHomePanel.hidden = !isHome;
+    els.astraeaHomePanel.classList.toggle("active", isHome);
+  }
+  if (els.astraeaSpreadsPanel) {
+    els.astraeaSpreadsPanel.hidden = isHome;
+    els.astraeaSpreadsPanel.classList.toggle("active", !isHome);
+  }
+  if (els.openModuleChooserButton) {
+    els.openModuleChooserButton.hidden = !isHome;
+  }
+  document.querySelectorAll("[data-astraea-bottom]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.astraeaBottom === tab);
+  });
+  if (isHome) renderAstraeaCarousel();
 }
 
 function renderAstraeaCarousel() {
@@ -2518,9 +2542,18 @@ document.querySelectorAll("[data-home-shortcut]").forEach((button) => {
 document.querySelectorAll("[data-astraea-bottom]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = button.dataset.astraeaBottom;
-    if (target === "home") return showAstraeaLanding();
-    if (target === "spreads") return showHistoryFlow();
+    if (target === "home") return setAstraeaTab("home");
+    if (target === "spreads") return setAstraeaTab("spreads");
+    if (target === "settings") return showModuleChooser();
     showModuleChooser();
+  });
+});
+document.querySelectorAll("[data-offering-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.offeringTarget;
+    if (target === "indian") return showIndianFlow();
+    if (target === "tarot") return showTarotFlow();
+    if (target === "astrology") return showAstrologyFlow();
   });
 });
 els.showTarotButton.addEventListener("click", showTarotFlow);
