@@ -107,24 +107,37 @@
               <div class="astraea-corner astraea-corner-br"></div>
               <h2>THE HERMIT'S ANSWER</h2>
               <div class="astraea-card-stage">
-                <button class="astraea-round-arrow" type="button" aria-label="Previous card">&lsaquo;</button>
-                <div class="astraea-card-stack">
-                  <div class="astraea-side-card astraea-side-left" aria-hidden="true"></div>
-                  <div class="astraea-tarot-mini astraea-mini-back" aria-hidden="true"></div>
-                  <div class="astraea-tarot-mini astraea-mini-main" aria-hidden="true">
-                    <span>Ace of Pentacles</span>
-                  </div>
-                  <div class="astraea-side-card astraea-side-right" aria-hidden="true"></div>
-                </div>
-                <button class="astraea-round-arrow" type="button" aria-label="Next card">&rsaquo;</button>
+                <button class="astraea-round-arrow" id="astraeaPrevCard" type="button" aria-label="Previous card">&lsaquo;</button>
+                <div class="astraea-card-stack" id="astraeaCardStack" aria-live="polite"></div>
+                <button class="astraea-round-arrow" id="astraeaNextCard" type="button" aria-label="Next card">&rsaquo;</button>
               </div>
-              <p class="astraea-oracle-copy">以安静、专业的方式进入你的占卜空间。下一步选择塔罗、个人星盘或印度占星。</p>
-              <div class="astraea-dots" aria-hidden="true">
-                <span></span><span class="active"></span><span></span>
+              <div class="astraea-card-caption">
+                <h3 id="astraeaCardTitle">The Star</h3>
+                <p id="astraeaCardSubtitle">Hope & Inspiration</p>
               </div>
+              <div class="astraea-dots" id="astraeaDots" aria-label="Tarot carousel pagination"></div>
             </article>
 
             <button class="astraea-draw-button" id="openModuleChooserButton" type="button">DRAW A CARD</button>
+
+            <footer class="astraea-bottom-nav" aria-label="Astraea bottom navigation">
+              <button class="active" type="button" data-astraea-bottom="home">
+                <span>⌂</span>
+                <small>Home</small>
+              </button>
+              <button type="button" data-astraea-bottom="spreads">
+                <span>▦</span>
+                <small>My Spreads</small>
+              </button>
+              <button type="button" data-astraea-bottom="explore">
+                <span>◎</span>
+                <small>Explore</small>
+              </button>
+              <button type="button" data-astraea-bottom="settings">
+                <span>⚙</span>
+                <small>Settings</small>
+              </button>
+            </footer>
           </section>
 
           <section class="module-chooser-page" id="moduleChooserPage" hidden>
@@ -554,9 +567,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=30"></script>
-    <script src="indian-astrology-skill.js?v=30"></script>
-    <script src="tarot-skill.js?v=30"></script>
-    <script src="app.js?v=30"></script>
+    <script src="astrology-skill.js?v=31"></script>
+    <script src="indian-astrology-skill.js?v=31"></script>
+    <script src="tarot-skill.js?v=31"></script>
+    <script src="app.js?v=31"></script>
   </body>
 </html>

@@ -568,76 +568,110 @@ input {
 
 .astraea-card-stack {
   position: relative;
-  height: 160px;
+  height: 164px;
+  perspective: 900px;
 }
 
-.astraea-tarot-mini,
-.astraea-side-card {
+.astraea-card-stack.is-drawing .astraea-tarot-mini.active {
+  animation: astraeaFlip 520ms ease;
+}
+
+.astraea-tarot-mini {
   position: absolute;
   top: 4px;
-  width: 76px;
-  height: 120px;
+  left: 50%;
+  width: 84px;
+  height: 132px;
+  display: grid;
+  align-content: space-between;
+  justify-items: center;
+  padding: 10px 7px;
+  color: rgba(255, 248, 232, 0.82);
   border: 2px solid #c3a06b;
   border-radius: 7px;
+  opacity: var(--opacity);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 248, 232, 0.16), transparent 30px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 42%),
+    var(--card-color);
   box-shadow: 0 10px 24px rgba(77, 43, 34, 0.2);
+  transform:
+    translateX(calc(-50% + (var(--offset) * 74px)))
+    translateY(calc(var(--distance) * 9px))
+    scale(calc(1 - (var(--distance) * 0.16)))
+    rotate(calc(var(--offset) * 4deg));
+  transform-origin: center;
+  transition: transform 420ms ease, opacity 420ms ease, filter 420ms ease;
+  z-index: var(--z);
 }
 
-.astraea-mini-back {
-  left: 50%;
-  transform: translateX(-76%) rotate(-2deg);
-  background:
-    linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25% 50%, rgba(255,255,255,0.08) 50% 75%, transparent 75%),
-    #9e7b5e;
-  background-size: 14px 14px;
+.astraea-tarot-mini:not(.active) {
+  filter: blur(0.4px);
 }
 
-.astraea-mini-main {
-  left: 50%;
-  transform: translateX(-18%) translateY(16px) rotate(1deg);
-  display: grid;
-  place-items: end center;
-  padding: 8px 5px;
-  color: #4d3027;
-  font-family: "Playfair Display", serif;
-  font-size: 11px;
-  background:
-    radial-gradient(circle at 52% 30%, transparent 0 14px, rgba(105, 68, 54, 0.42) 15px, transparent 16px),
-    radial-gradient(circle at 50% 34%, rgba(246, 229, 181, 0.8), transparent 24px),
-    linear-gradient(#f4e5c5, #d5ad76);
-}
-
-.astraea-mini-main::before {
-  content: "A";
+.astraea-tarot-mini::before {
+  content: "";
   position: absolute;
-  top: 23px;
-  left: 50%;
-  color: rgba(88, 52, 41, 0.54);
+  inset: 5px;
+  border: 1px double rgba(255, 248, 232, 0.34);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.astraea-mini-number {
   font-family: Cinzel, serif;
-  font-size: 28px;
-  transform: translateX(-50%);
+  font-size: 8px;
+  letter-spacing: 0.12em;
 }
 
-.astraea-side-card {
-  top: 25px;
-  opacity: 0.62;
-  background: linear-gradient(135deg, #b88473, #8c6452);
+.astraea-mini-symbol {
+  width: 34px;
+  height: 34px;
+  display: block;
+  border: 1px solid rgba(255, 248, 232, 0.32);
+  border-radius: 50%;
+  transform: rotate(45deg);
 }
 
-.astraea-side-left {
-  left: -34px;
+.astraea-mini-symbol::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(255, 248, 232, 0.48);
 }
 
-.astraea-side-right {
-  right: -34px;
-  background: linear-gradient(135deg, #b9a17f, #806453);
+.astraea-tarot-mini strong {
+  max-width: 68px;
+  color: rgba(255, 248, 232, 0.84);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
 }
 
-.astraea-oracle-copy {
-  max-width: 250px;
-  margin: 0 auto;
+.astraea-card-caption {
+  min-height: 42px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}
+
+.astraea-card-caption h3 {
+  margin: 0;
+  color: #4f3128;
+  font-family: Cinzel, serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.astraea-card-caption p {
+  margin: 3px 0 0;
   color: #5f3d33;
-  font-size: 12px;
-  line-height: 1.55;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 11px;
+  font-style: italic;
 }
 
 .astraea-dots {
@@ -647,14 +681,20 @@ input {
   margin-top: 10px;
 }
 
-.astraea-dots span {
-  width: 5px;
-  height: 5px;
+.astraea-dots button {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
   background: rgba(98, 62, 51, 0.32);
+  cursor: pointer;
+  transition: width 220ms ease, background 220ms ease;
 }
 
-.astraea-dots .active {
+.astraea-dots button.active {
+  width: 17px;
+  border-radius: 999px;
   background: #a66a60;
 }
 
@@ -671,6 +711,55 @@ input {
   font-family: Cinzel, serif;
   font-size: 18px;
   cursor: pointer;
+}
+
+.astraea-draw-button:active {
+  transform: scale(0.97);
+}
+
+.astraea-bottom-nav {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(92, 70, 64, 0.1);
+}
+
+.astraea-bottom-nav button {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  color: rgba(92, 70, 64, 0.64);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.astraea-bottom-nav button.active {
+  color: #a87e73;
+}
+
+.astraea-bottom-nav span {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.astraea-bottom-nav small {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 9px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+@keyframes astraeaFlip {
+  0% { transform: translateX(-50%) rotateY(0deg) scale(1); }
+  48% { transform: translateX(-50%) rotateY(92deg) scale(0.97); }
+  100% { transform: translateX(-50%) rotateY(0deg) scale(1); }
 }
 
 .module-chooser-page {
@@ -1922,6 +2011,14 @@ input:focus {
 .app-tabbar a.active {
   color: var(--rose-soft);
   background: rgba(217, 154, 170, 0.09);
+}
+
+body.astraea-landing-active .app-tabbar {
+  display: none;
+}
+
+body.astraea-landing-active .app-main {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .install-banner {

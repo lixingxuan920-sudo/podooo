@@ -152,6 +152,13 @@ function buildMinorArcana() {
 
 const tarotCards = [...majorArcana, ...buildMinorArcana()];
 
+const astraeaCards = [
+  { title: "The Magician", subtitle: "Power & Potential", color: "#d4b2a7", mark: "I" },
+  { title: "The Star", subtitle: "Hope & Inspiration", color: "#c9af9c", mark: "XVII" },
+  { title: "Ace of Pentacles", subtitle: "Abundance & New Beginnings", color: "#bc9d94", mark: "A" },
+  { title: "The Hermit", subtitle: "Inner Guidance", color: "#cbb2a3", mark: "IX" }
+];
+
 const state = {
   topic: topics[0],
   spread: spreads[0],
@@ -165,7 +172,8 @@ const state = {
   indianMasterReading: null,
   indianSkillResult: null,
   indianSkillPromise: null,
-  indianSkillRequestId: 0
+  indianSkillRequestId: 0,
+  astraeaIndex: 1
 };
 
 const els = {
@@ -219,6 +227,12 @@ els.astraeaHomePage = document.querySelector("#astraeaHomePage");
 els.moduleChooserPage = document.querySelector("#moduleChooserPage");
 els.openModuleChooserButton = document.querySelector("#openModuleChooserButton");
 els.astraeaProfileButton = document.querySelector("#astraeaProfileButton");
+els.astraeaCardStack = document.querySelector("#astraeaCardStack");
+els.astraeaCardTitle = document.querySelector("#astraeaCardTitle");
+els.astraeaCardSubtitle = document.querySelector("#astraeaCardSubtitle");
+els.astraeaDots = document.querySelector("#astraeaDots");
+els.astraeaPrevCard = document.querySelector("#astraeaPrevCard");
+els.astraeaNextCard = document.querySelector("#astraeaNextCard");
 els.backFromAstrologyButton = document.querySelector("#backFromAstrologyButton");
 els.backFromIndianButton = document.querySelector("#backFromIndianButton");
 els.refreshAstrologyButton = document.querySelector("#refreshAstrologyButton");
@@ -387,8 +401,10 @@ function renderLoginState() {
 }
 
 function showAstraeaLanding() {
+  document.body.classList.add("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
+  renderAstraeaCarousel();
 }
 
 function showModuleChooser() {
@@ -397,11 +413,65 @@ function showModuleChooser() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
   if (els.moduleChooserPage) {
     els.moduleChooserPage.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+function renderAstraeaCarousel() {
+  if (!els.astraeaCardStack) return;
+  els.astraeaCardStack.innerHTML = astraeaCards.map((card, index) => {
+    let offset = index - state.astraeaIndex;
+    if (offset < -1) offset += astraeaCards.length;
+    if (offset > 1) offset -= astraeaCards.length;
+    const visible = Math.abs(offset) <= 1;
+    const active = index === state.astraeaIndex;
+    return `
+      <article
+        class="astraea-tarot-mini ${active ? "active" : ""}"
+        style="
+          --offset: ${offset};
+          --distance: ${Math.abs(offset)};
+          --card-color: ${card.color};
+          --z: ${active ? 20 : 10};
+          --opacity: ${active ? 1 : visible ? 0.44 : 0};
+          display: ${visible ? "grid" : "none"};
+        "
+        aria-label="${card.title}"
+      >
+        <span class="astraea-mini-number">${card.mark}</span>
+        <span class="astraea-mini-symbol"></span>
+        <strong>${card.title}</strong>
+      </article>
+    `;
+  }).join("");
+  const activeCard = astraeaCards[state.astraeaIndex];
+  if (els.astraeaCardTitle) els.astraeaCardTitle.textContent = activeCard.title;
+  if (els.astraeaCardSubtitle) els.astraeaCardSubtitle.textContent = activeCard.subtitle;
+  if (els.astraeaDots) {
+    els.astraeaDots.innerHTML = astraeaCards.map((_, index) => `
+      <button class="${index === state.astraeaIndex ? "active" : ""}" type="button" data-astraea-dot="${index}" aria-label="Show card ${index + 1}"></button>
+    `).join("");
+  }
+}
+
+function moveAstraeaCard(direction) {
+  state.astraeaIndex = (state.astraeaIndex + direction + astraeaCards.length) % astraeaCards.length;
+  renderAstraeaCarousel();
+}
+
+function drawAstraeaCard() {
+  const next = Math.floor(Math.random() * astraeaCards.length);
+  state.astraeaIndex = next === state.astraeaIndex ? (next + 1) % astraeaCards.length : next;
+  if (els.astraeaCardStack) {
+    els.astraeaCardStack.classList.remove("is-drawing");
+    void els.astraeaCardStack.offsetWidth;
+    els.astraeaCardStack.classList.add("is-drawing");
+  }
+  renderAstraeaCarousel();
 }
 
 function setAuthStatus(message) {
@@ -1441,6 +1511,7 @@ function showAstrologyFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("astraea-landing-active");
   persistProfileFromFields();
   renderAstrologyPage();
   els.home.hidden = true;
@@ -1458,6 +1529,7 @@ function showIndianFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("astraea-landing-active");
   persistProfileFromFields();
   renderIndianPage();
   els.home.hidden = true;
@@ -1470,6 +1542,7 @@ function showIndianFlow() {
 }
 
 function showHomeFlow() {
+  document.body.classList.remove("astraea-landing-active");
   els.home.hidden = false;
   els.drawSection.hidden = true;
   els.resultSection.hidden = true;
@@ -1488,6 +1561,7 @@ function showHistoryFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("astraea-landing-active");
   renderHistory();
   els.home.hidden = true;
   els.drawSection.hidden = true;
@@ -1505,6 +1579,7 @@ function showTarotFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("astraea-landing-active");
   els.home.hidden = true;
   els.astrologySection.hidden = true;
   els.indianAstrologySection.hidden = true;
@@ -2415,11 +2490,27 @@ els.spreadGrid.addEventListener("click", (event) => {
 els.prepareButton.addEventListener("click", startRitual);
 els.shuffleButton.addEventListener("click", shuffleDeck);
 els.enterDrawButton.addEventListener("click", enterDrawFlow);
-els.openModuleChooserButton.addEventListener("click", showModuleChooser);
+els.openModuleChooserButton.addEventListener("click", drawAstraeaCard);
 els.astraeaProfileButton.addEventListener("click", showModuleChooser);
+els.astraeaPrevCard.addEventListener("click", () => moveAstraeaCard(-1));
+els.astraeaNextCard.addEventListener("click", () => moveAstraeaCard(1));
+els.astraeaDots.addEventListener("click", (event) => {
+  const dot = event.target.closest("[data-astraea-dot]");
+  if (!dot) return;
+  state.astraeaIndex = Number(dot.dataset.astraeaDot);
+  renderAstraeaCarousel();
+});
 document.querySelectorAll("[data-home-shortcut]").forEach((button) => {
   button.addEventListener("click", () => {
     console.log(`Astraea shortcut: ${button.dataset.homeShortcut}`);
+    showModuleChooser();
+  });
+});
+document.querySelectorAll("[data-astraea-bottom]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.astraeaBottom;
+    if (target === "home") return showAstraeaLanding();
+    if (target === "spreads") return showHistoryFlow();
     showModuleChooser();
   });
 });
@@ -2607,4 +2698,9 @@ renderSpreads();
 renderDeck();
 renderHistory();
 renderProfile();
-updateActiveTab(location.hash.replace("#", "") || "home");
+renderAstraeaCarousel();
+const initialView = location.hash.replace("#", "") || "home";
+if (initialView === "home" && isLoggedIn()) {
+  showAstraeaLanding();
+}
+updateActiveTab(initialView);
