@@ -650,7 +650,7 @@
         </div>
         ${southIndianChart(profile)}
         <div class="chart-actions">
-          <button class="button primary full" id="startIndianReadingButton" type="button">开始印度星盘解读</button>
+          <button class="button primary full" id="startIndianReadingButton" type="button">生成 Life Blueprint</button>
         </div>
         <div class="deepseek-reading" id="deepseekIndianReading" hidden></div>
       </div>

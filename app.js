@@ -162,6 +162,7 @@ const state = {
   installPrompt: null,
   indianContext: null,
   indianChatHistory: [],
+  indianMasterReading: null,
   indianSkillResult: null,
   indianSkillPromise: null,
   indianSkillRequestId: 0
@@ -1017,6 +1018,96 @@ function warmVedicSkillResult(profile, options, chart) {
   return state.indianSkillPromise;
 }
 
+function stableVedicSignature(profile, options) {
+  const payload = {
+    birthDate: profile.birthDate || "",
+    birthTime: profile.birthTime || "",
+    birthSecond: profile.birthSecond || "",
+    birthCity: profile.birthCity || "",
+    latitude: profile.latitude || "",
+    longitude: profile.longitude || "",
+    timezone: profile.timezone || "",
+    ayanamsa: profile.ayanamsa || "Lahiri",
+    focusArea: options.focusArea || ""
+  };
+  const text = JSON.stringify(payload);
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
+  }
+  return `vedic-${Math.abs(hash)}`;
+}
+
+function getMasterReadings() {
+  try {
+    return JSON.parse(localStorage.getItem(userStorageKey("master_readings")) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveMasterReading(record) {
+  const readings = getMasterReadings();
+  const next = [record, ...readings.filter((item) => item.id !== record.id)].slice(0, 8);
+  localStorage.setItem(userStorageKey("master_readings"), JSON.stringify(next));
+}
+
+function getConversationMemory(masterId) {
+  try {
+    const all = JSON.parse(localStorage.getItem(userStorageKey("conversation_memory")) || "{}");
+    return Array.isArray(all[masterId]) ? all[masterId] : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveConversationMemory(masterId, history) {
+  let all = {};
+  try {
+    all = JSON.parse(localStorage.getItem(userStorageKey("conversation_memory")) || "{}");
+  } catch {
+    all = {};
+  }
+  all[masterId] = history.slice(-24);
+  localStorage.setItem(userStorageKey("conversation_memory"), JSON.stringify(all));
+}
+
+function summarizeReading(reading) {
+  return String(reading || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 420);
+}
+
+function findMasterReading(profile, options) {
+  const signature = stableVedicSignature(profile, options);
+  return getMasterReadings().find((item) => item.signature === signature) || null;
+}
+
+function renderVedicProgress(activeStep = 0) {
+  const steps = [
+    "读取出生资料",
+    "计算印度星盘",
+    "生成结构化命盘",
+    "行星与宫位分析",
+    "D9 / D10 与大运校验",
+    "业力主题整理",
+    "生成 Life Blueprint",
+    "进入持续咨询"
+  ];
+  return `
+    <div class="vedic-progress">
+      ${steps.map((step, index) => `
+        <span class="${index <= activeStep ? "active" : ""}">
+          <b>${index < activeStep ? "✓" : index === activeStep ? "•" : ""}</b>
+          ${step}
+        </span>
+      `).join("")}
+    </div>
+    <p class="disclaimer">首次生成会比较久，后续追问会直接读取这份 Life Blueprint 和咨询记忆，不会重新生成整份报告。</p>
+  `;
+}
+
 async function renderIndianPage() {
   if (els.indianBirthCity.value.trim() && (!els.indianLatitude.value || !els.indianLongitude.value)) {
     await resolveIndianLocation({ silent: true, rerender: false });
@@ -1046,10 +1137,33 @@ async function renderIndianInterpretation() {
   const deepseekBox = document.querySelector("#deepseekIndianReading");
   if (!chart || !deepseekBox) return;
   deepseekBox.hidden = false;
+  const cachedMaster = findMasterReading(profile, options);
+  if (cachedMaster) {
+    state.indianMasterReading = cachedMaster;
+    state.indianContext = { profile, chart, options, skillResult: cachedMaster.skillResult, masterReading: cachedMaster.masterReading };
+    state.indianChatHistory = getConversationMemory(cachedMaster.id);
+    deepseekBox.innerHTML = `
+      <h3>Life Blueprint</h3>
+      <p class="disclaimer">已读取这个账号保存过的完整印占总报告。后续追问会继续引用这份报告与历史咨询，不会重新生成整盘。</p>
+      ${formatReadingText(cachedMaster.masterReading)}
+      ${indianChatMarkup()}
+    `;
+    renderIndianChatMessages();
+    return;
+  }
+
+  let activeProgress = 0;
   deepseekBox.innerHTML = `
-    <h3>印度占星解读</h3>
-    <p>正在根据你的印度星盘生成完整专业报告，内容较长，请稍等……</p>
+    <h3>Life Blueprint</h3>
+    ${renderVedicProgress(activeProgress)}
   `;
+  const progressTimer = window.setInterval(() => {
+    activeProgress = Math.min(activeProgress + 1, 6);
+    deepseekBox.innerHTML = `
+      <h3>Life Blueprint</h3>
+      ${renderVedicProgress(activeProgress)}
+    `;
+  }, 8500);
   let skillResult = null;
   try {
     skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null);
@@ -1057,11 +1171,13 @@ async function renderIndianInterpretation() {
       skillResult = await fetchVedicSkillResult(profile, options, chart);
       state.indianSkillResult = skillResult;
     }
+    activeProgress = 6;
 
     const response = await fetch("/.netlify/functions/deepseek-vedic", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        mode: "master",
         profile,
         chart,
         options,
@@ -1071,19 +1187,53 @@ async function renderIndianInterpretation() {
     });
     if (!response.ok) throw new Error("DeepSeek unavailable");
     const data = await response.json();
-    state.indianContext = { profile, chart, options, skillResult };
+    const masterReading = data.reading || "";
+    const masterRecord = {
+      id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
+      signature: stableVedicSignature(profile, options),
+      userId: getCurrentUser(),
+      birthData: profile,
+      chartJson: chart,
+      skillResult,
+      masterReading,
+      summary: data.summary || summarizeReading(masterReading),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    saveMasterReading(masterRecord);
+    state.indianMasterReading = masterRecord;
+    state.indianContext = { profile, chart, options, skillResult, masterReading };
     state.indianChatHistory = [];
+    saveConversationMemory(masterRecord.id, []);
+    window.clearInterval(progressTimer);
     deepseekBox.innerHTML = `
-      <h3>印度占星解读</h3>
-      ${formatReadingText(data.reading)}
+      <h3>Life Blueprint</h3>
+      <p class="disclaimer">这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。</p>
+      ${formatReadingText(masterReading)}
       ${indianChatMarkup()}
     `;
   } catch {
-    state.indianContext = { profile, chart, options, skillResult };
+    window.clearInterval(progressTimer);
+    const fallbackReading = window.IndianAstrologySkill.reading(profile, options);
+    const masterRecord = {
+      id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
+      signature: stableVedicSignature(profile, options),
+      userId: getCurrentUser(),
+      birthData: profile,
+      chartJson: chart,
+      skillResult,
+      masterReading: fallbackReading.replace(/<[^>]+>/g, "\n"),
+      summary: "DeepSeek 暂时不可用，已显示本地基础解读。配置模型后可重新生成更完整的 Life Blueprint。",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    state.indianMasterReading = masterRecord;
+    state.indianContext = { profile, chart, options, skillResult, masterReading: masterRecord.masterReading };
     state.indianChatHistory = [];
     deepseekBox.innerHTML = `
-      <h3>印度占星解读</h3>
-      ${window.IndianAstrologySkill.reading(profile, options)}
+      <h3>Life Blueprint</h3>
+      <p class="disclaimer">当前 DeepSeek 没有返回结果，先显示本地基础解读。模型恢复后可重新生成专业总报告。</p>
+      ${fallbackReading}
       ${indianChatMarkup()}
     `;
   }
@@ -1092,13 +1242,13 @@ async function renderIndianInterpretation() {
 function indianChatMarkup() {
   return `
     <div class="vedic-chat">
-      <h4>继续追问</h4>
+      <h4>Continue Consultation</h4>
       <div class="vedic-chat-messages" id="indianChatMessages"></div>
       <div class="vedic-chat-input">
-        <input id="indianQuestionInput" type="text" placeholder="例如：我的事业方向怎么看？感情什么时候更稳定？" />
+        <input id="indianQuestionInput" type="text" placeholder="例如：我什么时候适合换工作？这段关系能不能稳定？" />
         <button class="button secondary" id="sendIndianQuestionButton" type="button">发送</button>
       </div>
-      <p class="disclaimer">追问会继续基于这张印度星盘回答，不会重新生成一张盘。</p>
+      <p class="disclaimer">追问会读取 Life Blueprint 与 Consultation History，保持同一张命盘逻辑连续。</p>
     </div>
   `;
 }
@@ -1118,12 +1268,12 @@ function renderIndianChatMessages() {
 async function sendIndianQuestion() {
   const input = document.querySelector("#indianQuestionInput");
   const button = document.querySelector("#sendIndianQuestionButton");
-  if (!input || !button || !state.indianContext) return;
+  if (!input || !button || !state.indianContext || !state.indianMasterReading) return;
   const question = input.value.trim();
   if (!question) return;
   input.value = "";
   state.indianChatHistory.push({ role: "user", content: question });
-  state.indianChatHistory.push({ role: "assistant", content: "正在看这张盘里和你问题有关的线索……" });
+  state.indianChatHistory.push({ role: "assistant", content: "正在结合你的 Life Blueprint 和之前的咨询记录回答……" });
   renderIndianChatMessages();
   button.disabled = true;
   try {
@@ -1134,6 +1284,8 @@ async function sendIndianQuestion() {
         ...state.indianContext,
         question,
         history: state.indianChatHistory.slice(0, -1),
+        masterReading: state.indianMasterReading.masterReading,
+        masterSummary: state.indianMasterReading.summary,
         mode: "qa",
         pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
       })
@@ -1144,11 +1296,13 @@ async function sendIndianQuestion() {
       role: "assistant",
       content: data.reading || "这次没有生成有效回答，请换一种问法再试。"
     };
+    saveConversationMemory(state.indianMasterReading.id, state.indianChatHistory);
   } catch {
     state.indianChatHistory[state.indianChatHistory.length - 1] = {
       role: "assistant",
       content: "当前 DeepSeek 没有返回结果。我仍建议你围绕上升、月亮、Rahu/Ketu 轴和土星所在宫位来追问，这样答案会更聚焦。"
     };
+    saveConversationMemory(state.indianMasterReading.id, state.indianChatHistory);
   } finally {
     button.disabled = false;
     renderIndianChatMessages();

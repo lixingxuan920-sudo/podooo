@@ -528,9 +528,45 @@ input {
   color: var(--rose-soft);
 }
 
+.deepseek-reading > .disclaimer {
+  margin: 8px 0 14px;
+}
+
 .deepseek-reading p {
   color: var(--ivory);
   line-height: 1.5;
+}
+
+.vedic-progress {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.vedic-progress span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(217, 154, 170, 0.18);
+  background: rgba(23, 20, 21, 0.34);
+  color: var(--muted);
+}
+
+.vedic-progress span.active {
+  border-color: rgba(198, 166, 108, 0.42);
+  color: var(--ivory);
+  background: rgba(198, 166, 108, 0.08);
+}
+
+.vedic-progress b {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: #25191c;
+  background: var(--gold);
 }
 
 .vedic-chat {
