@@ -17,7 +17,7 @@ function getModelConfig() {
   return { apiKey, chatUrl, model };
 }
 
-function clip(value, maxLength = 16000) {
+function clip(value, maxLength = 10000) {
   const text = typeof value === "string" ? value : JSON.stringify(value || {}, null, 2);
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}\n[内容过长，已截取关键前半部分]`;
@@ -173,7 +173,7 @@ ${options.focusArea || "未填写"}
 ${clip(activeRoute, 3000)}
 
 已接入的技能规则库摘要
-${clip(skillResult.skillGuidance || [], 9000)}
+${clip(skillResult.skillGuidance || [], 5000)}
 
 使用规则
 1. 基础判断顺序是：出生资料校验、D1 本命盘、Moon/Nakshatra、Rahu/Ketu 轴、关键宫位、D9/D10、Dasha，再到现实建议。
@@ -200,7 +200,7 @@ ${clip(skillResult.skillGuidance || [], 9000)}
 22. 如果当前模式是 qa，禁止重新生成完整命盘报告。必须读取已保存的 Life Blueprint、最近对话和当前问题，做连续咨询，不能与 Life Blueprint 的基础判断互相矛盾。
 
 master / reading 模式输出要求
-首次报告命名为 Life Blueprint。它是以后所有咨询的基础，只生成一次。不要写得像说明书，不要机械堆 bullet，不要重复解释术语。每个章节都要详细、连贯、有咨询感，并解释“为什么这样判断”。整体尽量完整，目标是 8000 到 15000 个中文字符；如果模型长度受限，也必须优先保证结构完整和现实建议完整。
+首次报告命名为 Life Blueprint。它是以后所有咨询的基础，只生成一次。不要写得像说明书，不要机械堆 bullet，不要重复解释术语。每个章节都要详细、连贯、有咨询感，并解释“为什么这样判断”。当前部署环境有函数时限，请优先保证十章结构完整、盘面依据明确、建议可落地；长度尽量充分，但不要为了凑字导致接口超时。
 
 开头先确认出生日期、出生时间、出生地点、性别、目前最关心的问题。缺失就写“未填写”。如果出生时间、经纬度、时区或夏令时会影响精度，请说明哪些结论受影响。
 
@@ -242,7 +242,7 @@ qa 模式输出结构
 
 核心排盘数据摘要
 这是你必须优先使用和引用的数据，不可忽略：
-${clip(chartDataDigest, 14000)}
+${clip(chartDataDigest, 10000)}
 
 最近对话
 ${clip(history, 6000)}
@@ -251,19 +251,19 @@ ${clip(history, 6000)}
 ${clip(profile, 8000)}
 
 印度占星网页排盘数据
-${clip(chart, 18000)}
+${clip(chart, 10000)}
 
 缓存的完整结构化星盘数据
-${clip(chartData, 22000)}
+${clip(chartData, 10000)}
 
 skill 结构化数据
-${clip(chart.structuredData || {}, 12000)}
+${clip(chart.structuredData || {}, 8000)}
 
 完整 structured_data.md
-${clip(skillResult.structuredDataMarkdown || "未生成，使用网页 fallback 结构化数据。", 18000)}
+${clip(skillResult.structuredDataMarkdown || "未生成，使用网页 fallback 结构化数据。", 9000)}
 
 PDF / JHora 参考数据
-${clip(pdfReferenceData, 12000)}
+${clip(pdfReferenceData, 6000)}
 `;
 }
 
@@ -310,7 +310,7 @@ exports.handler = async (event) => {
         { role: "user", content: prompt }
       ],
       temperature: 0.62,
-      max_tokens: mode === "qa" ? 4200 : 11000
+      max_tokens: mode === "qa" ? 3200 : 5200
     })
   });
 

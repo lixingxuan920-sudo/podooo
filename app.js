@@ -1142,7 +1142,7 @@ function renderVedicProgress(activeStep = 0) {
         </span>
       `).join("")}
     </div>
-    <p class="disclaimer">首次生成会比较久。星盘结构数据和 Life Blueprint 都会保存，后续追问只读取缓存与咨询记忆。</p>
+    <p class="disclaimer">首次生成会比较久。若模型接口超时，页面会先进入本地基础蓝图，稍后可重新生成专业版。</p>
   `;
 }
 
@@ -1202,6 +1202,26 @@ function renderIndianBlueprint(record, message = "") {
     ${indianChatMarkup()}
   `;
   renderIndianChatMessages();
+}
+
+async function postJsonWithTimeout(url, payload, timeoutMs = 45000) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(detail || `HTTP ${response.status}`);
+    }
+    return response.json();
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 function jumpBlueprintChapter(id) {
@@ -1290,20 +1310,14 @@ async function renderIndianInterpretation() {
     chartData = await getOrCreateVedicChartData(profile, options, chart);
     activeProgress = 3;
 
-    const response = await fetch("/api/generate-blueprint", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        profile,
-        chart,
-        chartData,
-        options,
-        skillResult: chartData.skillResult,
-        pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
-      })
-    });
-    if (!response.ok) throw new Error("DeepSeek unavailable");
-    const data = await response.json();
+    const data = await postJsonWithTimeout("/api/generate-blueprint", {
+      profile,
+      chart,
+      chartData,
+      options,
+      skillResult: chartData.skillResult,
+      pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
+    }, 42000);
     const masterReading = data.blueprint || "";
     const masterRecord = {
       id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
@@ -1348,7 +1362,7 @@ async function renderIndianInterpretation() {
     state.indianChatHistory = [];
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
-      <p class="disclaimer">当前 DeepSeek 没有返回结果，先显示本地基础解读。模型恢复后可重新生成专业总报告。</p>
+      <p class="disclaimer">DeepSeek 长报告接口这次超时或未返回，先显示本地基础蓝图，避免页面卡住。等部署环境稳定后可重新生成专业版。</p>
       ${fallbackReading}
       ${indianChatMarkup()}
     `;
@@ -1393,22 +1407,16 @@ async function sendIndianQuestion() {
   renderIndianChatMessages();
   button.disabled = true;
   try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...state.indianContext,
-        question,
-        blueprint: state.indianMasterReading.masterReading,
-        history: state.indianChatHistory.slice(0, -1),
-        chartData: state.indianMasterReading.chartData || state.indianContext.chartData,
-        masterReading: state.indianMasterReading.masterReading,
-        masterSummary: state.indianMasterReading.summary,
-        pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
-      })
-    });
-    if (!response.ok) throw new Error("DeepSeek unavailable");
-    const data = await response.json();
+    const data = await postJsonWithTimeout("/api/chat", {
+      ...state.indianContext,
+      question,
+      blueprint: state.indianMasterReading.masterReading,
+      history: state.indianChatHistory.slice(0, -1),
+      chartData: state.indianMasterReading.chartData || state.indianContext.chartData,
+      masterReading: state.indianMasterReading.masterReading,
+      masterSummary: state.indianMasterReading.summary,
+      pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
+    }, 42000);
     state.indianChatHistory[state.indianChatHistory.length - 1] = {
       role: "assistant",
       content: data.answer || "这次没有生成有效回答，请换一种问法再试。"
