@@ -12,6 +12,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/blueprint/start"
+  to = "/.netlify/functions/blueprint-start"
+  status = 200
+
+[[redirects]]
+  from = "/api/blueprint/:jobId"
+  to = "/.netlify/functions/blueprint-status/:jobId"
+  status = 200
+
+[[redirects]]
   from = "/api/chat"
   to = "/.netlify/functions/chat"
   status = 200

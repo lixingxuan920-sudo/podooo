@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import math
 import os
+import threading
+import uuid
 from datetime import date, datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
 import swisseph as swe
+import urllib.error
+import urllib.request
+import json
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -60,6 +65,14 @@ class VedicRequest(BaseModel):
     profile: dict[str, Any] = Field(default_factory=dict)
     options: dict[str, Any] = Field(default_factory=dict)
     chart: dict[str, Any] = Field(default_factory=dict)
+    skillResult: dict[str, Any] = Field(default_factory=dict)
+    chartData: dict[str, Any] = Field(default_factory=dict)
+    pdfReferenceData: dict[str, Any] = Field(default_factory=dict)
+    blueprint: str | None = None
+    masterReading: str | None = None
+    masterSummary: str | None = None
+    question: str | None = None
+    history: list[dict[str, Any]] = Field(default_factory=list)
 
 
 app = FastAPI(title="Luna Vedic Ephemeris API", version="1.0.0")
@@ -70,11 +83,199 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+JOBS: dict[str, dict[str, Any]] = {}
+JOBS_LOCK = threading.Lock()
+
 
 def require_api_key(x_vedic_api_key: str | None) -> None:
     expected = os.getenv("VEDIC_API_KEY", "").strip()
     if expected and x_vedic_api_key != expected:
         raise HTTPException(status_code=401, detail="Invalid VEDIC_API_KEY")
+
+
+def model_config() -> dict[str, str]:
+    api_key = (
+        os.getenv("DEEPSEEK_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("CCSWITCH_API_KEY")
+        or os.getenv("API_KEY")
+        or ""
+    ).strip()
+    base_url = (
+        os.getenv("DEEPSEEK_BASE_URL")
+        or os.getenv("DEEPSEEK_API_BASE")
+        or os.getenv("OPENAI_BASE_URL")
+        or os.getenv("OPENAI_API_BASE")
+        or os.getenv("CCSWITCH_BASE_URL")
+        or "https://api.deepseek.com"
+    ).rstrip("/")
+    model = (
+        os.getenv("DEEPSEEK_MODEL")
+        or os.getenv("CCSWITCH_MODEL")
+        or os.getenv("OPENAI_MODEL")
+        or "deepseek-chat"
+    )
+    chat_url = base_url if base_url.endswith("/chat/completions") else f"{base_url}/chat/completions"
+    return {"api_key": api_key, "chat_url": chat_url, "model": model}
+
+
+def clip(value: Any, max_length: int = 16000) -> str:
+    text = value if isinstance(value, str) else json.dumps(value or {}, ensure_ascii=False, indent=2)
+    if len(text) <= max_length:
+        return text
+    return f"{text[:max_length]}\n[内容过长，已截取]"
+
+
+def clean_reading(text: str) -> str:
+    import re
+
+    text = re.sub(r"^#{1,6}\s*", "", str(text or ""), flags=re.M)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.*?)\*", r"\1", text)
+    text = re.sub(r"^\s*[-*]\s+", "", text, flags=re.M)
+    return text.strip()
+
+
+def call_deepseek(prompt: str, mode: str) -> str:
+    cfg = model_config()
+    if not cfg["api_key"]:
+        raise RuntimeError("DeepSeek API key is not configured on Render")
+    system_prompt = (
+        "你是高级吠陀占星顾问。当前是连续咨询模式：只回答用户本次问题，必须引用已保存 Life Blueprint、历史对话和结构化星盘数据，不要重新生成完整报告。"
+        if mode == "qa"
+        else "你是高级吠陀占星顾问。当前是 Life Blueprint 长报告模式：必须按十章结构加 Executive Summary 输出，像真实咨询师一样深入、连贯、可落地。"
+    )
+    body = {
+        "model": cfg["model"],
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.62,
+        "max_tokens": 4200 if mode == "qa" else 12000,
+    }
+    request = urllib.request.Request(
+        cfg["chat_url"],
+        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {cfg['api_key']}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=260) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise RuntimeError(f"Model request failed: {detail[:800]}") from exc
+    content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    return clean_reading(content)
+
+
+def build_blueprint_prompt(payload: VedicRequest, chart_result: dict[str, Any]) -> str:
+    profile = payload.profile
+    options = payload.options
+    chart_data = payload.chartData or {}
+    structured = chart_result.get("structuredDataMarkdown") or chart_data.get("structuredDataMarkdown") or ""
+    return f"""
+你是一位拥有二十年以上咨询经验的印度占星咨询师。
+请根据下面所有盘的数据，写一份完整的 Life Blueprint。
+不要简单列点，必须像真实咨询师面对面咨询一样，每个主题都深入解释原因、命盘依据、人格形成、优势、阻碍、现实表现、内在心理、建议。
+
+要求：
+1. 目标长度 8000 到 15000 字。不是摘要，是真正完整咨询。
+2. 必须引用结构化星盘数据，不能空泛。
+3. 不要制造恐惧，不要绝对化判断。
+4. 当前后端如果没有完整 D9、D10、Shadbala、SAV/BAV 或瑜伽量化，不要伪造，要说明限制，并基于 D1、Nakshatra、Dasha 做可用判断。
+5. 不要输出 Markdown 符号标题，直接写章节标题。
+
+Life Blueprint 必须包含：
+第一章 灵魂主题：为什么来到这一世、人生主线、业力方向。
+第二章 人格分析：Asc、Moon、Sun、Nakshatra、心理模式、行为模式、潜意识。
+第三章 家庭成长：父母影响、童年、情绪模式。
+第四章 学习能力：天赋、思维方式、适合学习什么。
+第五章 事业蓝图：D10、职业方向、创业、管理、媒体、艺术、AI、自由职业、适合行业以及为什么。
+第六章 财富模式：赚钱方式、财富来源、容易漏财的位置、资产配置建议。
+第七章 感情模式：择偶、恋爱、婚姻、业力关系、婚后模式。
+第八章 健康：容易出现的问题、生活建议。不能做医疗诊断。
+第九章 Dasha 大运分析：未来十年、重点年份、转折点。
+第十章 人生建议：应该放弃什么、应该坚持什么、真正适合的人生道路。
+Executive Summary：用咨询师语气总结。
+
+用户资料：
+{clip(profile, 6000)}
+
+用户关注：
+{clip(options, 3000)}
+
+结构化星盘数据：
+{clip(structured, 26000)}
+
+计算元数据：
+{clip(chart_result.get("calculationMeta"), 8000)}
+
+网页/缓存星盘数据：
+{clip(chart_data, 12000)}
+"""
+
+
+def build_chat_prompt(payload: VedicRequest) -> str:
+    blueprint = payload.blueprint or payload.masterReading or ""
+    return f"""
+你是长期跟进同一位用户的印度占星咨询师。
+请基于 Life Blueprint、结构化星盘数据和历史聊天，回答用户当前问题。
+不要重新生成整份报告，不要重复介绍命盘。
+回答要像继续咨询：先直接回答，再说明盘面依据、现实趋势和行动建议。
+
+用户问题：
+{payload.question or ""}
+
+Life Blueprint：
+{clip(blueprint, 30000)}
+
+历史聊天：
+{clip(payload.history, 9000)}
+
+结构化星盘数据：
+{clip(payload.chartData or payload.chart, 18000)}
+"""
+
+
+def set_job(job_id: str, **updates: Any) -> None:
+    with JOBS_LOCK:
+        current = JOBS.get(job_id, {})
+        current.update(updates)
+        current["updatedAt"] = datetime.utcnow().isoformat() + "Z"
+        JOBS[job_id] = current
+
+
+def run_blueprint_job(job_id: str, payload: VedicRequest) -> None:
+    try:
+        set_job(job_id, status="running", step="calculate_chart", progress=20)
+        chart_result = calculate_chart(payload.profile)
+        chart_data = {
+            "profile": payload.profile,
+            "options": payload.options,
+            "chart": payload.chart,
+            "structuredDataMarkdown": chart_result["structuredDataMarkdown"],
+            "calculationMeta": chart_result["calculationMeta"],
+        }
+        set_job(job_id, status="running", step="generate_blueprint", progress=55, chartData=chart_data)
+        blueprint = call_deepseek(build_blueprint_prompt(payload, chart_result), "master")
+        summary = " ".join(blueprint.split())[:500]
+        set_job(
+            job_id,
+            status="completed",
+            step="completed",
+            progress=100,
+            blueprint=blueprint,
+            chartData=chart_data,
+            summary=summary,
+            createdAt=datetime.utcnow().isoformat() + "Z",
+        )
+    except Exception as exc:
+        set_job(job_id, status="failed", step="failed", progress=100, error=str(exc))
 
 
 def dms_to_decimal(value: Any) -> float | None:
@@ -373,3 +574,37 @@ def calculate(payload: VedicRequest, x_vedic_api_key: str | None = Header(defaul
     require_api_key(x_vedic_api_key)
     result = calculate_chart(payload.profile)
     return {"ok": True, **result}
+
+
+@app.post("/blueprint/start")
+def start_blueprint(payload: VedicRequest, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
+    require_api_key(x_vedic_api_key)
+    job_id = uuid.uuid4().hex
+    set_job(
+      job_id,
+      id=job_id,
+      status="queued",
+      step="queued",
+      progress=0,
+      createdAt=datetime.utcnow().isoformat() + "Z",
+    )
+    thread = threading.Thread(target=run_blueprint_job, args=(job_id, payload), daemon=True)
+    thread.start()
+    return {"ok": True, "jobId": job_id, "status": "queued"}
+
+
+@app.get("/blueprint/{job_id}")
+def get_blueprint_job(job_id: str, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
+    require_api_key(x_vedic_api_key)
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Blueprint job not found")
+    return {"ok": True, **job}
+
+
+@app.post("/chat")
+def chat(payload: VedicRequest, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
+    require_api_key(x_vedic_api_key)
+    answer = call_deepseek(build_chat_prompt(payload), "qa")
+    return {"ok": True, "answer": answer, "createdAt": datetime.utcnow().isoformat() + "Z"}

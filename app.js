@@ -1123,26 +1123,14 @@ function findMasterReading(profile, options) {
 }
 
 function renderVedicProgress(activeStep = 0) {
-  const steps = [
-    "读取出生资料",
-    "计算印度星盘",
-    "缓存结构化数据",
-    "发送完整盘给 DeepSeek",
-    "生成深度 Life Blueprint",
-    "自动保存总报告",
-    "准备持续咨询",
-    "进入持续咨询"
-  ];
   return `
-    <div class="vedic-progress">
-      ${steps.map((step, index) => `
-        <span class="${index <= activeStep ? "active" : ""}">
-          <b>${index + 1}</b>
-          ${step}
-        </span>
-      `).join("")}
+    <div class="vedic-progress compact">
+      <span class="active">
+        <b>${Math.max(1, activeStep + 1)}</b>
+        正在生成 Life Blueprint，请保持页面打开
+      </span>
     </div>
-    <p class="disclaimer">首次生成会比较久。若模型接口超时，页面会先进入本地基础蓝图，稍后可重新生成专业版。</p>
+    <p class="disclaimer">这一步已交给 Render 长任务处理，通常需要 2-5 分钟。完成后会自动进入电子书式蓝图页面。</p>
   `;
 }
 
@@ -1222,6 +1210,34 @@ async function postJsonWithTimeout(url, payload, timeoutMs = 45000) {
   } finally {
     window.clearTimeout(timer);
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function createBlueprintJob(profile, options, chart, chartData) {
+  return postJsonWithTimeout("/api/blueprint/start", {
+    profile,
+    options,
+    chart,
+    chartData,
+    skillResult: chartData?.skillResult || null,
+    pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
+  }, 30000);
+}
+
+async function waitForBlueprintJob(jobId, onProgress) {
+  for (let attempt = 0; attempt < 90; attempt += 1) {
+    const response = await fetch(`/api/blueprint/${encodeURIComponent(jobId)}`);
+    if (!response.ok) throw new Error(`Blueprint job status failed: ${response.status}`);
+    const job = await response.json();
+    onProgress?.(job);
+    if (job.status === "completed") return job;
+    if (job.status === "failed") throw new Error(job.error || "Blueprint job failed");
+    await sleep(attempt < 12 ? 4000 : 7000);
+  }
+  throw new Error("Blueprint job timed out");
 }
 
 function jumpBlueprintChapter(id) {
@@ -1310,28 +1326,28 @@ async function renderIndianInterpretation() {
     chartData = await getOrCreateVedicChartData(profile, options, chart);
     activeProgress = 3;
 
-    const data = await postJsonWithTimeout("/api/generate-blueprint", {
-      profile,
-      chart,
-      chartData,
-      options,
-      skillResult: chartData.skillResult,
-      pdfReferenceData: window.IndianAstrologySkill.pdfReferenceData
-    }, 42000);
-    const masterReading = data.blueprint || "";
+    const started = await createBlueprintJob(profile, options, chart, chartData);
+    const job = await waitForBlueprintJob(started.jobId, (current) => {
+      activeProgress = Math.max(activeProgress, Math.floor((current.progress || 0) / 15));
+      deepseekBox.innerHTML = `
+        <h3>Life Blueprint</h3>
+        ${renderVedicProgress(activeProgress)}
+      `;
+    });
+    const masterReading = job.blueprint || "";
     const masterRecord = {
       id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
       signature: stableVedicSignature(profile, options),
       userId: getCurrentUser(),
       birthData: profile,
       chartJson: chart,
-      chartData: data.chartData || chartData,
-      skillResult: chartData.skillResult,
+      chartData: job.chartData || chartData,
+      skillResult: (job.chartData || chartData)?.skillResult || chartData.skillResult,
       masterReading,
-      summary: data.summary || summarizeReading(masterReading),
+      summary: job.summary || summarizeReading(masterReading),
       favoriteChapters: [],
       createdAt: new Date().toISOString(),
-      updatedAt: data.createdAt || new Date().toISOString()
+      updatedAt: job.createdAt || new Date().toISOString()
     };
     saveMasterReading(masterRecord);
     state.indianMasterReading = masterRecord;
