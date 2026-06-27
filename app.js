@@ -153,10 +153,10 @@ function buildMinorArcana() {
 const tarotCards = [...majorArcana, ...buildMinorArcana()];
 
 const astraeaCards = [
-  { title: "The Magician", subtitle: "Power & Potential", color: "#a87162", mark: "I" },
-  { title: "The Star", subtitle: "Hope & Inspiration", color: "#b39173", mark: "XVII" },
-  { title: "Ace of Pentacles", subtitle: "Lorem ipsum dolor sit amet.", color: "#d1ad78", mark: "A" },
-  { title: "The Hermit", subtitle: "Inner Guidance", color: "#8c7465", mark: "IX" }
+  { title: "The Magician", subtitle: "Power & Potential", color: "#a87162", mark: "I", art: "magician" },
+  { title: "The Star", subtitle: "Hope & Inspiration", color: "#8f7864", mark: "XVII", art: "star" },
+  { title: "Ace of Pentacles", subtitle: "Lorem ipsum dolor sit amet.", color: "#d1ad78", mark: "A", art: "pentacle" },
+  { title: "The Hermit", subtitle: "Inner Guidance", color: "#8c7465", mark: "IX", art: "hermit" }
 ];
 
 const state = {
@@ -454,15 +454,15 @@ function renderAstraeaCarousel() {
     const visible = Math.abs(offset) <= 2;
     const active = index === state.astraeaIndex;
     const layout = {
-      "-2": { x: -184, y: 34, scale: 0.82, rotate: -3, opacity: 0.54, z: 6, role: "peek" },
-      "-1": { x: -34, y: 10, scale: 0.92, rotate: -2, opacity: 0.78, z: 16, role: "back" },
-      "0": { x: 24, y: 26, scale: 1, rotate: 1, opacity: 1, z: 24, role: "front" },
-      "1": { x: 184, y: 34, scale: 0.82, rotate: 3, opacity: 0.54, z: 6, role: "peek" },
-      "2": { x: 184, y: 34, scale: 0.82, rotate: 3, opacity: 0, z: 1, role: "hidden" }
+      "-2": { x: -204, y: 38, scale: 0.82, rotate: -3, opacity: 0.5, z: 6, role: "peek" },
+      "-1": { x: -42, y: 9, scale: 0.92, rotate: -2, opacity: 0.78, z: 16, role: "back" },
+      "0": { x: 30, y: 28, scale: 1, rotate: 1, opacity: 1, z: 24, role: "front" },
+      "1": { x: 204, y: 38, scale: 0.82, rotate: 3, opacity: 0.5, z: 6, role: "peek" },
+      "2": { x: 204, y: 38, scale: 0.82, rotate: 3, opacity: 0, z: 1, role: "hidden" }
     }[String(offset)];
     return `
       <article
-        class="astraea-tarot-mini ${active ? "active" : ""} astraea-card-${layout.role}"
+        class="astraea-tarot-mini ${active ? "active" : ""} astraea-card-${layout.role} astraea-card-art-${card.art}"
         style="
           --x: ${layout.x}px;
           --y: ${layout.y}px;
@@ -476,6 +476,7 @@ function renderAstraeaCarousel() {
         aria-label="${card.title}"
       >
         <span class="astraea-mini-number">${card.mark}</span>
+        <span class="astraea-mini-motif"></span>
         <span class="astraea-mini-symbol"></span>
         <strong>${card.title}</strong>
       </article>

@@ -3058,3 +3058,311 @@ body.astraea-landing-active .app-dashboard {
     font-size: 14px;
   }
 }
+
+/* Final Astraea iPhone 15 Plus lock. This sits last so the reference screen wins. */
+body.astraea-landing-active {
+  overflow: hidden;
+  background: #2b2220;
+}
+
+body.astraea-landing-active .app-main {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  padding: 0;
+  background: #2b2220;
+}
+
+body.astraea-landing-active .home-app {
+  width: 100vw;
+  min-height: 100dvh;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 18%, rgba(186, 137, 124, 0.08), transparent 18rem), #2b2220;
+}
+
+body.astraea-landing-active .app-dashboard {
+  width: min(430px, 100vw);
+  height: 100dvh;
+  min-height: 0;
+  max-width: none;
+  display: grid;
+  place-items: center;
+}
+
+.astraea-home-page {
+  width: min(430px, 100vw);
+  height: 100dvh;
+  max-height: 932px;
+  min-height: 0;
+  padding: 42px 18px 18px;
+  border: 1px solid rgba(255, 246, 236, 0.28);
+  border-radius: 34px;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255, 251, 239, 0.86) 0 24%, rgba(244, 224, 211, 0.6) 52%, transparent 68%),
+    radial-gradient(circle at 23% 19%, rgba(255, 247, 232, 0.45), transparent 7rem),
+    linear-gradient(180deg, #eadfd7 0%, #f4ebdf 42%, #dbb6ad 100%);
+  box-shadow: 0 34px 82px rgba(0, 0, 0, 0.36), inset 0 0 0 1px rgba(88, 51, 43, 0.11);
+}
+
+.astraea-home-page::before {
+  background:
+    linear-gradient(180deg, rgba(188, 129, 119, 0.88) 0 116px, transparent 116px),
+    radial-gradient(circle at 50% 35px, rgba(239, 218, 208, 0.98) 0 45px, rgba(197, 139, 128, 0.9) 46px 47px, transparent 48px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 5px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+  opacity: 0.76;
+}
+
+.astraea-home-page::after {
+  top: 116px;
+  background: rgba(105, 66, 56, 0.22);
+  box-shadow: 0 2px 0 rgba(255, 252, 238, 0.78), 0 10px 0 -9px rgba(138, 92, 76, 0.16);
+}
+
+.astraea-notch {
+  width: 166px;
+  height: 34px;
+  border-radius: 0 0 22px 22px;
+  background: #101010;
+}
+
+.astraea-topbar {
+  grid-template-columns: 48px 1fr 48px;
+  height: 52px;
+}
+
+.astraea-icon-button,
+.astraea-user-button {
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 244, 229, 0.9);
+}
+
+.astraea-user-button svg {
+  opacity: 0;
+}
+
+.astraea-crest {
+  width: 66px;
+  height: 66px;
+  color: rgba(255, 246, 235, 0.92);
+  font-size: 52px;
+  transform: translateY(-7px);
+}
+
+.astraea-brand {
+  margin-top: 28px;
+}
+
+.astraea-brand h1 {
+  color: #3d281f;
+  font-size: clamp(25px, 6.7vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.astraea-brand p {
+  margin-top: 4px;
+  color: #4c3028;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.astraea-ritual-nav {
+  gap: 5px;
+  margin: clamp(16px, 2.7dvh, 22px) 0 clamp(12px, 2dvh, 17px);
+}
+
+.astraea-ritual-item {
+  min-height: 84px;
+  color: #473027;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.astraea-nav-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 5px;
+  color: #8e6357;
+}
+
+.astraea-sun-icon {
+  border: 0;
+}
+
+.astraea-oracle-card {
+  height: clamp(342px, 43dvh, 418px);
+  margin-top: 0;
+  padding: clamp(17px, 2.2dvh, 22px) 12px 12px;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 50% 56%, rgba(255, 255, 245, 0.92) 0 15%, rgba(255, 248, 236, 0.55) 36%, rgba(222, 177, 165, 0.28) 74%, transparent 100%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(251, 230, 220, 0.28));
+}
+
+.astraea-oracle-card h2 {
+  margin-bottom: clamp(8px, 1.2dvh, 13px);
+  color: #503027;
+  font-size: clamp(19px, 4.9vw, 23px);
+}
+
+.astraea-card-stage {
+  grid-template-columns: 34px 1fr 34px;
+  min-height: clamp(199px, 25dvh, 246px);
+}
+
+.astraea-card-stack {
+  height: clamp(199px, 25dvh, 246px);
+}
+
+.astraea-round-arrow {
+  width: 29px;
+  height: 29px;
+  background: linear-gradient(145deg, #c8897e, #9a5e56);
+}
+
+.astraea-tarot-mini {
+  top: 3px;
+  width: clamp(82px, 22vw, 96px);
+  height: clamp(132px, 34vw, 154px);
+  padding: 10px 8px;
+  border: 2px solid #b9945d;
+  border-radius: 8px;
+  transform: translateX(calc(-50% + var(--x))) translateY(var(--y)) scale(var(--scale)) rotate(var(--rotate)) rotateY(-5deg);
+}
+
+.astraea-mini-motif {
+  position: absolute;
+  inset: 33px 13px 36px;
+  z-index: 1;
+  display: block;
+  opacity: 0.92;
+}
+
+.astraea-mini-symbol {
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+}
+
+.astraea-card-art-pentacle .astraea-mini-motif {
+  border: 1px solid rgba(83, 54, 42, 0.18);
+  border-radius: 42% 58% 45% 55%;
+  background:
+    radial-gradient(circle at 63% 31%, transparent 0 17px, rgba(85, 55, 43, 0.58) 18px 19px, transparent 20px),
+    radial-gradient(circle at 30% 64%, rgba(255, 246, 222, 0.42), transparent 23px);
+}
+
+.astraea-card-art-star .astraea-mini-motif {
+  background:
+    radial-gradient(circle at 27% 19%, rgba(255, 248, 225, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 73% 31%, rgba(255, 248, 225, 0.82) 0 2px, transparent 3px),
+    radial-gradient(circle at 48% 62%, rgba(255, 248, 225, 0.7) 0 2px, transparent 3px),
+    linear-gradient(125deg, transparent 42%, rgba(255, 248, 225, 0.35) 43% 45%, transparent 46%);
+}
+
+.astraea-card-art-hermit .astraea-mini-motif {
+  background:
+    radial-gradient(circle at 54% 23%, rgba(255, 241, 185, 0.88) 0 9px, transparent 10px),
+    linear-gradient(90deg, transparent 43%, rgba(255, 248, 225, 0.52) 44% 47%, transparent 48%),
+    linear-gradient(160deg, transparent 32%, rgba(255, 248, 225, 0.36) 33% 36%, transparent 37%);
+}
+
+.astraea-card-art-magician .astraea-mini-motif {
+  background:
+    radial-gradient(ellipse at 50% 18%, transparent 0 13px, rgba(255, 248, 225, 0.48) 14px 15px, transparent 16px),
+    linear-gradient(90deg, transparent 48%, rgba(255, 248, 225, 0.46) 49% 51%, transparent 52%),
+    radial-gradient(circle at 50% 60%, rgba(255, 248, 225, 0.25), transparent 22px);
+}
+
+.astraea-card-caption {
+  min-height: 41px;
+  margin-top: clamp(-14px, -1.5dvh, -8px);
+}
+
+.astraea-card-caption h3 {
+  color: #4c3027;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.astraea-card-caption p {
+  margin-top: 4px;
+  color: #4d3129;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.astraea-draw-button {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(93px, 11.8dvh, 112px);
+  width: 210px;
+  min-height: 52px;
+  margin: 0;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 52%),
+    linear-gradient(135deg, #d9a091, #a2685f 72%, #8f5a53);
+}
+
+.astraea-draw-button:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.astraea-bottom-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  height: 78px;
+  margin: 0;
+  padding: 12px 18px 0;
+  border-top: 1px solid rgba(86, 57, 49, 0.18);
+  background: linear-gradient(180deg, rgba(255, 248, 235, 0.74), rgba(246, 227, 216, 0.62));
+}
+
+@media (max-width: 430px) {
+  .astraea-home-page {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+}
+
+@media (max-height: 760px) {
+  .astraea-home-page {
+    padding-top: 32px;
+  }
+
+  .astraea-brand {
+    margin-top: 16px;
+  }
+
+  .astraea-nav-icon {
+    width: 47px;
+    height: 47px;
+  }
+
+  .astraea-ritual-item {
+    min-height: 72px;
+    font-size: 9px;
+  }
+
+  .astraea-oracle-card {
+    height: 330px;
+  }
+
+  .astraea-card-stage,
+  .astraea-card-stack {
+    min-height: 180px;
+    height: 180px;
+  }
+}
