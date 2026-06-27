@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astraea's Guidance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="astraea-tarot.css" />
+  </head>
+  <body>
+    <main class="phone-shell" aria-label="Astraea Tarot mobile screen">
+      <section class="tarot-app">
+        <header class="app-header">
+          <button class="icon-button menu-button" type="button" aria-label="Open menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="crest" aria-hidden="true">A</div>
+          <button class="icon-button user-button" type="button" aria-label="Open settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.2"></circle>
+              <path d="M5.8 20c1.1-4 11.3-4 12.4 0"></path>
+            </svg>
+          </button>
+        </header>
+
+        <section class="brand-panel">
+          <h1>ASTRAEA'S GUIDANCE</h1>
+          <p>BY ASTRAEA TAROT</p>
+        </section>
+
+        <nav class="ritual-nav" aria-label="Tarot reading types">
+          <button class="ritual-item" type="button" data-route="daily-draw">
+            <span class="nav-icon sun-icon" aria-hidden="true"></span>
+            <span>DAILY<br />DRAW</span>
+          </button>
+          <button class="ritual-item" type="button" data-route="relationship-spread">
+            <span class="nav-icon figures-icon" aria-hidden="true"></span>
+            <span>RELATIONSHIP<br />SPREAD</span>
+          </button>
+          <button class="ritual-item" type="button" data-route="career-path">
+            <span class="nav-icon compass-icon" aria-hidden="true"></span>
+            <span>CAREER<br />PATH</span>
+          </button>
+          <button class="ritual-item" type="button" data-route="open-inquiry">
+            <span class="nav-icon crystal-icon" aria-hidden="true"></span>
+            <span>OPEN<br />INQUIRY</span>
+          </button>
+        </nav>
+
+        <section class="oracle-card" aria-live="polite">
+          <div class="corner corner-top-left"></div>
+          <div class="corner corner-top-right"></div>
+          <div class="corner corner-bottom-left"></div>
+          <div class="corner corner-bottom-right"></div>
+
+          <h2 id="readingTitle">THE HERMIT'S ANSWER</h2>
+
+          <div class="card-stage">
+            <button class="round-arrow" type="button" aria-label="Previous card">&lsaquo;</button>
+
+            <div class="tarot-stack">
+              <div class="side-card side-left" aria-hidden="true"></div>
+              <article class="tarot-card-preview back-card" aria-hidden="true">
+                <div class="card-art stars-art"></div>
+              </article>
+              <article class="tarot-card-preview main-card" id="mainCard">
+                <div class="card-inner">
+                  <div class="card-face front">
+                    <img id="cardImage" alt="Selected tarot card" />
+                  </div>
+                  <div class="card-face back">
+                    <div class="back-pattern"></div>
+                  </div>
+                </div>
+              </article>
+              <div class="side-card side-right" aria-hidden="true"></div>
+            </div>
+
+            <button class="round-arrow" type="button" aria-label="Next card">&rsaquo;</button>
+          </div>
+
+          <div class="reader-row">
+            <div class="reader-avatar">L</div>
+            <div>
+              <strong>LYRA</strong>
+              <p id="readerText">Lorem ipsum dolor sit amet, consectetur adipiscing elit. The card asks for quiet attention before movement.</p>
+            </div>
+          </div>
+
+          <div class="card-caption">
+            <span id="cardSubtitle">Ace of Pentacles</span>
+          </div>
+
+          <div class="pager-dots" aria-hidden="true">
+            <span></span>
+            <span class="active"></span>
+            <span></span>
+            <span></span>
+          </div>
+        </section>
+
+        <button class="draw-button" id="drawButton" type="button">DRAW A CARD</button>
+
+        <nav class="bottom-tabbar" aria-label="Bottom navigation">
+          <button class="tab active" type="button" data-tab="home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M6 10.5V20h4v-5h4v5h4v-9.5"></path></svg>
+            <span>Home</span>
+          </button>
+          <button class="tab" type="button" data-tab="spreads">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="6"></rect><rect x="14" y="5" width="6" height="6"></rect><rect x="4" y="15" width="6" height="5"></rect><rect x="14" y="15" width="6" height="5"></rect></svg>
+            <span>My Spreads</span>
+          </button>
+          <button class="tab" type="button" data-tab="explore">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="m15 9-2 5-5 2 2-5 5-2z"></path></svg>
+            <span>Explore</span>
+          </button>
+          <button class="tab" type="button" data-tab="settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3"></path><path d="M12 18v3"></path><path d="M4.8 7.2 7 9.4"></path><path d="m17 14.6 2.2 2.2"></path><path d="M3 12h3"></path><path d="M18 12h3"></path><path d="m4.8 16.8 2.2-2.2"></path><path d="m17 9.4 2.2-2.2"></path><circle cx="12" cy="12" r="3.2"></circle></svg>
+            <span>Settings</span>
+          </button>
+        </nav>
+      </section>
+    </main>
+
+    <script src="astraea-tarot.js"></script>
+  </body>
+</html>
