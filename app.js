@@ -445,6 +445,49 @@ function setAstraeaTab(tab) {
   if (isHome) renderAstraeaCarousel();
 }
 
+function getAstraeaCardIcon(art) {
+  if (art === "pentacle") {
+    return `
+      <svg class="astraea-card-line-svg" viewBox="0 0 72 92" aria-hidden="true">
+        <path class="card-glow" d="M19 56c9.8-8.8 23.8-11.1 35-5.7" />
+        <path d="M13.5 61.5c7.1-4.4 13.2-4 17.7.4 1.5 1.5 3.7 2.2 5.8 1.8l12.4-2.4c3.2-.6 5.2 3 3 5.4-5.6 5.8-13.5 9.6-21.4 8.9-6.5-.6-11-4.5-17.5-1.4" />
+        <path d="M13.5 61.5 6.8 71.8M18.6 60.2l-4.7 14.2" />
+        <circle cx="47.4" cy="30.6" r="16.2" />
+        <path d="m47.4 17.2 3.5 9 9.6.5-7.4 6.1 2.5 9.3-8.2-5.2-8.1 5.2 2.5-9.3-7.5-6.1 9.6-.5 3.5-9Z" />
+        <path d="M36.4 48.4c6 2.8 13.1 2.8 19.1 0" />
+      </svg>
+    `;
+  }
+  if (art === "hermit") {
+    return `
+      <svg class="astraea-card-line-svg" viewBox="0 0 72 92" aria-hidden="true">
+        <path d="M36 13.5v12.2M27.8 25.7h16.4M30.8 25.7l-4.2 19.8h18.8l-4.2-19.8" />
+        <path d="M30.4 45.5 25.8 74h20.4l-4.6-28.5M31.7 74h8.6" />
+        <path class="card-glow" d="M28.6 41.8c5.3 5 9.5 5 14.8 0M22.8 37.5c8.7-8.4 17.7-8.4 26.4 0" />
+        <path d="M36 31.6v8.7M31.7 36h8.6" />
+        <path d="M20.5 79.5c9.4-4.6 21.6-4.6 31 0" />
+      </svg>
+    `;
+  }
+  if (art === "star") {
+    return `
+      <svg class="astraea-card-line-svg" viewBox="0 0 72 92" aria-hidden="true">
+        <path d="M36 12.8 39.9 26l13.8.3-11 8.3 4 13.1L36 39.8 25.3 47.7l4-13.1-11-8.3 13.8-.3L36 12.8Z" />
+        <path class="card-glow" d="M16 66.5c11.2-5.3 28.8-5.3 40 0M22 75c8.2-2.7 19.8-2.7 28 0" />
+        <path d="M19.2 17.5v5.2M16.6 20.1h5.2M53 20v6M50 23h6M51.2 46.5v4.4M49 48.7h4.4" />
+      </svg>
+    `;
+  }
+  return `
+    <svg class="astraea-card-line-svg" viewBox="0 0 72 92" aria-hidden="true">
+      <path d="M36 14.8c-7.2 0-13 5.8-13 13 0 5 2.8 9.3 6.8 11.5" />
+      <path d="M36 14.8c7.2 0 13 5.8 13 13 0 5-2.8 9.3-6.8 11.5" />
+      <path d="M31.8 41.5h8.4v22.8h-8.4zM25.6 64.3h20.8" />
+      <path class="card-glow" d="M19.6 75.5c10.4-4.2 22.4-4.2 32.8 0M25.5 28h21M36 19.6v16.8" />
+    </svg>
+  `;
+}
+
 function renderAstraeaCarousel() {
   if (!els.astraeaCardStack) return;
   els.astraeaCardStack.innerHTML = astraeaCards.map((card, index) => {
@@ -476,8 +519,7 @@ function renderAstraeaCarousel() {
         aria-label="${card.title}"
       >
         <span class="astraea-mini-number">${card.mark}</span>
-        <span class="astraea-mini-motif"></span>
-        <span class="astraea-mini-symbol"></span>
+        <span class="astraea-mini-motif">${getAstraeaCardIcon(card.art)}</span>
         <strong>${card.title}</strong>
       </article>
     `;

@@ -64,6 +64,23 @@
 
         <div class="app-dashboard" id="appDashboard" hidden>
           <section class="astraea-home-page" id="astraeaHomePage" aria-label="Astraea tarot landing">
+            <svg class="astraea-svg-defs" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="astraeaGoldStroke" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#D4AF37" stop-opacity="0.96" />
+                  <stop offset="0.55" stop-color="#C0A080" stop-opacity="0.9" />
+                  <stop offset="1" stop-color="#C0AF77" stop-opacity="0.74" />
+                </linearGradient>
+                <radialGradient id="astraeaSoftBase" cx="50%" cy="38%" r="62%">
+                  <stop offset="0" stop-color="#ffffff" stop-opacity="0.34" />
+                  <stop offset="0.58" stop-color="#D4AF37" stop-opacity="0.16" />
+                  <stop offset="1" stop-color="#C6A66E" stop-opacity="0.04" />
+                </radialGradient>
+                <filter id="astraeaIconGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#C0AF77" flood-opacity="0.24" />
+                </filter>
+              </defs>
+            </svg>
             <div class="astraea-notch" aria-hidden="true"></div>
             <div class="astraea-topbar">
               <button class="astraea-icon-button" type="button" aria-label="Open menu">
@@ -73,9 +90,9 @@
               </button>
               <div class="astraea-crest" aria-hidden="true">A</div>
               <button class="astraea-user-button" id="astraeaProfileButton" type="button" aria-label="Open profile">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="12" cy="8" r="3.2"></circle>
-                  <path d="M5.8 20c1.1-4 11.3-4 12.4 0"></path>
+                <svg class="astraea-micro-svg" viewBox="0 0 32 32" aria-hidden="true">
+                  <path d="M20.9 5.5c-4.9 1.4-8.1 6.2-7 11.3 1 4.6 5 7.5 9.3 7.6-1.9 1.5-4.4 2.2-7 1.7-5.1-1-8.5-5.9-7.5-11 1-5.2 6-8.6 11.2-7.6.4.1.7.1 1 .3Z" />
+                  <path d="M24.6 8.3v4.4M22.4 10.5h4.4M6.3 22.5v3.5M4.6 24.2h3.5" />
                 </svg>
               </button>
             </div>
@@ -87,19 +104,45 @@
 
             <div class="astraea-ritual-nav" aria-label="Tarot reading shortcuts">
               <button class="astraea-ritual-item" type="button" data-home-shortcut="daily-draw">
-                <span class="astraea-nav-icon astraea-sun-icon" aria-hidden="true"></span>
+                <svg class="astraea-nav-icon astraea-nav-svg" viewBox="0 0 64 64" aria-hidden="true">
+                  <circle class="icon-base" cx="32" cy="32" r="28" />
+                  <circle cx="32" cy="32" r="13.5" />
+                  <circle cx="27.6" cy="29.3" r="1" />
+                  <circle cx="36.4" cy="29.3" r="1" />
+                  <path d="M27.7 36.1c2.7 2 6 2 8.6 0M32 3.8v9.2M32 51v9.2M3.8 32h9.2M51 32h9.2M12.1 12.1l6.5 6.5M45.4 45.4l6.5 6.5M51.9 12.1l-6.5 6.5M18.6 45.4l-6.5 6.5" />
+                  <path d="M23 24.4c3.5-3.8 14.5-3.8 18 0M23.1 39.5c4.1 2.8 13.8 2.8 17.8 0" />
+                </svg>
                 <span>DAILY<br />DRAW</span>
               </button>
               <button class="astraea-ritual-item" type="button" data-home-shortcut="relationship-spread">
-                <span class="astraea-nav-icon astraea-figures-icon" aria-hidden="true"></span>
+                <svg class="astraea-nav-icon astraea-nav-svg" viewBox="0 0 64 64" aria-hidden="true">
+                  <circle class="icon-base" cx="32" cy="32" r="28" />
+                  <path d="M25.2 18.8c3.3 0 5.6 2.6 5.6 6 0 7.5-11.4 7.5-11.4 0 0-3.4 2.4-6 5.8-6Z" />
+                  <path d="M38.8 18.8c-3.3 0-5.6 2.6-5.6 6 0 7.5 11.4 7.5 11.4 0 0-3.4-2.4-6-5.8-6Z" />
+                  <path d="M18.9 46.1c1.7-6.2 8-9.4 13.1-7.1 5.1-2.3 11.4.9 13.1 7.1" />
+                  <path d="M32 37.6c-5.9-4.2-7.2-8.2-4.9-10.4 1.7-1.7 3.7-.8 4.9 1.1 1.2-1.9 3.2-2.8 4.9-1.1 2.3 2.2 1 6.2-4.9 10.4Z" />
+                </svg>
                 <span>RELATIONSHIP<br />SPREAD</span>
               </button>
               <button class="astraea-ritual-item" type="button" data-home-shortcut="career-path">
-                <span class="astraea-nav-icon astraea-compass-icon" aria-hidden="true"></span>
+                <svg class="astraea-nav-icon astraea-nav-svg" viewBox="0 0 64 64" aria-hidden="true">
+                  <circle class="icon-base" cx="32" cy="32" r="28" />
+                  <circle cx="32" cy="32" r="20" />
+                  <path d="M32 9.5v6M32 48.5v6M9.5 32h6M48.5 32h6M16.1 16.1l4.2 4.2M43.7 43.7l4.2 4.2M47.9 16.1l-4.2 4.2M20.3 43.7l-4.2 4.2" />
+                  <path d="M38.7 25.3 34.8 36l-9.5 4.7 3.9-10.7 9.5-4.7Z" />
+                  <circle cx="32" cy="32" r="2.2" />
+                  <path d="M23 15.5c5.4-2.7 12.6-2.7 18 0M23 48.5c5.4 2.7 12.6 2.7 18 0" />
+                </svg>
                 <span>CAREER<br />PATH</span>
               </button>
               <button class="astraea-ritual-item" type="button" data-home-shortcut="open-inquiry">
-                <span class="astraea-nav-icon astraea-crystal-icon" aria-hidden="true"></span>
+                <svg class="astraea-nav-icon astraea-nav-svg" viewBox="0 0 64 64" aria-hidden="true">
+                  <circle class="icon-base" cx="32" cy="32" r="28" />
+                  <circle cx="32" cy="26.8" r="17.2" />
+                  <path d="M20.8 45h22.4M24.2 45c-.6 4.1-2 6.7-4.4 8h24.4c-2.4-1.3-3.8-3.9-4.4-8" />
+                  <path d="M25.2 24.4c3.7-4.4 9.8-5 14.2-1.5" />
+                  <path d="M48 14.5v4M46 16.5h4M16.2 20.5v3.4M14.5 22.2h3.4M46.3 38.2v3.8M44.4 40.1h3.8" />
+                </svg>
                 <span>OPEN<br />INQUIRY</span>
               </button>
             </div>
@@ -112,9 +155,13 @@
               <div class="astraea-panel astraea-panel-home active" id="astraeaHomePanel">
                 <h2>THE HERMIT'S ANSWER</h2>
                 <div class="astraea-card-stage">
-                  <button class="astraea-round-arrow" id="astraeaPrevCard" type="button" aria-label="Previous card">&lsaquo;</button>
+                  <button class="astraea-round-arrow" id="astraeaPrevCard" type="button" aria-label="Previous card">
+                    <svg class="astraea-arrow-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5" /></svg>
+                  </button>
                   <div class="astraea-card-stack" id="astraeaCardStack" aria-live="polite"></div>
-                  <button class="astraea-round-arrow" id="astraeaNextCard" type="button" aria-label="Next card">&rsaquo;</button>
+                  <button class="astraea-round-arrow" id="astraeaNextCard" type="button" aria-label="Next card">
+                    <svg class="astraea-arrow-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5 15 12l-5.5 5.5" /></svg>
+                  </button>
                 </div>
                 <div class="astraea-card-caption">
                   <h3 id="astraeaCardTitle">The Star</h3>
@@ -155,19 +202,19 @@
 
             <footer class="astraea-bottom-nav" aria-label="Astraea bottom navigation">
               <button class="active" type="button" data-astraea-bottom="home">
-                <span class="astraea-tab-icon astraea-tab-home" aria-hidden="true"></span>
+                <svg class="astraea-tab-icon-svg" viewBox="0 0 28 28" aria-hidden="true"><path d="M4.6 13.6 14 5.5l9.4 8.1M7.4 12.5v10h13.2v-10M11.4 22.5v-6.1h5.2v6.1" /></svg>
                 <small>Home</small>
               </button>
               <button type="button" data-astraea-bottom="spreads">
-                <span class="astraea-tab-icon astraea-tab-spreads" aria-hidden="true"></span>
+                <svg class="astraea-tab-icon-svg" viewBox="0 0 28 28" aria-hidden="true"><path d="M6.1 8.2h6.2v6.2H6.1ZM15.7 8.2h6.2v6.2h-6.2ZM6.1 17.6h6.2v6.2H6.1ZM15.7 17.6h6.2v6.2h-6.2Z" /></svg>
                 <small>My Spreads</small>
               </button>
               <button type="button" data-astraea-bottom="explore">
-                <span class="astraea-tab-icon astraea-tab-explore" aria-hidden="true"></span>
+                <svg class="astraea-tab-icon-svg" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.3" /><path d="M17.9 10.1 15.4 15.4l-5.3 2.5 2.5-5.3 5.3-2.5Z" /></svg>
                 <small>Explore</small>
               </button>
               <button type="button" data-astraea-bottom="settings">
-                <span class="astraea-tab-icon astraea-tab-settings" aria-hidden="true"></span>
+                <svg class="astraea-tab-icon-svg" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4.8v3M14 20.2v3M7.5 7.5l2.1 2.1M18.4 18.4l2.1 2.1M4.8 14h3M20.2 14h3M7.5 20.5l2.1-2.1M18.4 9.6l2.1-2.1" /><circle cx="14" cy="14" r="4.4" /></svg>
                 <small>Settings</small>
               </button>
             </footer>
@@ -600,9 +647,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=36"></script>
-    <script src="indian-astrology-skill.js?v=36"></script>
-    <script src="tarot-skill.js?v=36"></script>
-    <script src="app.js?v=36"></script>
+    <script src="astrology-skill.js?v=37"></script>
+    <script src="indian-astrology-skill.js?v=37"></script>
+    <script src="tarot-skill.js?v=37"></script>
+    <script src="app.js?v=37"></script>
   </body>
 </html>
