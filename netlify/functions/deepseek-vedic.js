@@ -292,10 +292,10 @@ exports.handler = async (event) => {
 
   const { apiKey, chatUrl, model } = getModelConfig();
   if (!apiKey) {
-    if (process.env.CONTEXT === "deploy-preview") {
+    if (!event.headers?.["x-podo-production-fallback"]) {
       const production = await fetch("https://podooo.netlify.app/.netlify/functions/deepseek-vedic", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-podo-production-fallback": "1" },
         body: JSON.stringify(payload)
       });
       return {
