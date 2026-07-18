@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Serif+Display&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css?v=42" />
     <link rel="stylesheet" href="indian-wellness.css?v=42" />
-    <link rel="stylesheet" href="cream-system.css?v=42" />
+    <link rel="stylesheet" href="cream-system.css?v=44" />
   </head>
   <body>
     <header class="site-header">
@@ -305,8 +305,12 @@
           <h2>占星师式星盘解读</h2>
           <button class="text-button" id="backFromAstrologyButton" type="button">返回档案与问题</button>
         </div>
+        <nav class="experience-tabs" aria-label="西方占星步骤">
+          <button class="is-active" type="button" data-experience-tab="astrology" data-stage="form" aria-selected="true">01 出生资料</button>
+          <button type="button" data-experience-tab="astrology" data-stage="reading" aria-selected="false">02 星盘解读</button>
+        </nav>
         <div class="astrology-layout">
-          <div class="profile-form">
+          <div class="profile-form" data-experience-panel="astrology" data-stage="form">
             <h2>出生资料</h2>
             <p class="disclaimer">星盘需要生日、出生时间和出生城市。当前为本地近似星盘，适合性格和能量结构参考。</p>
             <div class="compact-fields">
@@ -353,7 +357,7 @@
             <input id="astroTargetDate" type="date" />
             <button class="button primary full" id="refreshAstrologyButton" type="button">生成/更新星盘</button>
           </div>
-          <div class="profile-reading astrology-reading" id="astrologyReading">
+          <div class="profile-reading astrology-reading" id="astrologyReading" data-experience-panel="astrology" data-stage="reading" hidden>
             <p>请先在首页填写生日、出生时间和出生城市，然后生成个人星盘。</p>
           </div>
         </div>
@@ -361,8 +365,13 @@
 
       <section class="section astrology-section vedic-wellness-page" id="indianAstrology" hidden>
         <div class="vedic-reading-progress" id="indianReadingProgress" aria-hidden="true"><span></span></div>
+        <nav class="experience-tabs vedic-mode-tabs" aria-label="印度占星步骤">
+          <button class="is-active" type="button" data-experience-tab="vedic" data-stage="intro" aria-selected="true">01 开始</button>
+          <button type="button" data-experience-tab="vedic" data-stage="form" aria-selected="false">02 出生资料</button>
+          <button type="button" data-experience-tab="vedic" data-stage="reading" aria-selected="false">03 解读</button>
+        </nav>
 
-        <section class="vedic-wellness-hero" aria-labelledby="vedicHeroTitle">
+        <section class="vedic-wellness-hero" aria-labelledby="vedicHeroTitle" data-experience-panel="vedic" data-stage="intro">
           <div class="vedic-grain" aria-hidden="true"></div>
           <div class="vedic-hero-inner">
             <div class="vedic-hero-copy">
@@ -399,7 +408,7 @@
         </section>
 
         <div class="vedic-page-shell">
-          <section class="vedic-intake-section" id="vedicBirthForm" aria-labelledby="vedicFormTitle">
+          <section class="vedic-intake-section" id="vedicBirthForm" aria-labelledby="vedicFormTitle" data-experience-panel="vedic" data-stage="form" hidden>
             <header class="vedic-section-heading">
               <p class="vedic-kicker"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>Begin your reading</p>
               <h2 id="vedicFormTitle">A few details, held with care.</h2>
@@ -580,7 +589,7 @@
             </div>
           </section>
 
-          <section class="vedic-results-section" aria-labelledby="vedicResultTitle">
+          <section class="vedic-results-section" aria-labelledby="vedicResultTitle" data-experience-panel="vedic" data-stage="reading" hidden>
             <header class="vedic-result-header">
               <div>
                 <p class="vedic-kicker"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>Your reading</p>
@@ -610,8 +619,13 @@
           <h2>提问后开始抽牌</h2>
           <button class="text-button" id="backToHomeButton" type="button">返回占卜入口</button>
         </div>
+        <nav class="experience-tabs" aria-label="塔罗步骤">
+          <button class="is-active" type="button" data-experience-tab="tarot" data-stage="question" aria-selected="true">01 提问</button>
+          <button type="button" data-experience-tab="tarot" data-stage="spread" aria-selected="false">02 牌阵</button>
+          <button type="button" data-experience-tab="tarot" data-stage="draw" aria-selected="false">03 抽牌</button>
+        </nav>
 
-        <div class="question-panel tarot-question-panel">
+        <div class="question-panel tarot-question-panel" data-experience-panel="tarot" data-stage="question">
           <h2>本次问题</h2>
           <label for="questionInput">你想询问什么？</label>
           <textarea id="questionInput" rows="2" placeholder="例如：这段关系接下来适合继续推进吗？"></textarea>
@@ -647,7 +661,7 @@
           <p class="status" id="ritualStatus">先写下问题，再进入抽牌流程。</p>
         </div>
 
-        <div class="flow-stack">
+        <div class="flow-stack" data-experience-panel="tarot" data-stage="spread" hidden>
           <div>
             <h3>占卜主题</h3>
             <div class="topic-grid compact-choice-grid" id="topicGrid"></div>
@@ -658,7 +672,7 @@
           </div>
         </div>
 
-        <div class="deck-panel single-panel">
+        <div class="deck-panel single-panel" data-experience-panel="tarot" data-stage="draw" hidden>
           <div class="deck-header">
             <div>
               <p class="kicker">洗牌抽牌</p>
@@ -733,6 +747,6 @@
     <script src="astrology-skill.js?v=41"></script>
     <script src="indian-astrology-skill.js?v=41"></script>
     <script src="tarot-skill.js?v=41"></script>
-    <script src="app.js?v=41"></script>
+    <script src="app.js?v=44"></script>
   </body>
 </html>

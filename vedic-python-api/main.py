@@ -94,29 +94,19 @@ def require_api_key(x_vedic_api_key: str | None) -> None:
 
 
 def model_config() -> dict[str, str]:
-    api_key = (
-        os.getenv("DEEPSEEK_API_KEY")
-        or os.getenv("OPENAI_API_KEY")
-        or os.getenv("CCSWITCH_API_KEY")
-        or os.getenv("API_KEY")
-        or ""
-    ).strip()
-    base_url = (
-        os.getenv("DEEPSEEK_BASE_URL")
-        or os.getenv("DEEPSEEK_API_BASE")
-        or os.getenv("OPENAI_BASE_URL")
-        or os.getenv("OPENAI_API_BASE")
-        or os.getenv("CCSWITCH_BASE_URL")
-        or "https://api.deepseek.com"
-    ).rstrip("/")
-    model = (
-        os.getenv("DEEPSEEK_MODEL")
-        or os.getenv("CCSWITCH_MODEL")
-        or os.getenv("OPENAI_MODEL")
-        or "deepseek-chat"
-    )
+    providers = {
+        "deepseek": {"api_key": os.getenv("DEEPSEEK_API_KEY", ""), "base_url": os.getenv("DEEPSEEK_BASE_URL") or os.getenv("DEEPSEEK_API_BASE") or "https://api.deepseek.com", "model": os.getenv("DEEPSEEK_MODEL") or "deepseek-chat"},
+        "openai": {"api_key": os.getenv("OPENAI_API_KEY", ""), "base_url": os.getenv("OPENAI_BASE_URL") or os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1", "model": os.getenv("OPENAI_MODEL") or "gpt-4o-mini"},
+        "ccswitch": {"api_key": os.getenv("CCSWITCH_API_KEY") or os.getenv("API_KEY", ""), "base_url": os.getenv("CCSWITCH_BASE_URL") or "https://api.openai.com/v1", "model": os.getenv("CCSWITCH_MODEL") or "gpt-4o-mini"},
+    }
+    requested = (os.getenv("AI_PROVIDER") or os.getenv("MODEL_PROVIDER") or "").lower()
+    provider = requested if requested in providers and providers[requested]["api_key"] else next((name for name in ("deepseek", "openai", "ccswitch") if providers[name]["api_key"]), requested or "deepseek")
+    selected = providers.get(provider, providers["deepseek"])
+    api_key = selected["api_key"].strip()
+    base_url = selected["base_url"].rstrip("/")
+    model = selected["model"]
     chat_url = base_url if base_url.endswith("/chat/completions") else f"{base_url}/chat/completions"
-    return {"api_key": api_key, "chat_url": chat_url, "model": model}
+    return {"api_key": api_key, "chat_url": chat_url, "model": model, "provider": provider}
 
 
 def clip(value: Any, max_length: int = 16000) -> str:

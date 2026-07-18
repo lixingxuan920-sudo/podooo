@@ -1,20 +1,31 @@
 function getModelConfig() {
-  const apiKey = process.env.DEEPSEEK_API_KEY
-    || process.env.OPENAI_API_KEY
-    || process.env.CCSWITCH_API_KEY
-    || process.env.API_KEY;
-  const baseUrl = (process.env.DEEPSEEK_BASE_URL
-    || process.env.DEEPSEEK_API_BASE
-    || process.env.OPENAI_BASE_URL
-    || process.env.OPENAI_API_BASE
-    || process.env.CCSWITCH_BASE_URL
-    || "https://api.deepseek.com").replace(/\/$/, "");
-  const model = process.env.DEEPSEEK_MODEL
-    || process.env.CCSWITCH_MODEL
-    || process.env.OPENAI_MODEL
-    || "deepseek-chat";
+  const requested = String(process.env.AI_PROVIDER || process.env.MODEL_PROVIDER || "").toLowerCase();
+  const providers = {
+    deepseek: {
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseUrl: process.env.DEEPSEEK_BASE_URL || process.env.DEEPSEEK_API_BASE || "https://api.deepseek.com",
+      model: process.env.DEEPSEEK_MODEL || "deepseek-chat"
+    },
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY,
+      baseUrl: process.env.OPENAI_BASE_URL || process.env.OPENAI_API_BASE || "https://api.openai.com/v1",
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+    },
+    ccswitch: {
+      apiKey: process.env.CCSWITCH_API_KEY || process.env.API_KEY,
+      baseUrl: process.env.CCSWITCH_BASE_URL || "https://api.openai.com/v1",
+      model: process.env.CCSWITCH_MODEL || "gpt-4o-mini"
+    }
+  };
+  const provider = providers[requested]?.apiKey
+    ? requested
+    : (["deepseek", "openai", "ccswitch"].find((name) => providers[name].apiKey) || requested || "deepseek");
+  const selected = providers[provider] || providers.deepseek;
+  const apiKey = selected.apiKey;
+  const baseUrl = selected.baseUrl.replace(/\/$/, "");
+  const model = selected.model;
   const chatUrl = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
-  return { apiKey, chatUrl, model };
+  return { apiKey, chatUrl, model, provider };
 }
 
 function clip(value, maxLength = 10000) {

@@ -1713,6 +1713,7 @@ function showAstrologyFlow() {
   els.astrologySection.hidden = false;
   location.hash = "astrology";
   updateActiveTab("astrology");
+  setExperienceStage("astrology", "form");
 }
 
 function showIndianFlow() {
@@ -1733,6 +1734,7 @@ function showIndianFlow() {
   els.indianAstrologySection.hidden = false;
   location.hash = "indianAstrology";
   updateActiveTab("indianAstrology");
+  setExperienceStage("vedic", "intro");
 }
 
 function showHomeFlow() {
@@ -1792,6 +1794,19 @@ function showTarotFlow() {
   renderDeck();
   location.hash = "draw";
   updateActiveTab("draw");
+  setExperienceStage("tarot", "question");
+}
+
+function setExperienceStage(experience, stage) {
+  document.querySelectorAll(`[data-experience-panel="${experience}"]`).forEach((panel) => {
+    panel.hidden = panel.dataset.stage !== stage;
+  });
+  document.querySelectorAll(`[data-experience-tab="${experience}"]`).forEach((button) => {
+    const active = button.dataset.stage === stage;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  document.querySelector(".app-main")?.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function enterDrawFlow() {
@@ -1807,6 +1822,7 @@ function enterDrawFlow() {
     return;
   }
   persistProfileFromFields();
+  setExperienceStage("tarot", "spread");
   els.home.hidden = true;
   els.astrologySection.hidden = true;
   els.indianAstrologySection.hidden = true;
@@ -2740,10 +2756,18 @@ document.querySelectorAll("[data-tab-target]").forEach((tab) => {
     if (target === "history") showHistoryFlow();
   });
 });
-els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
+els.refreshAstrologyButton.addEventListener("click", async () => {
+  await renderAstrologyPage();
+  setExperienceStage("astrology", "reading");
+});
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-experience-tab]");
+  if (!tab) return;
+  setExperienceStage(tab.dataset.experienceTab, tab.dataset.stage);
+});
 els.startVedicFormButton?.addEventListener("click", () => {
-  document.querySelector("#vedicBirthForm")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  window.setTimeout(() => els.indianBirthDate?.focus(), 450);
+  setExperienceStage("vedic", "form");
+  window.setTimeout(() => els.indianBirthDate?.focus(), 250);
 });
 
 els.refreshIndianButton.addEventListener("click", async () => {
@@ -2754,7 +2778,7 @@ els.refreshIndianButton.addEventListener("click", async () => {
   try {
     if (label) label.textContent = "正在生成星盘…";
     await renderIndianPage();
-    document.querySelector(".vedic-results-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setExperienceStage("vedic", "reading");
     if (label) label.textContent = "正在生成完整解读…";
     await renderIndianInterpretation();
   } finally {

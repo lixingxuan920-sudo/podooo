@@ -1701,3 +1701,102 @@ body.cream-app-active .blueprint-chapter .typewriter-text > p:last-child {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Interactive, viewport-based reading flows */
+body.cream-app-active .experience-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+  width: min(680px, 100%);
+  margin: 0 auto 16px;
+  padding: 5px;
+  border: 1px solid var(--podo-border, #ded8d3);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  position: sticky;
+  top: 0;
+  z-index: 12;
+}
+
+body.cream-app-active .experience-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #6c6c6a;
+  font: 600 13px/1.2 Pretendard, "HarmonyOS Sans SC", sans-serif;
+  cursor: pointer;
+  transition: transform 200ms ease, background 200ms ease, color 200ms ease;
+}
+
+body.cream-app-active .experience-tabs button.is-active {
+  color: #474745;
+  background: #e8ccd8;
+  box-shadow: 0 8px 20px rgba(108, 108, 106, 0.1);
+}
+
+body.cream-app-active [data-experience-panel] {
+  animation: podo-panel-in 0.45s ease both;
+}
+
+body.cream-app-active [data-experience-panel][hidden] { display: none !important; }
+
+body.cream-app-active #astrology,
+body.cream-app-active #draw,
+body.cream-app-active #result,
+body.cream-app-active #history,
+body.cream-app-active #indianAstrology {
+  height: calc(100dvh - 148px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.cream-app-active #astrology [data-experience-panel],
+body.cream-app-active #draw [data-experience-panel],
+body.cream-app-active #result .result-list,
+body.cream-app-active #history .history-list,
+body.cream-app-active #indianAstrology [data-experience-panel] {
+  max-height: calc(100dvh - 285px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+body.cream-app-active #astrology .astrology-layout { display: block; }
+body.cream-app-active #draw .experience-tabs { margin-bottom: 14px; }
+body.cream-app-active #indianAstrology .vedic-mode-tabs { margin-top: 10px; }
+body.cream-app-active #indianAstrology .vedic-page-shell { padding-top: 0; }
+
+body.cream-app-active .vedic-wellness-page .vedic-reading-surface,
+body.cream-app-active .vedic-wellness-page .vedic-reading-surface p,
+body.cream-app-active .vedic-wellness-page .vedic-reading-surface li,
+body.cream-app-active .vedic-wellness-page .deepseek-reading,
+body.cream-app-active .vedic-wellness-page .deepseek-reading p,
+body.cream-app-active .vedic-wellness-page .typewriter-text,
+body.cream-app-active .vedic-wellness-page .typewriter-text > p {
+  color: #4e4e4c !important;
+}
+
+@keyframes podo-panel-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 720px) {
+  body.cream-app-active #astrology,
+  body.cream-app-active #draw,
+  body.cream-app-active #result,
+  body.cream-app-active #history,
+  body.cream-app-active #indianAstrology { height: calc(100dvh - 116px); }
+  body.cream-app-active #astrology [data-experience-panel],
+  body.cream-app-active #draw [data-experience-panel],
+  body.cream-app-active #result .result-list,
+  body.cream-app-active #history .history-list,
+  body.cream-app-active #indianAstrology [data-experience-panel] {
+    max-height: calc(100dvh - 238px);
+    padding-bottom: 96px;
+  }
+  body.cream-app-active .experience-tabs button { font-size: 12px; }
+}
