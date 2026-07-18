@@ -1702,6 +1702,53 @@ body.cream-app-active .blueprint-chapter .typewriter-text > p:last-child {
   }
 }
 
+/* Mobile app behavior: natural content scrolling, fixed navigation controls */
+body.cream-app-active .app-main {
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 720px) {
+  body.cream-app-active #astrology,
+  body.cream-app-active #draw,
+  body.cream-app-active #result,
+  body.cream-app-active #history,
+  body.cream-app-active #indianAstrology {
+    height: auto;
+    min-height: calc(100dvh - 116px);
+    overflow: visible;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+
+  body.cream-app-active #astrology [data-experience-panel],
+  body.cream-app-active #draw [data-experience-panel],
+  body.cream-app-active #result .result-list,
+  body.cream-app-active #history .history-list,
+  body.cream-app-active #indianAstrology [data-experience-panel] {
+    max-height: none;
+    overflow: visible;
+    touch-action: pan-y;
+    padding-bottom: 24px;
+  }
+
+  body.cream-app-active .app-tabbar {
+    position: fixed !important;
+    left: 50%;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 100;
+    transform: translateX(-50%);
+  }
+
+  body.cream-app-active .experience-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 80;
+    box-shadow: 0 10px 24px rgba(108, 108, 106, 0.08);
+  }
+}
+
 /* Interactive, viewport-based reading flows */
 body.cream-app-active .experience-tabs {
   display: grid;
@@ -1834,4 +1881,51 @@ body.cream-app-active .vedic-wellness-page .typewriter-text > p {
     padding-bottom: 96px;
   }
   body.cream-app-active .experience-tabs button { font-size: 12px; }
+}
+
+/* Final mobile overrides */
+body.cream-app-active .app-main {
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 720px) {
+  body.cream-app-active #astrology,
+  body.cream-app-active #draw,
+  body.cream-app-active #result,
+  body.cream-app-active #history,
+  body.cream-app-active #indianAstrology {
+    height: auto;
+    min-height: calc(100dvh - 116px);
+    overflow: visible;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+
+  body.cream-app-active #astrology [data-experience-panel],
+  body.cream-app-active #draw [data-experience-panel],
+  body.cream-app-active #result .result-list,
+  body.cream-app-active #history .history-list,
+  body.cream-app-active #indianAstrology [data-experience-panel] {
+    max-height: none;
+    overflow: visible;
+    touch-action: pan-y;
+    padding-bottom: 24px;
+  }
+
+  body.cream-app-active .app-tabbar {
+    position: fixed !important;
+    left: 50%;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 100;
+    transform: translateX(-50%);
+  }
+
+  body.cream-app-active .experience-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 80;
+    box-shadow: 0 10px 24px rgba(108, 108, 106, 0.08);
+  }
 }

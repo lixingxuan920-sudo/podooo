@@ -1775,7 +1775,6 @@ function showHistoryFlow() {
   els.historySection.hidden = false;
   location.hash = "history";
   updateActiveTab("history");
-  window.requestAnimationFrame(() => mountFixedPager(els.historyList));
 }
 
 function showTarotFlow() {
@@ -1803,7 +1802,6 @@ function showTarotFlow() {
 }
 
 function setExperienceStage(experience, stage) {
-  document.querySelectorAll(".fixed-panel-pager").forEach((pager) => pager.remove());
   document.querySelectorAll(`[data-experience-panel="${experience}"]`).forEach((panel) => {
     panel.hidden = panel.dataset.stage !== stage;
   });
@@ -1813,42 +1811,6 @@ function setExperienceStage(experience, stage) {
     button.setAttribute("aria-selected", String(active));
   });
   document.querySelector(".app-main")?.scrollTo({ top: 0 });
-  const activePanel = document.querySelector(`[data-experience-panel="${experience}"][data-stage="${stage}"]`);
-  if (activePanel) window.requestAnimationFrame(() => mountFixedPager(activePanel));
-}
-
-function mountFixedPager(panel) {
-  if (!panel || panel.hidden) return;
-  panel.scrollTop = 0;
-  const pageSize = () => Math.max(180, panel.clientHeight - 32);
-  const pageCount = () => Math.max(1, Math.ceil(panel.scrollHeight / pageSize()));
-  const pager = document.createElement("nav");
-  pager.className = "fixed-panel-pager";
-  pager.setAttribute("aria-label", "内容分页");
-  pager.innerHTML = `
-    <button type="button" data-page-direction="prev" aria-label="上一页">← 上一页</button>
-    <span><b>1</b> / <i>${pageCount()}</i></span>
-    <button type="button" data-page-direction="next" aria-label="下一页">下一页 →</button>
-  `;
-  panel.insertAdjacentElement("afterend", pager);
-  const update = () => {
-    const count = pageCount();
-    const current = Math.min(count, Math.floor(panel.scrollTop / pageSize()) + 1);
-    pager.querySelector("b").textContent = current;
-    pager.querySelector("i").textContent = count;
-    pager.querySelector('[data-page-direction="prev"]').disabled = current <= 1;
-    pager.querySelector('[data-page-direction="next"]').disabled = current >= count;
-    pager.hidden = count <= 1;
-  };
-  pager.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-page-direction]");
-    if (!button) return;
-    const direction = button.dataset.pageDirection === "next" ? 1 : -1;
-    panel.scrollTo({ top: Math.max(0, panel.scrollTop + direction * pageSize()), behavior: "smooth" });
-    window.setTimeout(update, 260);
-  });
-  update();
-  window.setTimeout(update, 500);
 }
 
 function enterDrawFlow() {
@@ -2653,7 +2615,6 @@ function showResult() {
   }
   location.hash = "result";
   updateActiveTab("draw");
-  window.requestAnimationFrame(() => mountFixedPager(els.resultList));
 }
 
 function saveReading() {
