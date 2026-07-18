@@ -16,6 +16,8 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from vedic_skill_rules import LIFE_BLUEPRINT_SKILL_RULES, VEDIC_SKILL_SOURCE
+
 
 SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -133,7 +135,7 @@ def call_deepseek(prompt: str, mode: str) -> str:
     system_prompt = (
         "你是高级吠陀占星顾问。当前是连续咨询模式：只回答用户本次问题，必须引用已保存 Life Blueprint、历史对话和结构化星盘数据，不要重新生成完整报告。"
         if mode == "qa"
-        else "你是高级吠陀占星顾问。当前是 Life Blueprint 长报告模式：必须按十章结构加 Executive Summary 输出，像真实咨询师一样深入、连贯、可落地。"
+        else "你是高级吠陀占星顾问。当前是 Life Blueprint 长报告模式：严格执行提示词中的 Vedic Astro Skills v7.0 解读规则，像真实咨询师一样深入、连贯、可落地。"
     )
     body = {
         "model": cfg["model"],
@@ -172,6 +174,12 @@ def build_blueprint_prompt(payload: VedicRequest, chart_result: dict[str, Any]) 
 你是一位拥有二十年以上咨询经验的印度占星咨询师。
 请根据下面所有盘的数据，写一份完整的 Life Blueprint。
 不要简单列点，必须像真实咨询师面对面咨询一样，每个主题都深入解释原因、命盘依据、人格形成、优势、阻碍、现实表现、内在心理、建议。
+
+当前启用的上游解读 Skill：
+{clip(VEDIC_SKILL_SOURCE, 1200)}
+
+Vedic Astro Skills 解读规则（优先执行）：
+{LIFE_BLUEPRINT_SKILL_RULES}
 
 要求：
 1. 目标长度 8000 到 15000 字。不是摘要，是真正完整咨询。

@@ -1,3 +1,5 @@
+const { VEDIC_SKILL_SOURCE, LIFE_BLUEPRINT_SKILL_RULES } = require("./vedic-skill-rules.js");
+
 function getModelConfig() {
   const requested = String(process.env.AI_PROVIDER || process.env.MODEL_PROVIDER || "").toLowerCase();
   const providers = {
@@ -165,6 +167,12 @@ function buildPrompt(payload) {
 你的任务
 你不是百科词条作者，也不是普通 AI 聊天助手。你的输出要像一位资深占星顾问正在做真实咨询：冷静、专业、温和、有心理洞察、有现实建议。专业占星推理必须来自结构化星盘数据，DeepSeek 只负责把这些证据组织成自然、可信、可落地的中文咨询语言。
 
+当前启用的上游解读 Skill
+${clip(VEDIC_SKILL_SOURCE, 1200)}
+
+Vedic Astro Skills 解读规则（优先执行）
+${LIFE_BLUEPRINT_SKILL_RULES}
+
 当前模式
 ${mode}
 
@@ -315,7 +323,7 @@ exports.handler = async (event) => {
   const prompt = buildPrompt(payload);
   const systemPrompt = mode === "qa"
     ? "你是高级吠陀占星顾问。必须用中文回答。当前是连续咨询模式：只回答用户本次问题，必须引用已保存的 Life Blueprint、最近对话和核心排盘数据，不要重新生成完整报告，不做绝对化预言，不输出 Markdown 符号标题。"
-    : "你是高级吠陀占星顾问。必须用中文回答。当前是 Life Blueprint 首次报告模式：用资深咨询师语气输出完整、连贯、可落地的中文报告。必须按照十章结构加 Executive Summary 输出，依据核心排盘数据摘要和 structured_data.md，不做绝对化预言，不输出 Markdown 符号标题。每一章都要引用具体盘面数据。";
+    : "你是高级吠陀占星顾问。必须用中文回答。当前是 Life Blueprint 首次报告模式：严格执行已提供的 Vedic Astro Skills v7.0 规则，用资深咨询师语气输出完整、连贯、可落地的中文报告。依据核心排盘数据摘要和 structured_data.md，不做绝对化预言，不输出 Markdown 符号标题。每个核心判断都要引用具体盘面数据。";
 
   const response = await fetch(chatUrl, {
     method: "POST",

@@ -15,6 +15,7 @@ RUN python -m pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir --only-binary=pyswisseph,pydantic-core -r requirements.txt
 
 COPY main.py .
+COPY vedic_skill_rules.py .
 
 EXPOSE 8000
 
