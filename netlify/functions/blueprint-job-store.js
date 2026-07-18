@@ -8,7 +8,7 @@ function validJobId(value) {
 async function getJobStore(event) {
   const { connectLambda, getDeployStore } = await import("@netlify/blobs");
   connectLambda(event);
-  return getDeployStore({ name: STORE_NAME, consistency: "strong" });
+  return getDeployStore({ name: STORE_NAME, consistency: "strong", region: "ap-southeast-1" });
 }
 
 async function setBlueprintJob(event, jobId, value) {
