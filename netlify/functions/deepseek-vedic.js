@@ -292,6 +292,18 @@ exports.handler = async (event) => {
 
   const { apiKey, chatUrl, model } = getModelConfig();
   if (!apiKey) {
+    if (process.env.CONTEXT === "deploy-preview") {
+      const production = await fetch("https://podooo.netlify.app/.netlify/functions/deepseek-vedic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      return {
+        statusCode: production.status,
+        headers: { "Content-Type": "application/json" },
+        body: await production.text()
+      };
+    }
     return {
       statusCode: 501,
       headers: { "Content-Type": "application/json" },

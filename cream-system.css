@@ -1759,10 +1759,45 @@ body.cream-app-active #result .result-list,
 body.cream-app-active #history .history-list,
 body.cream-app-active #indianAstrology [data-experience-panel] {
   max-height: calc(100dvh - 285px);
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  touch-action: manipulation;
 }
+
+body.cream-app-active .app-main {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+body.cream-app-active .fixed-panel-pager {
+  width: min(560px, calc(100% - 24px));
+  min-height: 50px;
+  margin: 10px auto 0;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--podo-border, #ded8d3);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(108, 108, 106, 0.08);
+}
+
+body.cream-app-active .fixed-panel-pager button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 13px;
+  color: #4e4e4c;
+  background: #e8ccd8;
+  font: 600 12px/1 Pretendard, "HarmonyOS Sans SC", sans-serif;
+}
+
+body.cream-app-active .fixed-panel-pager button:disabled { opacity: 0.32; }
+body.cream-app-active .fixed-panel-pager span { color: #6c6c6a; font: 600 12px/1 Inter, sans-serif; }
+body.cream-app-active .fixed-panel-pager i { font-style: normal; }
 
 body.cream-app-active #astrology .astrology-layout { display: block; }
 body.cream-app-active #draw .experience-tabs { margin-bottom: 14px; }

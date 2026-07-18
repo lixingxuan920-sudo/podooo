@@ -1130,16 +1130,20 @@ async function renderAstrologyPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ profile, chart, options })
     });
-    if (!response.ok) throw new Error("DeepSeek unavailable");
+    if (!response.ok) {
+      const issue = await response.json().catch(() => ({}));
+      throw new Error(issue.error || "DeepSeek unavailable");
+    }
     const data = await response.json();
     deepseekBox.innerHTML = `
       <h3>DeepSeek 专业星盘解读</h3>
       ${formatReadingText(data.reading)}
     `;
-  } catch {
+  } catch (error) {
+    const missingKey = /key is not configured/i.test(error?.message || "");
     deepseekBox.innerHTML = `
       <h3>DeepSeek 专业星盘解读</h3>
-      <p>当前本地预览还没有读取到模型配置，所以先显示本地结构化解读。使用 ccswitch 时，请确保本地服务能读取 <strong>OPENAI_API_KEY / OPENAI_BASE_URL</strong> 或 <strong>CCSWITCH_API_KEY / CCSWITCH_BASE_URL</strong>；部署到 Netlify 时也要配置对应环境变量。</p>
+      <p>${missingKey ? "当前预览环境没有读取到 DEEPSEEK_API_KEY；正式环境中的 DeepSeek 不受影响。请在 Netlify 将该变量的作用域同时开放给 Deploy Preview。" : "DeepSeek 暂时没有返回结果，页面已保留本地结构化解读，请稍后重试。"}</p>
     `;
   }
 }
@@ -1771,6 +1775,7 @@ function showHistoryFlow() {
   els.historySection.hidden = false;
   location.hash = "history";
   updateActiveTab("history");
+  window.requestAnimationFrame(() => mountFixedPager(els.historyList));
 }
 
 function showTarotFlow() {
@@ -1798,6 +1803,7 @@ function showTarotFlow() {
 }
 
 function setExperienceStage(experience, stage) {
+  document.querySelectorAll(".fixed-panel-pager").forEach((pager) => pager.remove());
   document.querySelectorAll(`[data-experience-panel="${experience}"]`).forEach((panel) => {
     panel.hidden = panel.dataset.stage !== stage;
   });
@@ -1806,7 +1812,43 @@ function setExperienceStage(experience, stage) {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-selected", String(active));
   });
-  document.querySelector(".app-main")?.scrollTo({ top: 0, behavior: "smooth" });
+  document.querySelector(".app-main")?.scrollTo({ top: 0 });
+  const activePanel = document.querySelector(`[data-experience-panel="${experience}"][data-stage="${stage}"]`);
+  if (activePanel) window.requestAnimationFrame(() => mountFixedPager(activePanel));
+}
+
+function mountFixedPager(panel) {
+  if (!panel || panel.hidden) return;
+  panel.scrollTop = 0;
+  const pageSize = () => Math.max(180, panel.clientHeight - 32);
+  const pageCount = () => Math.max(1, Math.ceil(panel.scrollHeight / pageSize()));
+  const pager = document.createElement("nav");
+  pager.className = "fixed-panel-pager";
+  pager.setAttribute("aria-label", "内容分页");
+  pager.innerHTML = `
+    <button type="button" data-page-direction="prev" aria-label="上一页">← 上一页</button>
+    <span><b>1</b> / <i>${pageCount()}</i></span>
+    <button type="button" data-page-direction="next" aria-label="下一页">下一页 →</button>
+  `;
+  panel.insertAdjacentElement("afterend", pager);
+  const update = () => {
+    const count = pageCount();
+    const current = Math.min(count, Math.floor(panel.scrollTop / pageSize()) + 1);
+    pager.querySelector("b").textContent = current;
+    pager.querySelector("i").textContent = count;
+    pager.querySelector('[data-page-direction="prev"]').disabled = current <= 1;
+    pager.querySelector('[data-page-direction="next"]').disabled = current >= count;
+    pager.hidden = count <= 1;
+  };
+  pager.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-page-direction]");
+    if (!button) return;
+    const direction = button.dataset.pageDirection === "next" ? 1 : -1;
+    panel.scrollTo({ top: Math.max(0, panel.scrollTop + direction * pageSize()), behavior: "smooth" });
+    window.setTimeout(update, 260);
+  });
+  update();
+  window.setTimeout(update, 500);
 }
 
 function enterDrawFlow() {
@@ -2611,6 +2653,7 @@ function showResult() {
   }
   location.hash = "result";
   updateActiveTab("draw");
+  window.requestAnimationFrame(() => mountFixedPager(els.resultList));
 }
 
 function saveReading() {
