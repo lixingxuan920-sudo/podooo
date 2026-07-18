@@ -5,20 +5,21 @@ function validJobId(value) {
   return JOB_ID_PATTERN.test(String(value || ""));
 }
 
-async function getJobStore() {
-  const { getDeployStore } = await import("@netlify/blobs");
+async function getJobStore(event) {
+  const { connectLambda, getDeployStore } = await import("@netlify/blobs");
+  connectLambda(event);
   return getDeployStore({ name: STORE_NAME, consistency: "strong" });
 }
 
-async function setBlueprintJob(jobId, value) {
+async function setBlueprintJob(event, jobId, value) {
   if (!validJobId(jobId)) throw new Error("Invalid blueprint job ID.");
-  const store = await getJobStore();
+  const store = await getJobStore(event);
   await store.setJSON(jobId, value);
 }
 
-async function getBlueprintJob(jobId) {
+async function getBlueprintJob(event, jobId) {
   if (!validJobId(jobId)) return null;
-  const store = await getJobStore();
+  const store = await getJobStore(event);
   return store.get(jobId, { type: "json", consistency: "strong" });
 }
 

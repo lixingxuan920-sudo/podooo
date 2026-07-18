@@ -47,7 +47,7 @@ exports.handler = async (event) => {
     if (!validJobId(jobId)) throw new Error("Invalid blueprint job ID.");
     createdAt = request.createdAt || createdAt;
 
-    await setBlueprintJob(jobId, {
+    await setBlueprintJob(event, jobId, {
       jobId,
       status: "processing",
       progress: 25,
@@ -58,7 +58,7 @@ exports.handler = async (event) => {
     const segments = await Promise.all(REPORT_SEGMENTS.map((question) => generateSegment(payload, question)));
     const blueprint = segments.join("\n\n").trim();
     const summary = blueprint.replace(/\s+/g, " ").slice(0, 420);
-    await setBlueprintJob(jobId, {
+    await setBlueprintJob(event, jobId, {
       jobId,
       status: "completed",
       progress: 100,
@@ -70,7 +70,7 @@ exports.handler = async (event) => {
     });
   } catch (error) {
     if (validJobId(jobId)) {
-      await setBlueprintJob(jobId, {
+      await setBlueprintJob(event, jobId, {
         jobId,
         status: "failed",
         progress: 100,

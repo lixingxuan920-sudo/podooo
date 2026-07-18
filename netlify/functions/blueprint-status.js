@@ -10,7 +10,7 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const job = await getBlueprintJob(jobId);
+  const job = await getBlueprintJob(event, jobId);
   if (!job) {
     return {
       statusCode: 404,

@@ -23,7 +23,7 @@ exports.handler = async (event) => {
 
   const jobId = crypto.randomUUID();
   const createdAt = new Date().toISOString();
-  await setBlueprintJob(jobId, {
+  await setBlueprintJob(event, jobId, {
     jobId,
     status: "queued",
     progress: 5,
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
       throw new Error(`Background function returned HTTP ${response.status}.`);
     }
   } catch (error) {
-    await setBlueprintJob(jobId, {
+    await setBlueprintJob(event, jobId, {
       jobId,
       status: "failed",
       progress: 100,
