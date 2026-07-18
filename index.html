@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Serif+Display&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="indian-wellness.css" />
+    <link rel="stylesheet" href="cream-system.css" />
   </head>
   <body>
     <header class="site-header">
@@ -33,7 +34,7 @@
     <main class="app-main">
       <section class="home-app section" id="home">
         <div class="hero-bg" aria-hidden="true"></div>
-        <div class="auth-screen" id="authScreen">
+        <div class="auth-screen" id="authScreen" hidden>
           <div class="home-copy">
             <p class="kicker">Luna Arcana Tarot</p>
             <h1>登录后开始占卜</h1>
@@ -224,34 +225,42 @@
           <section class="module-chooser-page" id="moduleChooserPage" hidden>
           <div class="dashboard-top">
             <div>
-              <p class="kicker">Luna Arcana</p>
-              <h1>选择你的占卜</h1>
-              <p class="hero-copy">塔罗、个人星盘、印度占星，三项功能分开进入。</p>
+              <p class="kicker">Podo · AI Wellness</p>
+              <h1>Choose your reflection.</h1>
+              <p class="hero-copy">四种安静的自我探索方式，在同一套柔和体验中展开。</p>
             </div>
             <button class="text-button" id="logoutButton" type="button">退出登录</button>
           </div>
 
           <div class="feature-grid" aria-label="占卜功能入口">
             <button class="feature-card" id="showTarotButton" type="button">
-              <span>01</span>
-              <h2>塔罗占卜</h2>
-              <p>提问、洗牌、抽牌、获得针对问题的解读。</p>
+              <span class="module-number">01</span>
+              <svg class="module-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="m12 7 1.2 2.8L16 11l-2.8 1.2L12 15l-1.2-2.8L8 11l2.8-1.2L12 7Z" /></svg>
+              <span class="feature-copy"><strong>塔罗占卜</strong><small>提问、洗牌、抽牌，倾听当下的回应。</small></span>
+              <svg class="module-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
             <button class="feature-card" id="showAstrologyButton" type="button">
-              <span>02</span>
-              <h2>个人星盘</h2>
-              <p>输入出生资料，查看行星落座和占星师解读。</p>
+              <span class="module-number">02</span>
+              <svg class="module-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 3v3M21 12h-3M12 21v-3M3 12h3" /></svg>
+              <span class="feature-copy"><strong>个人星盘</strong><small>查看行星落座、元素倾向与内在节奏。</small></span>
+              <svg class="module-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
             <button class="feature-card" id="showIndianButton" type="button">
-              <span>03</span>
-              <h2>印度占星</h2>
-              <p>查看印占命盘、月宿与业力轴提示。</p>
+              <span class="module-number">03</span>
+              <svg class="module-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 1 0 7 7c0-3-2-5-4-6 0 5-4 9-9 9-1 0-1 0-1-.1A7 7 0 0 0 12 3Z" /><path d="m18 4 .6 1.4L20 6l-1.4.6L18 8l-.6-1.4L16 6l1.4-.6L18 4Z" /></svg>
+              <span class="feature-copy"><strong>印度占星</strong><small>探索月宿、D1、大运与生命蓝图。</small></span>
+              <svg class="module-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </button>
+            <button class="feature-card" id="showHistoryButton" type="button">
+              <span class="module-number">04</span>
+              <svg class="module-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z" /><path d="M8 8h8M8 12h6" /></svg>
+              <span class="feature-copy"><strong>阅读记录</strong><small>回看保存过的提问、牌阵与个人洞见。</small></span>
+              <svg class="module-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </div>
 
           <div class="dashboard-actions">
-            <button class="button secondary" id="showProfileButton" type="button">个人档案</button>
-            <button class="button secondary" id="showHistoryButton" type="button">历史记录</button>
+            <button class="button secondary" id="showProfileButton" type="button">编辑个人档案</button>
           </div>
 
           <details class="profile-drawer" id="profileDrawer">
@@ -708,9 +717,6 @@
       <a href="#indianAstrology" data-tab-target="indianAstrology">
         <span>印占</span>
       </a>
-      <a href="#history" data-tab-target="history">
-        <span>记录</span>
-      </a>
     </footer>
 
     <div class="install-banner" id="installBanner" hidden>
@@ -719,9 +725,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=38"></script>
-    <script src="indian-astrology-skill.js?v=38"></script>
-    <script src="tarot-skill.js?v=38"></script>
-    <script src="app.js?v=38"></script>
+    <script src="astrology-skill.js?v=39"></script>
+    <script src="indian-astrology-skill.js?v=39"></script>
+    <script src="tarot-skill.js?v=39"></script>
+    <script src="app.js?v=39"></script>
   </body>
 </html>

@@ -384,11 +384,11 @@ function verifyLocalCode(account, code) {
 
 function getCurrentUser() {
   const stored = localStorage.getItem("lunaArcanaCurrentUser");
-  return normalizeUserName(stored || "访客");
+  return normalizeUserName(stored && stored !== "访客" ? stored : "Podo");
 }
 
 function isLoggedIn() {
-  return getCurrentUser() !== "访客";
+  return true;
 }
 
 function userStorageKey(base) {
@@ -404,18 +404,17 @@ function renderLoginState() {
     els.currentUserLabel.textContent = `当前用户：${user}`;
   }
   if (els.authScreen && els.appDashboard) {
-    els.authScreen.hidden = isLoggedIn();
-    els.appDashboard.hidden = !isLoggedIn();
+    els.authScreen.hidden = true;
+    els.appDashboard.hidden = false;
   }
 }
 
 function showAstraeaLanding() {
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
-  document.body.classList.add("astraea-landing-active");
-  if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
-  if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
-  setAstraeaTab(state.astraeaTab || "home");
-  renderAstraeaCarousel();
+  document.body.classList.remove("astraea-landing-active");
+  if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
+  if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
 }
 
 function showModuleChooser() {
@@ -424,6 +423,7 @@ function showModuleChooser() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
@@ -1610,6 +1610,7 @@ function showAstrologyFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   persistProfileFromFields();
@@ -1629,6 +1630,7 @@ function showIndianFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("astraea-landing-active");
   document.body.classList.add("indian-wellness-active");
   persistProfileFromFields();
@@ -1643,6 +1645,7 @@ function showIndianFlow() {
 }
 
 function showHomeFlow() {
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = false;
@@ -1663,6 +1666,7 @@ function showHistoryFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   renderHistory();
@@ -1682,6 +1686,7 @@ function showTarotFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = true;
@@ -2808,7 +2813,7 @@ els.showProfileButton.addEventListener("click", () => {
   }
 });
 els.logoutButton.addEventListener("click", () => {
-  localStorage.setItem("lunaArcanaCurrentUser", "访客");
+  localStorage.setItem("lunaArcanaCurrentUser", "Podo");
   state.selectedCards = [];
   state.currentReading = null;
   state.favorite = false;

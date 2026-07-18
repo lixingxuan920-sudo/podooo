@@ -1,9 +1,10 @@
-const CACHE_NAME = "podo-wellness-v38";
+const CACHE_NAME = "podo-cream-system-v39";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/styles.css",
   "/indian-wellness.css",
+  "/cream-system.css",
   "/app.js",
   "/astrology-skill.js",
   "/indian-astrology-skill.js",

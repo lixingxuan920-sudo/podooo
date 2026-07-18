@@ -1,0 +1,840 @@
+/* Podo unified cream design system
+   Shared by Home, Tarot, Natal Astrology, Vedic Astrology and Reading History. */
+
+:root {
+  --bg: #fffdf8;
+  --panel: #ffffff;
+  --panel-strong: #f7f3ee;
+  --rose: #eadfd3;
+  --rose-soft: #f3ebe3;
+  --rose-deep: #8d7f74;
+  --charcoal: #4a4542;
+  --ivory: #4a4542;
+  --muted: #8f8a86;
+  --gold: #9a8b7e;
+  --line: #eee7de;
+  --shadow: 0 10px 30px rgba(56, 46, 39, 0.05);
+  --podo-bg: #fffdf8;
+  --podo-surface: #ffffff;
+  --podo-soft: #f7f3ee;
+  --podo-primary: #eadfd3;
+  --podo-primary-hover: #dccebf;
+  --podo-border: #eee7de;
+  --podo-ink: #4a4542;
+  --podo-muted: #8f8a86;
+  --podo-success: #a9c8b8;
+  --podo-warning: #f5cfa7;
+  --podo-error: #e9b8b8;
+  --podo-shadow: 0 10px 30px rgba(56, 46, 39, 0.05);
+  --podo-shadow-lift: 0 18px 44px rgba(56, 46, 39, 0.09);
+}
+
+body,
+body.cream-app-active {
+  color: var(--podo-ink);
+  background: var(--podo-bg);
+  font-family: "Pretendard", "HarmonyOS Sans SC", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.cream-app-active .auth-screen {
+  display: none !important;
+}
+
+body.cream-app-active .app-main {
+  height: 100vh;
+  padding-top: 92px;
+  padding-bottom: 84px;
+  overflow-y: auto;
+  color: var(--podo-ink);
+  background: var(--podo-bg);
+  scroll-padding-top: 110px;
+}
+
+body.cream-app-active.indian-wellness-active .app-main {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.cream-app-active .site-header {
+  z-index: 80;
+  top: 16px;
+  left: 50%;
+  right: auto;
+  width: min(1200px, calc(100% - 48px));
+  height: 64px;
+  padding: 8px 12px 8px 18px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(238, 231, 222, 0.86);
+  border-radius: 22px;
+  color: var(--podo-ink);
+  background: rgba(255, 253, 248, 0.78);
+  box-shadow: 0 8px 28px rgba(57, 47, 39, 0.055);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.cream-app-active .site-header .brand {
+  display: inline-flex;
+  align-items: center;
+  color: var(--podo-ink);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+body.cream-app-active .site-header .brand::before {
+  content: "podo";
+  font-size: 23px;
+}
+
+body.cream-app-active .site-header .brand::after {
+  content: "";
+  order: -1;
+  width: 32px;
+  height: 32px;
+  margin-right: 9px;
+  display: inline-block;
+  border: 1px solid var(--podo-border);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 67% 35%, var(--podo-bg) 0 42%, transparent 43%),
+    #c9b9aa;
+}
+
+body.cream-app-active .site-header .nav {
+  color: var(--podo-muted);
+  font-size: 12px;
+}
+
+body.cream-app-active .site-header .nav a {
+  padding: 8px 0;
+  transition: color 200ms ease;
+}
+
+body.cream-app-active .site-header .nav a:hover {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active .fixed-app-icon {
+  display: none;
+}
+
+body.cream-app-active .app-tabbar {
+  z-index: 75;
+  left: 50%;
+  right: auto;
+  bottom: 14px;
+  width: min(520px, calc(100% - 32px));
+  min-height: 60px;
+  padding: 7px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(238, 231, 222, 0.9);
+  border-radius: 20px;
+  color: var(--podo-muted);
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--podo-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.cream-app-active .app-tabbar a {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 11px;
+  transition: color 200ms ease, background 200ms ease;
+}
+
+body.cream-app-active .app-tabbar a.active {
+  color: var(--podo-ink);
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .section:not(.vedic-wellness-page) {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  padding: 74px 24px 110px;
+  color: var(--podo-ink);
+  background: var(--podo-bg);
+}
+
+body.cream-app-active .home-app {
+  width: 100%;
+  min-height: calc(100vh - 92px);
+  padding-top: 0 !important;
+  overflow: visible;
+}
+
+body.cream-app-active .home-app .hero-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(234, 223, 211, 0.58), transparent 30rem),
+    radial-gradient(circle at 18% 80%, rgba(169, 200, 184, 0.13), transparent 24rem),
+    var(--podo-bg);
+}
+
+body.cream-app-active .app-dashboard {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: block;
+}
+
+body.cream-app-active .astraea-home-page {
+  display: none !important;
+}
+
+body.cream-app-active .module-chooser-page {
+  min-height: calc(100vh - 176px);
+  display: grid;
+  align-content: center;
+  gap: 34px;
+  padding: 40px 0 80px;
+  animation: podoFadeUp 0.45s ease both;
+}
+
+body.cream-app-active .dashboard-top {
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+body.cream-app-active .dashboard-top .kicker,
+body.cream-app-active .section-heading .kicker,
+body.cream-app-active .deck-header .kicker {
+  margin: 0 0 14px;
+  color: var(--podo-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+body.cream-app-active .dashboard-top h1,
+body.cream-app-active .section-heading h2 {
+  margin: 0;
+  color: var(--podo-ink);
+  font-family: "DM Serif Display", "HarmonyOS Sans SC", Georgia, serif;
+  font-size: clamp(48px, 7vw, 82px);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+body.cream-app-active .dashboard-top .hero-copy {
+  max-width: 580px;
+  margin: 20px 0 0;
+  color: var(--podo-muted);
+  font-family: "Cormorant Garamond", "HarmonyOS Sans SC", Georgia, serif;
+  font-size: 20px;
+  line-height: 1.65;
+}
+
+body.cream-app-active #logoutButton {
+  display: none;
+}
+
+body.cream-app-active .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+body.cream-app-active .feature-card {
+  position: relative;
+  min-height: 220px;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  gap: 24px;
+  overflow: hidden;
+  border: 1px solid var(--podo-border);
+  border-radius: 24px;
+  color: var(--podo-ink);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--podo-shadow);
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+body.cream-app-active .feature-card:hover {
+  transform: translateY(-4px);
+  background: var(--podo-surface);
+  box-shadow: var(--podo-shadow-lift);
+}
+
+body.cream-app-active .feature-card .module-number {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  color: var(--podo-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+body.cream-app-active .feature-card .module-icon {
+  width: 52px;
+  height: 52px;
+  padding: 14px;
+  grid-row: 2;
+  border-radius: 17px;
+  fill: none;
+  stroke: #8b7e74;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--podo-soft);
+}
+
+body.cream-app-active .feature-card .feature-copy {
+  grid-row: 2;
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+body.cream-app-active .feature-card .feature-copy strong {
+  color: var(--podo-ink);
+  font-family: "Cormorant Garamond", "HarmonyOS Sans SC", Georgia, serif;
+  font-size: 29px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+body.cream-app-active .feature-card .feature-copy small {
+  max-width: 320px;
+  color: var(--podo-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+body.cream-app-active .feature-card .module-arrow {
+  width: 20px;
+  height: 20px;
+  grid-row: 2;
+  fill: none;
+  stroke: var(--podo-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms ease;
+}
+
+body.cream-app-active .feature-card:hover .module-arrow {
+  transform: translateX(4px);
+}
+
+body.cream-app-active .dashboard-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+body.cream-app-active .dashboard-actions .button {
+  width: auto;
+}
+
+body.cream-app-active .profile-drawer {
+  overflow: hidden;
+  border: 1px solid var(--podo-border);
+  border-radius: 24px;
+  color: var(--podo-ink);
+  background: var(--podo-surface);
+  box-shadow: var(--podo-shadow);
+}
+
+body.cream-app-active .profile-drawer summary {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active h1,
+body.cream-app-active h2,
+body.cream-app-active h3,
+body.cream-app-active h4 {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active .section-heading.compact-heading {
+  max-width: 880px;
+  margin: 0 auto 42px;
+  text-align: center;
+}
+
+body.cream-app-active .section-heading.compact-heading .kicker {
+  text-align: center;
+}
+
+body.cream-app-active .section-heading.compact-heading h2 {
+  font-size: clamp(44px, 6vw, 68px);
+}
+
+body.cream-app-active .section-heading .text-button {
+  margin-top: 20px;
+}
+
+body.cream-app-active .button {
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 18px;
+  font-family: "Pretendard", "HarmonyOS Sans SC", "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 200ms ease, background 200ms ease, box-shadow 200ms ease;
+}
+
+body.cream-app-active .button:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+body.cream-app-active .button.primary {
+  border-color: var(--podo-ink);
+  color: var(--podo-bg);
+  background: var(--podo-ink);
+  box-shadow: 0 10px 24px rgba(74, 69, 66, 0.16);
+}
+
+body.cream-app-active .button.primary:hover {
+  border-color: #383431;
+  background: #383431;
+}
+
+body.cream-app-active .button.secondary,
+body.cream-app-active .icon-button {
+  border-color: var(--podo-border);
+  color: var(--podo-ink);
+  background: var(--podo-soft);
+  box-shadow: none;
+}
+
+body.cream-app-active .button.secondary:hover,
+body.cream-app-active .icon-button:hover {
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .text-button {
+  color: var(--podo-ink);
+  background: transparent;
+  border-bottom-color: var(--podo-border);
+}
+
+body.cream-app-active label {
+  color: var(--podo-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+body.cream-app-active input,
+body.cream-app-active select,
+body.cream-app-active textarea {
+  min-height: 56px;
+  padding: 0 17px;
+  border: 1px solid var(--podo-border);
+  border-radius: 16px;
+  color: var(--podo-ink);
+  background: #fffefa;
+  font-family: "Inter", "HarmonyOS Sans SC", sans-serif;
+  font-size: 14px;
+  transition: border 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+body.cream-app-active textarea {
+  min-height: 104px;
+  padding-top: 14px;
+}
+
+body.cream-app-active input:focus,
+body.cream-app-active select:focus,
+body.cream-app-active textarea:focus {
+  border-color: #cbbba9;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(234, 223, 211, 0.48);
+}
+
+body.cream-app-active :focus-visible {
+  outline: 3px solid rgba(169, 200, 184, 0.5);
+  outline-offset: 3px;
+}
+
+body.cream-app-active .profile-form,
+body.cream-app-active .profile-reading,
+body.cream-app-active .question-panel,
+body.cream-app-active .deck-panel,
+body.cream-app-active .result-summary,
+body.cream-app-active .history-card,
+body.cream-app-active .flow-stack {
+  border: 1px solid var(--podo-border);
+  border-radius: 24px;
+  color: var(--podo-ink);
+  background: var(--podo-surface);
+  box-shadow: var(--podo-shadow);
+}
+
+body.cream-app-active .profile-form,
+body.cream-app-active .profile-reading,
+body.cream-app-active .question-panel,
+body.cream-app-active .deck-panel {
+  padding: 32px;
+}
+
+body.cream-app-active .disclaimer,
+body.cream-app-active .status,
+body.cream-app-active .deck-note,
+body.cream-app-active .auto-location-note,
+body.cream-app-active .hero-copy {
+  color: var(--podo-muted);
+}
+
+body.cream-app-active .astrology-layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  gap: 20px;
+  align-items: start;
+}
+
+body.cream-app-active .astrology-reading {
+  min-height: 520px;
+}
+
+body.cream-app-active .astro-summary,
+body.cream-app-active .placement-card,
+body.cream-app-active .aspect-list span,
+body.cream-app-active .astro-reading-block {
+  border: 1px solid var(--podo-border);
+  border-radius: 18px;
+  color: var(--podo-ink);
+  background: var(--podo-soft);
+}
+
+body.cream-app-active .placement-card {
+  padding: 20px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+body.cream-app-active .placement-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--podo-shadow-lift);
+}
+
+body.cream-app-active .placement-card h3,
+body.cream-app-active .aspect-list small {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active .astro-wheel,
+body.cream-app-active .astro-wheel.large {
+  border-color: #cfc1b4;
+  color: var(--podo-ink);
+  background: var(--podo-soft);
+  box-shadow: none;
+}
+
+body.cream-app-active .astro-wheel::before,
+body.cream-app-active .astro-wheel::after {
+  border-color: #ded3c7;
+}
+
+body.cream-app-active .planet-marker {
+  border-color: #c8b7a8;
+  color: var(--podo-ink);
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .house-marker {
+  color: var(--podo-muted);
+  background: var(--podo-surface);
+}
+
+body.cream-app-active .tarot-question-panel,
+body.cream-app-active .deck-panel.single-panel,
+body.cream-app-active .flow-stack {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.cream-app-active .flow-stack {
+  padding: 28px;
+}
+
+body.cream-app-active .topic-grid,
+body.cream-app-active .spread-grid {
+  gap: 10px;
+}
+
+body.cream-app-active .topic-card,
+body.cream-app-active .spread-card {
+  min-height: 104px;
+  padding: 16px;
+  border: 1px solid var(--podo-border);
+  border-radius: 18px;
+  color: var(--podo-ink);
+  background: var(--podo-soft);
+  transition: transform 200ms ease, border 200ms ease, background 200ms ease;
+}
+
+body.cream-app-active .topic-card:hover,
+body.cream-app-active .spread-card:hover {
+  transform: translateY(-2px);
+}
+
+body.cream-app-active .topic-card.active,
+body.cream-app-active .spread-card.active {
+  border-color: #c9b8a8;
+  color: var(--podo-ink);
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .topic-card p,
+body.cream-app-active .spread-card p {
+  color: var(--podo-muted);
+}
+
+body.cream-app-active .deck-header {
+  border-bottom-color: var(--podo-border);
+}
+
+body.cream-app-active .deck-tools,
+body.cream-app-active .deck-note {
+  color: var(--podo-muted);
+}
+
+body.cream-app-active .shuffle-stage {
+  border: 1px dashed #d8ccc0;
+  border-radius: 18px;
+  background: var(--podo-soft);
+}
+
+body.cream-app-active .shuffle-stage span,
+body.cream-app-active .tarot-card {
+  border-color: #cdbdad;
+  color: var(--podo-ink);
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.75), transparent 36%),
+    linear-gradient(145deg, #eadfd3, #d9cbbc);
+  box-shadow: 0 8px 20px rgba(56, 46, 39, 0.08);
+}
+
+body.cream-app-active .tarot-card::before {
+  border-color: rgba(109, 94, 82, 0.28);
+}
+
+body.cream-app-active .tarot-card::after {
+  color: #75695f;
+}
+
+body.cream-app-active .result-summary {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 30px;
+}
+
+body.cream-app-active .result-summary h3 {
+  color: var(--podo-ink);
+  font-family: "Cormorant Garamond", "HarmonyOS Sans SC", Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+body.cream-app-active .position-tabs {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.cream-app-active .position-tab {
+  border-color: var(--podo-border);
+  color: var(--podo-muted);
+  background: var(--podo-surface);
+}
+
+body.cream-app-active .position-tab.active {
+  color: var(--podo-ink);
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .result-list {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.cream-app-active .result-card {
+  border: 1px solid var(--podo-border);
+  border-radius: 24px;
+  color: var(--podo-ink);
+  background: var(--podo-surface);
+  box-shadow: var(--podo-shadow);
+}
+
+body.cream-app-active .result-card strong,
+body.cream-app-active .result-card h3 {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active .result-card p {
+  color: #625c58;
+}
+
+body.cream-app-active .mobile-card-mini,
+body.cream-app-active .card-face {
+  border-color: #cdbdad;
+  color: var(--podo-ink);
+  background: var(--podo-soft);
+}
+
+body.cream-app-active .result-actions {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.cream-app-active .history-list {
+  max-width: 980px;
+  margin: 0 auto;
+  gap: 14px;
+}
+
+body.cream-app-active .history-card {
+  padding: 24px;
+}
+
+body.cream-app-active .history-card strong {
+  color: var(--podo-ink);
+}
+
+body.cream-app-active .history-card p {
+  color: var(--podo-muted);
+}
+
+body.cream-app-active .profile-drawer .profile-form,
+body.cream-app-active .profile-drawer .profile-reading {
+  border-color: var(--podo-border);
+  box-shadow: none;
+}
+
+body.cream-app-active .install-banner {
+  border-color: var(--podo-border);
+  color: var(--podo-ink);
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: var(--podo-shadow);
+}
+
+@keyframes podoFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  body.cream-app-active .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.cream-app-active .astrology-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  body.cream-app-active .site-header {
+    top: 10px;
+    width: calc(100% - 32px);
+    height: 60px;
+    border-radius: 19px;
+  }
+
+  body.cream-app-active .site-header .nav {
+    display: none;
+  }
+
+  body.cream-app-active .app-main {
+    padding-top: 76px;
+    padding-bottom: 86px;
+  }
+
+  body.cream-app-active .section:not(.vedic-wellness-page) {
+    padding: 54px 16px 90px;
+  }
+
+  body.cream-app-active .module-chooser-page {
+    min-height: auto;
+    padding: 52px 0 70px;
+  }
+
+  body.cream-app-active .dashboard-top h1,
+  body.cream-app-active .section-heading h2,
+  body.cream-app-active .section-heading.compact-heading h2 {
+    font-size: clamp(42px, 13vw, 58px);
+  }
+
+  body.cream-app-active .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.cream-app-active .feature-card {
+    min-height: 154px;
+    padding: 22px;
+  }
+
+  body.cream-app-active .feature-card .module-icon {
+    width: 46px;
+    height: 46px;
+    padding: 12px;
+  }
+
+  body.cream-app-active .feature-card .feature-copy strong {
+    font-size: 25px;
+  }
+
+  body.cream-app-active .dashboard-actions,
+  body.cream-app-active .dashboard-actions .button {
+    width: 100%;
+  }
+
+  body.cream-app-active .profile-form,
+  body.cream-app-active .profile-reading,
+  body.cream-app-active .question-panel,
+  body.cream-app-active .deck-panel,
+  body.cream-app-active .flow-stack {
+    padding: 20px;
+  }
+
+  body.cream-app-active .compact-fields,
+  body.cream-app-active .compact-fields.three {
+    grid-template-columns: 1fr;
+  }
+
+  body.cream-app-active .topic-grid,
+  body.cream-app-active .spread-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.cream-app-active .app-tabbar {
+    bottom: 8px;
+    width: calc(100% - 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.cream-app-active *,
+  body.cream-app-active *::before,
+  body.cream-app-active *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
