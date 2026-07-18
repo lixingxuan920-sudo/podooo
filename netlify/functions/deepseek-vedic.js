@@ -96,7 +96,7 @@ function buildChartDataDigest(skillResult, profile, options) {
       pada: row[2],
       lord: row[3]
     }));
-  const dashas = parseMarkdownTable(markdown, "### Vimsottari Dasha")
+  const dashas = parseMarkdownTable(markdown, "### Vimshottari Dasha")
     .filter((row) => row[1] && row[1] !== "行星")
     .map((row) => ({
       marker: row[0],
@@ -206,7 +206,7 @@ ${clip(skillResult.skillGuidance || [], 5000)}
 9. 出生参数里如果有秒数、UTC 时区、West/East of GMT、Daylight Saving、Use LMT、经纬度 DMS、海拔、气压、温度，要优先参考这些 JHora 风格字段。不要只根据城市名泛泛判断。
 10. 对上升、分盘、Dasha 时间窗这类对时间敏感的结论，要说明“秒、经纬度、时区和夏令时会影响精度”。如果当前只是网页 fallback，要把判断写成倾向，不要说成正式软件最终盘。
 11. 如果 structured_data 或 calculationMeta 出现 SAV/BAV、Shadbala、分盘、Dasha 的计算警示，不要把缺失值、0 值或占位值当作真实结论。要明确说明该模块待校验，并优先使用 D1 行星经度、宫位、月宿、Rahu/Ketu、D9/D10 可用数据与 Dasha 可用数据。
-12. 如果 calculationMeta.engine 是 vedic-calculator，说明 D1本命盘、上升、行星经度、月宿来自 Swiss Ephemeris 真实星历，可以比网页 fallback 更优先。
+12. 如果 calculationMeta.engine 是 swiss-ephemeris-lahiri 或 vedic-calculator，说明 D1 本命盘、上升、行星经度、月宿来自 Swiss Ephemeris 真实星历，可以比网页 fallback 更优先。
 13. 不要输出工程信息，不要说 schema、adapter、API、函数、JSON、skills 路由这些后台词。
 14. 不要制造恐惧，不要绝对化判断。使用“倾向于”“更像是”“这提示”“需要验证”等表达。
 15. 不要使用 Markdown 标题符号、粗体符号、星号、###、#、---。标题直接写普通中文，例如“1. 命盘整体格局”。

@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { calculateVedicChart } = require("./vedic-ephemeris.js");
 
 const REQUIRED_SKILLS = [
   "vedic-calculator",
@@ -361,45 +362,14 @@ print(json.dumps({
   }
 }
 
-async function runRemoteCalculator(payload) {
-  const baseUrl = (process.env.VEDIC_API_URL || "").replace(/\/$/, "");
-  if (!baseUrl) {
-    return { ok: false, reason: "未配置 VEDIC_API_URL。" };
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number(process.env.VEDIC_API_TIMEOUT_MS || 90000));
+function runBundledCalculator(payload) {
   try {
-    const response = await fetch(`${baseUrl}/calculate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(process.env.VEDIC_API_KEY ? { "X-Vedic-Api-Key": process.env.VEDIC_API_KEY } : {})
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    });
-    const text = await response.text();
-    if (!response.ok) {
-      return {
-        ok: false,
-        reason: `公网 Python 排盘接口返回 ${response.status}: ${text.slice(0, 500)}`
-      };
-    }
-    const data = JSON.parse(text);
-    return {
-      ok: Boolean(data.ok),
-      structuredDataMarkdown: data.structuredDataMarkdown || "",
-      calculationMeta: data.calculationMeta || null,
-      reason: data.ok ? "" : "公网 Python 排盘接口未返回有效结果。"
-    };
+    return calculateVedicChart(payload.profile || {});
   } catch (error) {
     return {
       ok: false,
-      reason: `公网 Python 排盘接口不可用：${error.message}`
+      reason: `内置 Swiss Ephemeris 计算失败：${error.message}`
     };
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -422,14 +392,14 @@ exports.handler = async (event) => {
   const skillGuidance = readSkillGuidance(activeRoute, skills);
   const allInstalled = REQUIRED_SKILLS.every((name) => skills.find((item) => item.name === name)?.installed);
   const calculatorSkill = skills.find((item) => item.name === "vedic-calculator");
-  const remoteCalculator = await runRemoteCalculator(payload);
-  const calculator = remoteCalculator.ok
-    ? remoteCalculator
+  const bundledCalculator = runBundledCalculator(payload);
+  const calculator = bundledCalculator.ok
+    ? bundledCalculator
     : (calculatorSkill?.installed
       ? runCalculator(payload.profile || {}, options, calculatorSkill.path)
-      : { ok: false, reason: remoteCalculator.reason || "本机尚未安装 vedic-calculator，当前使用网页 fallback 排盘数据。" });
-  const calculatorSource = remoteCalculator.ok
-    ? "vedic-python-api"
+      : { ok: false, reason: bundledCalculator.reason || "内置星历不可用，当前使用网页 fallback 排盘数据。" });
+  const calculatorSource = bundledCalculator.ok
+    ? "swiss-ephemeris-lahiri"
     : (calculator.ok ? "vedic-calculator" : "web-fallback");
 
   const body = {
