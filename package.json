@@ -6,6 +6,7 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.7.9",
     "sweph": "2.10.3-7"
   }
 }
