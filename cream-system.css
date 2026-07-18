@@ -31,9 +31,16 @@
 
 body,
 body.cream-app-active {
+  width: 100%;
+  min-width: 0;
   color: var(--podo-ink);
   background: var(--podo-bg);
   font-family: "Pretendard", "HarmonyOS Sans SC", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html,
+body.cream-app-active {
+  overflow-x: hidden;
 }
 
 body.cream-app-active .auth-screen {
@@ -42,9 +49,13 @@ body.cream-app-active .auth-screen {
 
 body.cream-app-active .app-main {
   height: 100vh;
+  height: 100dvh;
   padding-top: 92px;
   padding-bottom: 84px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   color: var(--podo-ink);
   background: var(--podo-bg);
   scroll-padding-top: 110px;
@@ -144,10 +155,23 @@ body.cream-app-active .app-tabbar {
 body.cream-app-active .app-tabbar a {
   min-height: 44px;
   display: grid;
+  grid-template-rows: 20px auto;
   place-items: center;
+  align-content: center;
+  gap: 3px;
   border-radius: 14px;
   font-size: 11px;
   transition: color 200ms ease, background 200ms ease;
+}
+
+body.cream-app-active .app-tabbar svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 body.cream-app-active .app-tabbar a.active {
@@ -750,53 +774,129 @@ body.cream-app-active .install-banner {
 
 @media (max-width: 680px) {
   body.cream-app-active .site-header {
-    top: 10px;
-    width: calc(100% - 32px);
-    height: 60px;
-    border-radius: 19px;
+    top: max(8px, env(safe-area-inset-top));
+    width: calc(100% - 24px);
+    height: 56px;
+    padding: 7px 10px 7px 14px;
+    border-radius: 18px;
   }
 
   body.cream-app-active .site-header .nav {
     display: none;
   }
 
+  body.cream-app-active .site-header .brand::before {
+    font-size: 21px;
+  }
+
+  body.cream-app-active .site-header .brand::after {
+    width: 29px;
+    height: 29px;
+    margin-right: 8px;
+  }
+
   body.cream-app-active .app-main {
-    padding-top: 76px;
-    padding-bottom: 86px;
+    padding-top: calc(72px + env(safe-area-inset-top));
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    scroll-padding-top: calc(82px + env(safe-area-inset-top));
   }
 
   body.cream-app-active .section:not(.vedic-wellness-page) {
-    padding: 54px 16px 90px;
+    width: 100%;
+    padding: 34px 16px 56px;
   }
 
   body.cream-app-active .module-chooser-page {
     min-height: auto;
-    padding: 52px 0 70px;
+    gap: 24px;
+    padding: 26px 0 40px;
+  }
+
+  body.cream-app-active .dashboard-top {
+    display: block;
   }
 
   body.cream-app-active .dashboard-top h1,
   body.cream-app-active .section-heading h2,
   body.cream-app-active .section-heading.compact-heading h2 {
-    font-size: clamp(42px, 13vw, 58px);
+    font-size: clamp(36px, 11vw, 48px);
+    line-height: 1.02;
+  }
+
+  body.cream-app-active .dashboard-top .hero-copy {
+    margin-top: 14px;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  body.cream-app-active .section-heading.compact-heading {
+    margin-bottom: 28px;
   }
 
   body.cream-app-active .feature-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
   body.cream-app-active .feature-card {
-    min-height: 154px;
-    padding: 22px;
+    min-width: 0;
+    min-height: 178px;
+    padding: 18px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: 20px;
+    text-align: left;
+    touch-action: manipulation;
+  }
+
+  body.cream-app-active .feature-card:hover {
+    transform: none;
+  }
+
+  body.cream-app-active .feature-card:active {
+    transform: scale(0.985);
+    background: var(--podo-surface);
+  }
+
+  body.cream-app-active .feature-card .module-number {
+    top: 16px;
+    right: 16px;
   }
 
   body.cream-app-active .feature-card .module-icon {
-    width: 46px;
-    height: 46px;
-    padding: 12px;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    padding: 11px;
+    border-radius: 14px;
+  }
+
+  body.cream-app-active .feature-card .feature-copy {
+    min-width: 0;
+    gap: 6px;
   }
 
   body.cream-app-active .feature-card .feature-copy strong {
-    font-size: 25px;
+    font-size: clamp(20px, 5.6vw, 24px);
+  }
+
+  body.cream-app-active .feature-card .feature-copy small {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  body.cream-app-active .feature-card .module-arrow {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 17px;
+    height: 17px;
   }
 
   body.cream-app-active .dashboard-actions,
@@ -810,6 +910,7 @@ body.cream-app-active .install-banner {
   body.cream-app-active .deck-panel,
   body.cream-app-active .flow-stack {
     padding: 20px;
+    border-radius: 20px;
   }
 
   body.cream-app-active .compact-fields,
@@ -817,14 +918,310 @@ body.cream-app-active .install-banner {
     grid-template-columns: 1fr;
   }
 
+  body.cream-app-active input,
+  body.cream-app-active select,
+  body.cream-app-active textarea {
+    width: 100%;
+    max-width: 100%;
+    min-height: 52px;
+    font-size: 16px;
+  }
+
+  body.cream-app-active textarea {
+    min-height: 112px;
+  }
+
+  body.cream-app-active .button,
+  body.cream-app-active .icon-button,
+  body.cream-app-active .text-button {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+
+  body.cream-app-active .button:hover,
+  body.cream-app-active .icon-button:hover {
+    transform: none;
+  }
+
   body.cream-app-active .topic-grid,
   body.cream-app-active .spread-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  body.cream-app-active .topic-card,
+  body.cream-app-active .spread-card {
+    min-width: 0;
+    min-height: 96px;
+    padding: 13px;
+  }
+
+  body.cream-app-active .deck {
+    width: 100%;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  body.cream-app-active .tarot-card::before {
+    inset: 6px;
+  }
+
+  body.cream-app-active .result-summary,
+  body.cream-app-active .result-card,
+  body.cream-app-active .history-card {
+    border-radius: 20px;
+  }
+
+  body.cream-app-active .result-summary {
+    padding: 20px;
+  }
+
+  body.cream-app-active .result-card summary {
+    grid-template-columns: 62px minmax(0, 1fr) 22px;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  body.cream-app-active .mobile-card-mini {
+    min-height: 82px;
+  }
+
+  body.cream-app-active .result-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.cream-app-active .result-actions input {
+    grid-column: 1 / -1;
+  }
+
+  body.cream-app-active .result-actions .button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.cream-app-active .astrology-layout,
+  body.cream-app-active .astrology-reading,
+  body.cream-app-active .vedic-reading-surface {
+    min-width: 0;
+  }
+
+  body.cream-app-active .astrology-reading {
+    min-height: 360px;
+    overflow: hidden;
+  }
+
+  body.cream-app-active .astro-wheel,
+  body.cream-app-active .astro-wheel.large {
+    width: min(100%, 330px);
+    margin-inline: auto;
+  }
+
+  body.cream-app-active .placement-grid,
+  body.cream-app-active .aspect-list {
+    grid-template-columns: 1fr;
+  }
+
+  body.cream-app-active .history-card header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  body.cream-app-active .profile-drawer summary {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+  }
+
   body.cream-app-active .app-tabbar {
-    bottom: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
     width: calc(100% - 24px);
+    min-height: 62px;
+    padding: 6px;
+    border-radius: 19px;
+  }
+
+  body.cream-app-active .app-tabbar a {
+    min-height: 48px;
+    border-radius: 13px;
+    font-size: 10px;
+  }
+
+  body.cream-app-active .install-banner {
+    left: 12px;
+    right: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    border-radius: 18px;
+  }
+
+  body.cream-app-active .install-banner span {
+    flex: 1 0 100%;
+    text-align: center;
+  }
+
+  body.cream-app-active.indian-wellness-active .app-main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  body.cream-app-active .vedic-wellness-hero {
+    min-height: auto;
+    padding: calc(104px + env(safe-area-inset-top)) 16px 64px;
+  }
+
+  body.cream-app-active .vedic-hero-copy {
+    padding-top: 0;
+  }
+
+  body.cream-app-active .vedic-hero-copy h1 {
+    font-size: clamp(43px, 13.2vw, 58px);
+    line-height: 0.98;
+  }
+
+  body.cream-app-active .vedic-hero-subtitle {
+    margin-top: 24px;
+    font-size: 21px;
+  }
+
+  body.cream-app-active .vedic-hero-actions .button,
+  body.cream-app-active .vedic-hero-actions .vedic-quiet-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  body.cream-app-active .vedic-trust-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.cream-app-active .vedic-trust-row span:last-child {
+    grid-column: 1 / -1;
+  }
+
+  body.cream-app-active .vedic-moon-scene {
+    width: 360px;
+    max-width: 112%;
+    height: 320px;
+    margin-left: -180px;
+    transform: scale(0.72);
+    transform-origin: top center;
+  }
+
+  body.cream-app-active .vedic-page-shell {
+    width: calc(100% - 24px);
+  }
+
+  body.cream-app-active .vedic-intake-section,
+  body.cream-app-active .vedic-results-section {
+    padding: 64px 0 84px;
+  }
+
+  body.cream-app-active .vedic-section-heading h2,
+  body.cream-app-active .vedic-result-header h2 {
+    font-size: clamp(34px, 10.5vw, 43px);
+  }
+
+  body.cream-app-active .vedic-intake-card {
+    padding: 52px 16px 20px !important;
+  }
+
+  body.cream-app-active .vedic-privacy-note {
+    left: 17px;
+    max-width: calc(100% - 34px);
+    font-size: 11px;
+  }
+
+  body.cream-app-active .vedic-result-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.cream-app-active .vedic-result-actions button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-chart-hero-card,
+  body.cream-app-active .vedic-wellness-page .deepseek-reading,
+  body.cream-app-active .vedic-empty-state {
+    padding: 20px 16px;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-chart {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-sign-cell,
+  body.cream-app-active .vedic-wellness-page .vedic-center {
+    min-width: 0;
+    min-height: 66px;
+    padding: 5px;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-sign-cell strong {
+    font-size: 12px;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-sign-cell small {
+    display: none;
+  }
+
+  body.cream-app-active .vedic-wellness-page .vedic-data-grid,
+  body.cream-app-active .vedic-wellness-page .vedic-module-list,
+  body.cream-app-active .vedic-wellness-page .vedic-position-table div,
+  body.cream-app-active .vedic-wellness-page .vedic-table,
+  body.cream-app-active .vedic-wellness-page .typewriter-text {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  body.cream-app-active .feature-card {
+    min-height: 166px;
+    padding: 15px;
+  }
+
+  body.cream-app-active .feature-card .feature-copy small {
+    display: none;
+  }
+
+  body.cream-app-active .feature-card .module-arrow {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  body.cream-app-active .result-actions,
+  body.cream-app-active .topic-grid,
+  body.cream-app-active .spread-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.cream-app-active .result-actions input {
+    grid-column: auto;
+  }
+
+  body.cream-app-active .deck {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  body.cream-app-active .site-header {
+    display: none;
+  }
+
+  body.cream-app-active .app-main {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  body.cream-app-active .app-tabbar {
+    bottom: 6px;
+    width: min(460px, calc(100% - 24px));
   }
 }
 

@@ -1,14 +1,14 @@
-const CACHE_NAME = "podo-cream-system-v39";
+const CACHE_NAME = "podo-mobile-cream-v40";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css",
-  "/indian-wellness.css",
-  "/cream-system.css",
-  "/app.js",
-  "/astrology-skill.js",
-  "/indian-astrology-skill.js",
-  "/tarot-skill.js",
+  "/styles.css?v=40",
+  "/indian-wellness.css?v=40",
+  "/cream-system.css?v=40",
+  "/app.js?v=40",
+  "/astrology-skill.js?v=40",
+  "/indian-astrology-skill.js?v=40",
+  "/tarot-skill.js?v=40",
   "/manifest.webmanifest",
   "/assets/app-icon.svg",
   "/assets/tarot-hero.png"
