@@ -573,19 +573,52 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function formatReadingText(text) {
-  const cleaned = String(text || "")
+function cleanReadingText(text) {
+  return String(text || "")
     .replace(/^#{1,6}\s*/gm, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/\*(.*?)\*/g, "$1")
     .replace(/^\s*[-*]\s+/gm, "")
     .replace(/^\s*>+\s*/gm, "")
     .trim();
+}
+
+function formatReadingText(text) {
+  const cleaned = cleanReadingText(text);
   return escapeHtml(cleaned)
     .split(/\n{2,}/)
     .filter(Boolean)
     .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br>")}</p>`)
     .join("");
+}
+
+function splitBlueprintSections(text) {
+  const cleaned = cleanReadingText(text);
+  if (!cleaned) return [];
+  const headingPattern = /^(Executive Summary|执行摘要|核心摘要|总览|第[一二三四五六七八九十百0-9]+章(?:[：:\s].*)?|Chapter\s+\d+(?:[：:\s].*)?)$/i;
+  const sections = [];
+  let current = { title: "核心摘要", body: [] };
+
+  cleaned.split("\n").forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (headingPattern.test(line)) {
+      if (current.body.some(Boolean)) sections.push(current);
+      current = { title: line.replace(/[：:]$/, ""), body: [] };
+      return;
+    }
+    current.body.push(rawLine);
+  });
+  if (current.body.some(Boolean)) sections.push(current);
+
+  if (sections.length > 1) return sections;
+  const paragraphs = cleaned.split(/\n{2,}/).filter(Boolean);
+  if (paragraphs.length < 4) return sections;
+  return paragraphs.reduce((groups, paragraph, index) => {
+    const groupIndex = Math.floor(index / 3);
+    if (!groups[groupIndex]) groups[groupIndex] = { title: groupIndex === 0 ? "核心摘要" : `深度解读 ${groupIndex + 1}`, body: [] };
+    groups[groupIndex].body.push(paragraph);
+    return groups;
+  }, []);
 }
 
 async function sendVerificationCode() {
@@ -1326,13 +1359,33 @@ function renderVedicProgress(activeStep = 0) {
 }
 
 function renderBlueprintReport(record) {
+  const sections = splitBlueprintSections(record.masterReading);
   return `
     <article class="blueprint-report">
+      <header class="blueprint-report-header">
+        <div>
+          <span class="blueprint-status"><i></i>完整解读已保存</span>
+          <h4>你的 Life Blueprint</h4>
+          <p>长解读已经按章节整理。点击章节即可展开阅读，后续追问会继续引用这份报告。</p>
+        </div>
+        <span class="blueprint-count">${sections.length || 1} 个章节</span>
+      </header>
       <div class="blueprint-toolbar">
-        <span>完整长报告已自动保存</span>
+        <span>首次生成后会保存在当前设备</span>
         <span>可使用页面上方的 PDF 按钮导出</span>
       </div>
-      <div class="typewriter-text">${formatReadingText(record.masterReading)}</div>
+      <div class="blueprint-chapters">
+        ${sections.length ? sections.map((section, index) => `
+          <details class="blueprint-chapter" ${index === 0 ? "open" : ""}>
+            <summary>
+              <span class="blueprint-index">${String(index + 1).padStart(2, "0")}</span>
+              <strong>${escapeHtml(section.title)}</strong>
+              <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </summary>
+            <div class="typewriter-text">${formatReadingText(section.body.join("\n"))}</div>
+          </details>
+        `).join("") : `<div class="typewriter-text">${formatReadingText(record.masterReading)}</div>`}
+      </div>
     </article>
   `;
 }
@@ -1385,6 +1438,17 @@ async function createBlueprintJob(profile, options, chart, chartData) {
   }, 30000);
 }
 
+async function generateBlueprintDirect(profile, options, chart, chartData) {
+  return postJsonWithTimeout("/api/generate-blueprint", {
+    profile,
+    options,
+    chart,
+    chartData,
+    skillResult: chartData?.skillResult || null,
+    pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
+  }, 58000);
+}
+
 async function waitForBlueprintJob(jobId, onProgress) {
   for (let attempt = 0; attempt < 90; attempt += 1) {
     const response = await fetch(`/api/blueprint/${encodeURIComponent(jobId)}`);
@@ -1411,6 +1475,22 @@ async function renderIndianPage() {
   const options = getIndianOptions();
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   els.indianReading.innerHTML = window.IndianAstrologySkill.chartView(profile, options);
+  const blueprintActions = els.indianReading.querySelector(".chart-actions");
+  if (blueprintActions) {
+    blueprintActions.outerHTML = `
+      <section class="vedic-blueprint-entry" aria-labelledby="vedicBlueprintEntryTitle">
+        <div class="vedic-blueprint-entry-copy">
+          <span class="vedic-blueprint-label">02 · 深度解读</span>
+          <h4 id="vedicBlueprintEntryTitle">生成完整 Life Blueprint</h4>
+          <p>系统会结合 D1、月亮、月宿、业力轴与大运，整理为可折叠的章节长报告。首次生成约需 2–5 分钟，之后可直接读取并继续追问。</p>
+          <div class="vedic-blueprint-points">
+            <span>完整章节</span><span>自动保存</span><span>持续咨询</span>
+          </div>
+        </div>
+        <button class="button primary" id="startIndianReadingButton" type="button">开始生成完整解读</button>
+      </section>
+    `;
+  }
   if (!chart) return;
   warmVedicSkillResult(profile, options, chart);
 }
@@ -1460,15 +1540,26 @@ async function renderIndianInterpretation() {
     chartData = await getOrCreateVedicChartData(profile, options, chart);
     activeProgress = 3;
 
-    const started = await createBlueprintJob(profile, options, chart, chartData);
-    const job = await waitForBlueprintJob(started.jobId, (current) => {
-      activeProgress = Math.max(activeProgress, Math.floor((current.progress || 0) / 15));
+    let job = null;
+    try {
+      const started = await createBlueprintJob(profile, options, chart, chartData);
+      job = await waitForBlueprintJob(started.jobId, (current) => {
+        activeProgress = Math.max(activeProgress, Math.floor((current.progress || 0) / 15));
+        deepseekBox.innerHTML = `
+          <h3>Life Blueprint</h3>
+          ${renderVedicProgress(activeProgress)}
+        `;
+      });
+    } catch {
+      activeProgress = 5;
       deepseekBox.innerHTML = `
         <h3>Life Blueprint</h3>
         ${renderVedicProgress(activeProgress)}
       `;
-    });
+      job = await generateBlueprintDirect(profile, options, chart, chartData);
+    }
     const masterReading = job.blueprint || "";
+    if (!masterReading.trim()) throw new Error("完整解读暂时没有返回有效内容");
     const masterRecord = {
       id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
       signature: stableVedicSignature(profile, options),
@@ -1510,10 +1601,10 @@ async function renderIndianInterpretation() {
     state.indianMasterReading = masterRecord;
     state.indianContext = { profile, chart, options, skillResult: chartData?.skillResult || null, chartData, masterReading: masterRecord.masterReading };
     state.indianChatHistory = [];
-    const reason = error?.message ? `原因：${error.message}` : "原因：长任务暂时没有返回。";
+    const reason = error?.message ? `原因：${error.message}` : "原因：完整解读服务暂时没有返回。";
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
-      <p class="disclaimer">Render 长任务没有生成专业版，先显示本地基础蓝图，避免页面卡住。${escapeHtml(reason)}</p>
+      <p class="disclaimer">在线完整解读暂时没有生成，已先显示本地基础蓝图。你可以稍后点击“开始生成完整解读”重试。${escapeHtml(reason)}</p>
       ${fallbackReading}
       ${indianChatMarkup()}
     `;
@@ -2656,12 +2747,18 @@ els.startVedicFormButton?.addEventListener("click", () => {
 });
 
 els.refreshIndianButton.addEventListener("click", async () => {
+  const label = els.refreshIndianButton.querySelector("span");
+  const originalLabel = label?.textContent || "Read my chart";
   els.refreshIndianButton.disabled = true;
   els.refreshIndianButton.setAttribute("aria-busy", "true");
   try {
+    if (label) label.textContent = "正在生成星盘…";
     await renderIndianPage();
     document.querySelector(".vedic-results-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (label) label.textContent = "正在生成完整解读…";
+    await renderIndianInterpretation();
   } finally {
+    if (label) label.textContent = originalLabel;
     els.refreshIndianButton.disabled = false;
     els.refreshIndianButton.removeAttribute("aria-busy");
   }
@@ -2734,8 +2831,18 @@ els.indianBirthTime.addEventListener("change", () => {
   if (second) els.indianBirthSecond.value = second;
 });
 els.indianReading.addEventListener("click", (event) => {
-  if (event.target.closest("#startIndianReadingButton")) {
-    renderIndianInterpretation();
+  const startButton = event.target.closest("#startIndianReadingButton");
+  if (startButton) {
+    startButton.disabled = true;
+    startButton.setAttribute("aria-busy", "true");
+    const original = startButton.textContent;
+    startButton.textContent = "正在生成完整解读…";
+    renderIndianInterpretation().finally(() => {
+      if (!startButton.isConnected) return;
+      startButton.disabled = false;
+      startButton.removeAttribute("aria-busy");
+      startButton.textContent = original;
+    });
   }
   const topicButton = event.target.closest("[data-indian-topic]");
   if (topicButton) {

@@ -2,31 +2,32 @@
    Shared by Home, Tarot, Natal Astrology, Vedic Astrology and Reading History. */
 
 :root {
-  --bg: #fffdf8;
+  --bg: #f8f4f6;
   --panel: #ffffff;
-  --panel-strong: #f7f3ee;
-  --rose: #eadfd3;
-  --rose-soft: #f3ebe3;
-  --rose-deep: #8d7f74;
-  --charcoal: #4a4542;
-  --ivory: #4a4542;
-  --muted: #8f8a86;
-  --gold: #9a8b7e;
-  --line: #eee7de;
-  --shadow: 0 10px 30px rgba(56, 46, 39, 0.05);
-  --podo-bg: #fffdf8;
+  --panel-strong: #f3ecef;
+  --rose: #e8ccd8;
+  --rose-soft: #f4e3ea;
+  --rose-deep: #a56f87;
+  --charcoal: #6c6c6a;
+  --ivory: #4e4e4c;
+  --muted: #7f7d7c;
+  --gold: #887b81;
+  --line: #e7dde1;
+  --shadow: 0 10px 30px rgba(75, 65, 70, 0.07);
+  --podo-bg: #f8f4f6;
   --podo-surface: #ffffff;
-  --podo-soft: #f7f3ee;
-  --podo-primary: #eadfd3;
-  --podo-primary-hover: #dccebf;
-  --podo-border: #eee7de;
-  --podo-ink: #4a4542;
-  --podo-muted: #8f8a86;
+  --podo-soft: #f3ecef;
+  --podo-primary: #e8ccd8;
+  --podo-primary-hover: #dcb9c8;
+  --podo-graphite: #6c6c6a;
+  --podo-border: #e7dde1;
+  --podo-ink: #4e4e4c;
+  --podo-muted: #7f7d7c;
   --podo-success: #a9c8b8;
   --podo-warning: #f5cfa7;
   --podo-error: #e9b8b8;
-  --podo-shadow: 0 10px 30px rgba(56, 46, 39, 0.05);
-  --podo-shadow-lift: 0 18px 44px rgba(56, 46, 39, 0.09);
+  --podo-shadow: 0 10px 30px rgba(75, 65, 70, 0.07);
+  --podo-shadow-lift: 0 18px 44px rgba(75, 65, 70, 0.12);
 }
 
 body,
@@ -78,7 +79,7 @@ body.cream-app-active .site-header {
   border: 1px solid rgba(238, 231, 222, 0.86);
   border-radius: 22px;
   color: var(--podo-ink);
-  background: rgba(255, 253, 248, 0.78);
+  background: rgba(248, 244, 246, 0.82);
   box-shadow: 0 8px 28px rgba(57, 47, 39, 0.055);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -110,7 +111,7 @@ body.cream-app-active .site-header .brand::after {
   border-radius: 50%;
   background:
     radial-gradient(circle at 67% 35%, var(--podo-bg) 0 42%, transparent 43%),
-    #c9b9aa;
+    var(--podo-graphite);
 }
 
 body.cream-app-active .site-header .nav {
@@ -146,7 +147,7 @@ body.cream-app-active .app-tabbar {
   border: 1px solid rgba(238, 231, 222, 0.9);
   border-radius: 20px;
   color: var(--podo-muted);
-  background: rgba(255, 253, 248, 0.9);
+  background: rgba(248, 244, 246, 0.92);
   box-shadow: var(--podo-shadow);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -201,7 +202,7 @@ body.cream-app-active .home-app .hero-bg {
   opacity: 1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 78% 20%, rgba(234, 223, 211, 0.58), transparent 30rem),
+    radial-gradient(circle at 78% 20%, rgba(232, 204, 216, 0.56), transparent 30rem),
     radial-gradient(circle at 18% 80%, rgba(169, 200, 184, 0.13), transparent 24rem),
     var(--podo-bg);
 }
@@ -316,11 +317,11 @@ body.cream-app-active .feature-card .module-icon {
   grid-row: 2;
   border-radius: 17px;
   fill: none;
-  stroke: #8b7e74;
+  stroke: var(--podo-graphite);
   stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  background: var(--podo-soft);
+  background: var(--podo-primary);
 }
 
 body.cream-app-active .feature-card .feature-copy {
@@ -423,15 +424,15 @@ body.cream-app-active .button:hover {
 }
 
 body.cream-app-active .button.primary {
-  border-color: var(--podo-ink);
-  color: var(--podo-bg);
-  background: var(--podo-ink);
+  border-color: var(--podo-graphite);
+  color: #ffffff;
+  background: var(--podo-graphite);
   box-shadow: 0 10px 24px rgba(74, 69, 66, 0.16);
 }
 
 body.cream-app-active .button.primary:hover {
-  border-color: #383431;
-  background: #383431;
+  border-color: #595957;
+  background: #595957;
 }
 
 body.cream-app-active .button.secondary,
@@ -481,9 +482,9 @@ body.cream-app-active textarea {
 body.cream-app-active input:focus,
 body.cream-app-active select:focus,
 body.cream-app-active textarea:focus {
-  border-color: #cbbba9;
+  border-color: #c49caf;
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(234, 223, 211, 0.48);
+  box-shadow: 0 0 0 4px rgba(232, 204, 216, 0.5);
 }
 
 body.cream-app-active :focus-visible {
@@ -753,8 +754,376 @@ body.cream-app-active .profile-drawer .profile-reading {
 body.cream-app-active .install-banner {
   border-color: var(--podo-border);
   color: var(--podo-ink);
-  background: rgba(255, 253, 248, 0.94);
+  background: rgba(248, 244, 246, 0.95);
   box-shadow: var(--podo-shadow);
+}
+
+/* Graphite Moss × Vintage Lilac theme */
+body.cream-app-active .feature-card,
+body.cream-app-active .profile-form,
+body.cream-app-active .profile-reading,
+body.cream-app-active .question-panel,
+body.cream-app-active .deck-panel,
+body.cream-app-active .result-summary,
+body.cream-app-active .result-card,
+body.cream-app-active .history-card,
+body.cream-app-active .flow-stack {
+  border-color: var(--podo-border);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+body.cream-app-active .feature-card:hover,
+body.cream-app-active .topic-card.active,
+body.cream-app-active .spread-card.active,
+body.cream-app-active .app-tabbar a.active {
+  background: var(--podo-primary);
+}
+
+body.cream-app-active .shuffle-stage,
+body.cream-app-active .astro-summary,
+body.cream-app-active .placement-card,
+body.cream-app-active .aspect-list span,
+body.cream-app-active .astro-reading-block {
+  background: var(--podo-soft);
+}
+
+body.cream-app-active .planet-marker {
+  border-color: #cba7b7;
+  background: var(--podo-primary);
+}
+
+/* Vedic typography and long-reading presentation */
+body.cream-app-active .vedic-wellness-page {
+  color: var(--vedic-ink);
+  background: var(--vedic-bg);
+  font-family: "HarmonyOS Sans SC", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.cream-app-active .vedic-wellness-hero {
+  border-bottom-color: var(--vedic-border);
+  background:
+    radial-gradient(circle at 75% 42%, rgba(232, 204, 216, 0.78), transparent 31%),
+    linear-gradient(145deg, #fbf8fa 8%, #f5eef1 100%);
+}
+
+body.cream-app-active .vedic-moon {
+  background: #e8ccd8;
+  box-shadow: 0 20px 55px rgba(108, 108, 106, 0.14);
+}
+
+body.cream-app-active .vedic-orbit {
+  border-color: rgba(108, 108, 106, 0.28);
+}
+
+body.cream-app-active .vedic-hero-copy h1 em,
+body.cream-app-active .vedic-hero-subtitle {
+  color: var(--vedic-graphite);
+}
+
+body.cream-app-active .vedic-section-heading h2,
+body.cream-app-active .vedic-result-header h2,
+body.cream-app-active .vedic-wellness-page .vedic-chart-overview h3,
+body.cream-app-active .vedic-wellness-page .vedic-data-panel h3,
+body.cream-app-active .vedic-wellness-page .deepseek-reading > h3,
+body.cream-app-active .vedic-wellness-page .vedic-chat h4,
+body.cream-app-active .vedic-wellness-page .complete-chart-panel > summary {
+  font-family: "HarmonyOS Sans SC", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+body.cream-app-active .vedic-section-heading > p:last-child,
+body.cream-app-active .vedic-result-header > div > p:last-child,
+body.cream-app-active .vedic-wellness-page .vedic-chart-overview > p,
+body.cream-app-active .vedic-wellness-page .vedic-table p,
+body.cream-app-active .vedic-wellness-page .vedic-data-grid,
+body.cream-app-active .vedic-wellness-page .vedic-module-list,
+body.cream-app-active .vedic-wellness-page .vedic-position-table,
+body.cream-app-active .vedic-wellness-page .vedic-chat-message,
+body.cream-app-active .vedic-wellness-page .disclaimer {
+  color: #5d5d5b !important;
+  font-family: "HarmonyOS Sans SC", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+body.cream-app-active .vedic-wellness-page input,
+body.cream-app-active .vedic-wellness-page select,
+body.cream-app-active .vedic-wellness-page textarea {
+  border-color: var(--vedic-border);
+  background: #fffdfd;
+  font-family: "HarmonyOS Sans SC", "Pretendard", "Inter", sans-serif;
+}
+
+body.cream-app-active .vedic-wellness-page input:focus,
+body.cream-app-active .vedic-wellness-page select:focus,
+body.cream-app-active .vedic-wellness-page textarea:focus {
+  border-color: #c49caf;
+  box-shadow: 0 0 0 4px rgba(232, 204, 216, 0.52);
+}
+
+body.cream-app-active .vedic-wellness-page .vedic-chart-hero-card,
+body.cream-app-active .vedic-wellness-page .vedic-table article,
+body.cream-app-active .vedic-wellness-page .vedic-data-grid span,
+body.cream-app-active .vedic-wellness-page .vedic-module-list span,
+body.cream-app-active .vedic-wellness-page .vedic-position-table div {
+  border-color: var(--vedic-border);
+  background: var(--vedic-soft);
+}
+
+body.cream-app-active .vedic-wellness-page .vedic-center,
+body.cream-app-active .vedic-wellness-page .vedic-sign-cell.lagna-cell {
+  background: var(--vedic-primary);
+}
+
+body.cream-app-active .vedic-wellness-page .button.primary {
+  border-color: var(--vedic-graphite);
+  color: #fff;
+  background: var(--vedic-graphite);
+}
+
+body.cream-app-active .vedic-wellness-page .button.secondary {
+  border-color: #dbc4ce;
+  background: #f6e8ee;
+}
+
+body.cream-app-active .vedic-blueprint-entry {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  border: 1px solid #626260;
+  border-radius: 24px;
+  color: #fff;
+  background: var(--vedic-graphite);
+  box-shadow: 0 16px 38px rgba(64, 59, 61, 0.14);
+}
+
+body.cream-app-active .vedic-blueprint-entry-copy {
+  min-width: 0;
+}
+
+body.cream-app-active .vedic-blueprint-label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--vedic-primary);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+body.cream-app-active .vedic-blueprint-entry h4 {
+  margin: 0;
+  color: #fff;
+  font-family: "HarmonyOS Sans SC", "Pretendard", sans-serif;
+  font-size: 25px;
+  font-weight: 650;
+}
+
+body.cream-app-active .vedic-blueprint-entry p {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+body.cream-app-active .vedic-blueprint-points {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body.cream-app-active .vedic-blueprint-points span {
+  padding: 7px 10px;
+  border: 1px solid rgba(232, 204, 216, 0.42);
+  border-radius: 999px;
+  color: var(--vedic-primary);
+  font-size: 11px;
+}
+
+body.cream-app-active .vedic-blueprint-entry .button.primary {
+  min-width: 190px;
+  border-color: var(--vedic-primary);
+  color: #555553;
+  background: var(--vedic-primary);
+  box-shadow: none;
+}
+
+body.cream-app-active .vedic-blueprint-entry .button.primary:hover {
+  border-color: #f0dae4;
+  background: #f0dae4;
+}
+
+body.cream-app-active .vedic-wellness-page .deepseek-reading {
+  padding: 0;
+  overflow: hidden;
+  border-color: var(--vedic-border);
+  background: #fff;
+}
+
+body.cream-app-active .vedic-wellness-page .deepseek-reading > h3,
+body.cream-app-active .vedic-wellness-page .deepseek-reading > .disclaimer,
+body.cream-app-active .vedic-wellness-page .deepseek-reading > .vedic-loading-stage {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+body.cream-app-active .vedic-wellness-page .deepseek-reading > h3 {
+  margin-top: 30px;
+  margin-bottom: 8px;
+  font-size: 26px;
+}
+
+body.cream-app-active .blueprint-report {
+  color: var(--vedic-ink);
+  background: transparent;
+}
+
+body.cream-app-active .blueprint-report-header {
+  padding: 28px 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid var(--vedic-border);
+  border-bottom: 1px solid var(--vedic-border);
+  background: #f8edf2;
+}
+
+body.cream-app-active .blueprint-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--vedic-graphite);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+body.cream-app-active .blueprint-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--podo-success);
+}
+
+body.cream-app-active .blueprint-report-header h4 {
+  margin: 10px 0 0;
+  color: var(--vedic-ink);
+  font-family: "HarmonyOS Sans SC", "Pretendard", sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+body.cream-app-active .blueprint-report-header p {
+  max-width: 660px;
+  margin: 10px 0 0;
+  color: #626260;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+body.cream-app-active .blueprint-count {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: var(--vedic-graphite);
+  background: var(--vedic-primary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+body.cream-app-active .blueprint-toolbar {
+  margin: 0;
+  padding: 14px 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--vedic-border);
+  color: var(--vedic-muted);
+  background: #fff;
+  font-size: 11px;
+}
+
+body.cream-app-active .blueprint-chapters {
+  padding: 12px 30px 30px;
+}
+
+body.cream-app-active .blueprint-chapter {
+  border-bottom: 1px solid var(--vedic-border);
+}
+
+body.cream-app-active .blueprint-chapter > summary {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  color: var(--vedic-ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+body.cream-app-active .blueprint-chapter > summary::-webkit-details-marker {
+  display: none;
+}
+
+body.cream-app-active .blueprint-index {
+  color: #a37f90;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+body.cream-app-active .blueprint-chapter > summary strong {
+  min-width: 0;
+  color: var(--vedic-ink);
+  font-family: "HarmonyOS Sans SC", "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+body.cream-app-active .blueprint-chapter > summary .lucide {
+  width: 18px;
+  height: 18px;
+  color: var(--vedic-muted);
+  transition: transform 200ms ease;
+}
+
+body.cream-app-active .blueprint-chapter[open] > summary .lucide {
+  transform: rotate(180deg);
+}
+
+body.cream-app-active .blueprint-chapter .typewriter-text,
+body.cream-app-active .vedic-wellness-page .typewriter-text {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+body.cream-app-active .blueprint-chapter .typewriter-text {
+  padding: 0 0 28px 46px;
+}
+
+body.cream-app-active .blueprint-chapter .typewriter-text > p,
+body.cream-app-active .vedic-wellness-page .typewriter-text > p {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  color: #545452;
+  background: transparent;
+  font-family: "HarmonyOS Sans SC", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.92;
+}
+
+body.cream-app-active .blueprint-chapter .typewriter-text > p:last-child {
+  margin-bottom: 0;
 }
 
 @keyframes podoFadeUp {
@@ -1177,6 +1546,76 @@ body.cream-app-active .install-banner {
   body.cream-app-active .vedic-wellness-page .vedic-table,
   body.cream-app-active .vedic-wellness-page .typewriter-text {
     grid-template-columns: 1fr;
+  }
+
+  body.cream-app-active .vedic-blueprint-entry {
+    padding: 22px 18px;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    border-radius: 20px;
+  }
+
+  body.cream-app-active .vedic-blueprint-entry h4 {
+    font-size: 21px;
+  }
+
+  body.cream-app-active .vedic-blueprint-entry p {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  body.cream-app-active .vedic-blueprint-entry .button.primary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.cream-app-active .vedic-wellness-page .deepseek-reading > h3,
+  body.cream-app-active .vedic-wellness-page .deepseek-reading > .disclaimer,
+  body.cream-app-active .vedic-wellness-page .deepseek-reading > .vedic-loading-stage {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  body.cream-app-active .blueprint-report-header {
+    padding: 22px 18px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  body.cream-app-active .blueprint-report-header h4 {
+    font-size: 23px;
+  }
+
+  body.cream-app-active .blueprint-toolbar {
+    padding: 13px 18px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  body.cream-app-active .blueprint-chapters {
+    padding: 8px 18px 22px;
+  }
+
+  body.cream-app-active .blueprint-chapter > summary {
+    min-height: 62px;
+    grid-template-columns: 28px minmax(0, 1fr) 18px;
+    gap: 9px;
+  }
+
+  body.cream-app-active .blueprint-chapter > summary strong {
+    font-size: 15px;
+  }
+
+  body.cream-app-active .blueprint-chapter .typewriter-text {
+    padding: 0 0 24px 37px;
+  }
+
+  body.cream-app-active .blueprint-chapter .typewriter-text > p,
+  body.cream-app-active .vedic-wellness-page .typewriter-text > p {
+    font-size: 15.5px;
+    line-height: 1.95;
   }
 }
 
