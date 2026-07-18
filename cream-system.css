@@ -772,6 +772,32 @@ body.cream-app-active .flow-stack {
   background: rgba(255, 255, 255, 0.9);
 }
 
+body.cream-app-active .module-chooser-page {
+  padding: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  background: var(--podo-graphite);
+  box-shadow: 0 24px 60px rgba(75, 65, 70, 0.15);
+}
+
+body.cream-app-active .module-chooser-page .dashboard-top h1 {
+  color: #f8edf2;
+}
+
+body.cream-app-active .module-chooser-page .dashboard-top .kicker {
+  color: var(--podo-primary);
+}
+
+body.cream-app-active .module-chooser-page .dashboard-top .hero-copy {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+body.cream-app-active .module-chooser-page .dashboard-actions .button.secondary {
+  border-color: var(--podo-primary);
+  color: #555553;
+  background: var(--podo-primary);
+}
+
 body.cream-app-active .feature-card:hover,
 body.cream-app-active .topic-card.active,
 body.cream-app-active .spread-card.active,
@@ -1178,7 +1204,8 @@ body.cream-app-active .blueprint-chapter .typewriter-text > p:last-child {
   body.cream-app-active .module-chooser-page {
     min-height: auto;
     gap: 24px;
-    padding: 26px 0 40px;
+    padding: 26px 14px 36px;
+    border-radius: 24px;
   }
 
   body.cream-app-active .dashboard-top {
