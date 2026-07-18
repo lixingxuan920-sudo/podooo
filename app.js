@@ -290,6 +290,12 @@ els.vedicPartnerBirthTime = document.querySelector("#vedicPartnerBirthTime");
 els.vedicPartnerBirthCity = document.querySelector("#vedicPartnerBirthCity");
 els.loadPdfIndianButton = document.querySelector("#loadPdfIndianButton");
 els.resolveIndianLocationButton = document.querySelector("#resolveIndianLocationButton");
+els.startVedicFormButton = document.querySelector("#startVedicFormButton");
+els.copyIndianReadingButton = document.querySelector("#copyIndianReadingButton");
+els.shareIndianReadingButton = document.querySelector("#shareIndianReadingButton");
+els.downloadIndianReadingButton = document.querySelector("#downloadIndianReadingButton");
+els.indianReadingProgress = document.querySelector("#indianReadingProgress");
+els.appMain = document.querySelector(".app-main");
 els.profileReading = document.querySelector("#profileReading");
 els.homeHistoryList = document.querySelector("#homeHistoryList");
 els.showHistoryButton = document.querySelector("#showHistoryButton");
@@ -404,6 +410,7 @@ function renderLoginState() {
 }
 
 function showAstraeaLanding() {
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.add("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
@@ -417,6 +424,7 @@ function showModuleChooser() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
@@ -1291,14 +1299,29 @@ function findMasterReading(profile, options) {
 }
 
 function renderVedicProgress(activeStep = 0) {
+  const messages = [
+    "Reading your birth chart...",
+    "Calculating planetary positions...",
+    "Interpreting Nakshatras...",
+    "Consulting ancient wisdom...",
+    "Generating AI insights...",
+    "Shaping your Life Blueprint...",
+    "Finishing your personal reading..."
+  ];
+  const safeStep = Math.min(Math.max(0, activeStep), messages.length - 1);
   return `
-    <div class="vedic-progress compact">
-      <span class="active">
-        <b>${Math.max(1, activeStep + 1)}</b>
-        正在生成 Life Blueprint，请保持页面打开
-      </span>
+    <div class="vedic-loading-stage" role="status" aria-live="polite">
+      <div class="vedic-loading-cosmos" aria-hidden="true">
+        <div class="vedic-loading-orbit"></div>
+        <div class="vedic-loading-moon">
+          <svg class="lucide" viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 7 7c0-3-2-5-4-6 0 5-4 9-9 9-1 0-1 0-1-.1A7 7 0 0 0 12 3Z" /></svg>
+        </div>
+      </div>
+      <p class="vedic-kicker">A moment of reflection</p>
+      <h4>${messages[safeStep]}</h4>
+      <div class="vedic-loading-track"><span style="width:${Math.max(12, ((safeStep + 1) / messages.length) * 100)}%"></span></div>
+      <p>正在生成完整 Life Blueprint，请保持页面打开。通常需要 2–5 分钟。</p>
     </div>
-    <p class="disclaimer">这一步已交给 Render 长任务处理，通常需要 2-5 分钟。完成后会生成一份完整专业长报告。</p>
   `;
 }
 
@@ -1307,7 +1330,7 @@ function renderBlueprintReport(record) {
     <article class="blueprint-report">
       <div class="blueprint-toolbar">
         <span>完整长报告已自动保存</span>
-        <button class="text-button" type="button" disabled>导出 PDF（后续）</button>
+        <span>可使用页面上方的 PDF 按钮导出</span>
       </div>
       <div class="typewriter-text">${formatReadingText(record.masterReading)}</div>
     </article>
@@ -1587,6 +1610,7 @@ function showAstrologyFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   persistProfileFromFields();
   renderAstrologyPage();
@@ -1606,6 +1630,7 @@ function showIndianFlow() {
     return;
   }
   document.body.classList.remove("astraea-landing-active");
+  document.body.classList.add("indian-wellness-active");
   persistProfileFromFields();
   renderIndianPage();
   els.home.hidden = true;
@@ -1618,6 +1643,7 @@ function showIndianFlow() {
 }
 
 function showHomeFlow() {
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = false;
   els.drawSection.hidden = true;
@@ -1637,6 +1663,7 @@ function showHistoryFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   renderHistory();
   els.home.hidden = true;
@@ -1655,6 +1682,7 @@ function showTarotFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = true;
   els.astrologySection.hidden = true;
@@ -2617,7 +2645,60 @@ document.querySelectorAll("[data-tab-target]").forEach((tab) => {
   });
 });
 els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
-els.refreshIndianButton.addEventListener("click", renderIndianPage);
+els.startVedicFormButton?.addEventListener("click", () => {
+  document.querySelector("#vedicBirthForm")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.setTimeout(() => els.indianBirthDate?.focus(), 450);
+});
+
+els.refreshIndianButton.addEventListener("click", async () => {
+  els.refreshIndianButton.disabled = true;
+  els.refreshIndianButton.setAttribute("aria-busy", "true");
+  try {
+    await renderIndianPage();
+    document.querySelector(".vedic-results-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } finally {
+    els.refreshIndianButton.disabled = false;
+    els.refreshIndianButton.removeAttribute("aria-busy");
+  }
+});
+
+function setVedicToolbarFeedback(button, message) {
+  const label = button?.querySelector("span");
+  if (!button || !label) return;
+  const original = label.textContent;
+  label.textContent = message;
+  window.setTimeout(() => { label.textContent = original; }, 1500);
+}
+
+els.copyIndianReadingButton?.addEventListener("click", async () => {
+  const text = els.indianReading?.innerText.trim();
+  if (!text) return;
+  await navigator.clipboard?.writeText(text);
+  setVedicToolbarFeedback(els.copyIndianReadingButton, "已复制");
+});
+
+els.shareIndianReadingButton?.addEventListener("click", async () => {
+  const text = els.indianReading?.innerText.trim().slice(0, 420) || "我的 Podo 印度占星解读";
+  if (navigator.share) {
+    await navigator.share({ title: "My Podo Reading", text, url: window.location.href }).catch(() => {});
+  } else {
+    await navigator.clipboard?.writeText(window.location.href);
+  }
+  setVedicToolbarFeedback(els.shareIndianReadingButton, "已分享");
+});
+
+els.downloadIndianReadingButton?.addEventListener("click", () => {
+  window.print();
+});
+
+els.appMain?.addEventListener("scroll", () => {
+  if (!document.body.classList.contains("indian-wellness-active") || !els.indianReadingProgress) return;
+  const total = els.appMain.scrollHeight - els.appMain.clientHeight;
+  const progress = total > 0 ? (els.appMain.scrollTop / total) * 100 : 0;
+  const bar = els.indianReadingProgress.querySelector("span");
+  if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+}, { passive: true });
+
 els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
 els.loadJhoraSouthGraftonButton.addEventListener("click", loadJhoraSouthGraftonSample);
 els.resolveIndianLocationButton.addEventListener("click", resolveIndianLocation);
@@ -2706,7 +2787,12 @@ els.profileForm.addEventListener("submit", (event) => {
 els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   await loginAccount();
-  if (isLoggedIn()) showAstraeaLanding();
+  if (isLoggedIn()) {
+    const pendingView = localStorage.getItem("lunaArcanaPendingView");
+    localStorage.removeItem("lunaArcanaPendingView");
+    if (pendingView === "indianAstrology") showIndianFlow();
+    else showAstraeaLanding();
+  }
   state.selectedCards = [];
   state.currentReading = null;
   state.favorite = false;
@@ -2785,7 +2871,19 @@ renderHistory();
 renderProfile();
 renderAstraeaCarousel();
 const initialView = location.hash.replace("#", "") || "home";
-if (initialView === "home" && isLoggedIn()) {
+if (initialView === "indianAstrology") {
+  if (isLoggedIn()) showIndianFlow();
+  else {
+    localStorage.setItem("lunaArcanaPendingView", "indianAstrology");
+    showHomeFlow();
+  }
+} else if (initialView === "astrology" && isLoggedIn()) {
+  showAstrologyFlow();
+} else if (initialView === "draw" && isLoggedIn()) {
+  showTarotFlow();
+} else if (initialView === "history" && isLoggedIn()) {
+  showHistoryFlow();
+} else if (initialView === "home" && isLoggedIn()) {
   showAstraeaLanding();
 }
 updateActiveTab(initialView);

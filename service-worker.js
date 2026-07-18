@@ -1,8 +1,9 @@
-const CACHE_NAME = "luna-arcana-tarot-v37";
+const CACHE_NAME = "podo-wellness-v38";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/styles.css",
+  "/indian-wellness.css",
   "/app.js",
   "/astrology-skill.js",
   "/indian-astrology-skill.js",

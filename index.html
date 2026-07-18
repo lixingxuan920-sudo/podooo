@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luna Arcana Tarot | 专业塔罗占卜</title>
-    <meta name="theme-color" content="#d99aaa" />
+    <title>Podo | Read Your Stars</title>
+    <meta name="theme-color" content="#FFFDF8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Luna Tarot" />
+    <meta name="apple-mobile-web-app-title" content="Podo" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="assets/app-icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Serif+Display&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="indian-wellness.css" />
   </head>
   <body>
     <header class="site-header">
@@ -348,31 +349,75 @@
         </div>
       </section>
 
-      <section class="section astrology-section" id="indianAstrology" hidden>
-        <div class="section-heading compact-heading">
-          <p class="kicker">印度占星</p>
-          <h2>Life Blueprint 与持续咨询</h2>
-          <button class="text-button" id="backFromIndianButton" type="button">返回档案与问题</button>
-        </div>
-        <div class="astrology-layout">
-          <div class="profile-form">
-            <h2>出生资料</h2>
-            <p class="disclaimer">印度占星重视上升、月亮、月宿和 Rahu/Ketu 业力轴。当前为本地近似盘，适合自我观察。</p>
-            <div class="compact-fields">
-              <div>
-                <label for="indianBirthDate">生日</label>
-                <input id="indianBirthDate" type="date" />
+      <section class="section astrology-section vedic-wellness-page" id="indianAstrology" hidden>
+        <div class="vedic-reading-progress" id="indianReadingProgress" aria-hidden="true"><span></span></div>
+
+        <section class="vedic-wellness-hero" aria-labelledby="vedicHeroTitle">
+          <div class="vedic-grain" aria-hidden="true"></div>
+          <div class="vedic-hero-inner">
+            <div class="vedic-hero-copy">
+              <p class="vedic-kicker"><span></span>A quieter way to look within</p>
+              <h1 id="vedicHeroTitle">Read Your Stars.<br /><em>Understand Yourself.</em></h1>
+              <p class="vedic-hero-subtitle">Ancient astrology,<br />powered by modern AI.</p>
+              <div class="vedic-hero-actions">
+                <button class="button primary" id="startVedicFormButton" type="button">
+                  Start Reading
+                  <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </button>
+                <button class="vedic-quiet-link" id="backFromIndianButton" type="button">
+                  <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+                  返回主页
+                </button>
               </div>
-              <div>
-                <label for="indianBirthTime">出生时间</label>
-                <input id="indianBirthTime" type="time" step="1" />
+              <div class="vedic-trust-row">
+                <span><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5" /></svg>Private</span>
+                <span><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5" /></svg>Personal</span>
+                <span><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5" /></svg>Thoughtfully interpreted</span>
               </div>
             </div>
-            <label for="indianBirthCity">出生城市</label>
-            <input id="indianBirthCity" type="text" placeholder="城市即可，例如：广州" />
-            <p class="auto-location-note" id="indianLocationStatus">输入城市后会自动生成经纬度。</p>
-            <label for="indianConcernSelect">目前最关心的问题</label>
-            <select id="indianConcernSelect">
+            <div class="vedic-moon-scene" aria-hidden="true">
+              <div class="vedic-orbit orbit-a"><i></i></div>
+              <div class="vedic-orbit orbit-b"></div>
+              <div class="vedic-moon"><span></span></div>
+              <svg class="lucide vedic-star star-a" viewBox="0 0 24 24"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>
+              <svg class="lucide vedic-star star-b" viewBox="0 0 24 24"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>
+              <div class="vedic-cloud cloud-a"></div>
+              <div class="vedic-cloud cloud-b"></div>
+              <p><span>01</span>Your inner sky</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="vedic-page-shell">
+          <section class="vedic-intake-section" id="vedicBirthForm" aria-labelledby="vedicFormTitle">
+            <header class="vedic-section-heading">
+              <p class="vedic-kicker"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>Begin your reading</p>
+              <h2 id="vedicFormTitle">A few details, held with care.</h2>
+              <p>出生信息用于定位你来到世界那一刻的天空。我们不会改变任何专业排盘参数。</p>
+            </header>
+
+            <div class="profile-form vedic-intake-card">
+              <div class="vedic-privacy-note">
+                <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 1 0 7 7c0-3-2-5-4-6 0 5-4 9-9 9-1 0-1 0-1-.1A7 7 0 0 0 12 3Z" /></svg>
+                你的出生资料仅用于本次排盘
+              </div>
+              <div class="vedic-form-grid">
+                <div class="vedic-field">
+                  <label for="indianBirthDate"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z" /></svg>出生日期</label>
+                  <input id="indianBirthDate" type="date" />
+                </div>
+                <div class="vedic-field">
+                  <label for="indianBirthTime"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>出生时间</label>
+                  <input id="indianBirthTime" type="time" step="1" />
+                </div>
+                <div class="vedic-field vedic-field-wide">
+                  <label for="indianBirthCity"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2" /></svg>出生城市</label>
+                  <input id="indianBirthCity" type="text" placeholder="城市即可，例如：广州" />
+                  <p class="auto-location-note" id="indianLocationStatus">输入城市后会自动生成经纬度。</p>
+                </div>
+                <div class="vedic-field vedic-field-wide">
+                  <label for="indianConcernSelect"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m16 8-2.5 5.5L8 16l2.5-5.5L16 8Z" /></svg>目前最关心的问题</label>
+                  <select id="indianConcernSelect">
               <option>事业</option>
               <option>财富</option>
               <option>婚姻</option>
@@ -382,9 +427,12 @@
               <option>家庭</option>
               <option>未来几年运势</option>
               <option>其他</option>
-            </select>
-            <details class="advanced-vedic-fields">
-              <summary>专业排盘参数</summary>
+                  </select>
+                </div>
+              </div>
+
+              <details class="advanced-vedic-fields">
+              <summary><span><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></svg>专业排盘参数</span><svg class="lucide detail-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></summary>
               <p class="auto-location-note">参考 JHora 输入方式。普通用户只填城市即可；需要更准时，可展开填写秒、时区、经纬度、海拔。</p>
               <div class="compact-fields">
                 <div>
@@ -514,11 +562,35 @@
               <input id="vedicPartnerBirthCity" type="text" />
               <button class="button secondary full" id="loadPdfIndianButton" type="button">载入 PDF 样例数据</button>
             </div>
-            <button class="button primary full" id="refreshIndianButton" type="button">生成印度星盘</button>
-          </div>
-          <div class="profile-reading astrology-reading" id="indianReading">
-            <p>请先在首页填写生日、出生时间和出生城市，然后生成印度占星命盘。</p>
-          </div>
+              <button class="button primary full vedic-submit-button" id="refreshIndianButton" type="button">
+                <span>Read my chart</span>
+                <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </button>
+              <p class="vedic-system-note">Vedic astrology · Sidereal zodiac · Lahiri Ayanamsa</p>
+            </div>
+          </section>
+
+          <section class="vedic-results-section" aria-labelledby="vedicResultTitle">
+            <header class="vedic-result-header">
+              <div>
+                <p class="vedic-kicker"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" /></svg>Your reading</p>
+                <h2 id="vedicResultTitle">A portrait of your inner sky.</h2>
+                <p>把它当作一面温和的镜子，而不是被写死的命运。</p>
+              </div>
+              <div class="vedic-result-actions" role="group" aria-label="解读操作">
+                <button id="copyIndianReadingButton" type="button" title="复制解读"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" /></svg><span>复制</span></button>
+                <button id="shareIndianReadingButton" type="button" title="分享解读"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="18" cy="19" r="2" /><path d="m8 11 8-5M8 13l8 5" /></svg><span>分享</span></button>
+                <button id="downloadIndianReadingButton" type="button" title="下载 PDF"><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg><span>PDF</span></button>
+              </div>
+            </header>
+            <div class="profile-reading astrology-reading vedic-reading-surface" id="indianReading">
+              <div class="vedic-empty-state">
+                <span><svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 1 0 7 7c0-3-2-5-4-6 0 5-4 9-9 9-1 0-1 0-1-.1A7 7 0 0 0 12 3Z" /></svg></span>
+                <h3>Your chart will appear here.</h3>
+                <p>填写出生日期、时间和城市，然后开始读取你的印度占星命盘。</p>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -647,9 +719,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=37"></script>
-    <script src="indian-astrology-skill.js?v=37"></script>
-    <script src="tarot-skill.js?v=37"></script>
-    <script src="app.js?v=37"></script>
+    <script src="astrology-skill.js?v=38"></script>
+    <script src="indian-astrology-skill.js?v=38"></script>
+    <script src="tarot-skill.js?v=38"></script>
+    <script src="app.js?v=38"></script>
   </body>
 </html>

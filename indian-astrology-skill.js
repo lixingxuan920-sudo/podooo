@@ -637,20 +637,27 @@
     const hasCoordinates = Boolean(profile.latitude && profile.longitude);
     return `
       <div class="vedic-chart-panel">
-        <div class="astro-tags">
-          <span>上升 ${lagna.sign}</span>
-          <span>月亮 ${moon.sign}</span>
-          <span>${chart.nakshatra}</span>
-          <span>Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+        <div class="vedic-chart-hero-card">
+          <div class="vedic-chart-overview">
+            <p class="vedic-kicker">Birth chart · D1</p>
+            <h3>Your celestial signature</h3>
+            <p>以柔和、清晰的方式查看构成本次解读的核心落点。</p>
+            <div class="astro-tags">
+              <span>上升 Ascendant · ${lagna.sign}</span>
+              <span>月亮 Moon · ${moon.sign}</span>
+              <span>月宿 Nakshatra · ${chart.nakshatra}</span>
+              <span>业力轴 · Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+            </div>
+            <div class="vedic-birth-line">
+              <strong>${profile.birthCity || "出生地未填写"}</strong>
+              <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
+              <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
+            </div>
+          </div>
+          ${southIndianChart(profile)}
         </div>
-        <div class="vedic-birth-line">
-          <strong>${profile.birthCity || "出生地未填写"}</strong>
-          <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
-          <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
-        </div>
-        ${southIndianChart(profile)}
-        <details class="vedic-data-panel complete-chart-panel" open>
-          <summary>完整印度星盘数据</summary>
+        <details class="vedic-data-panel complete-chart-panel">
+          <summary>展开完整印度星盘数据</summary>
           ${chartTable(chart)}
           ${computedDataPanel(chart)}
         </details>
