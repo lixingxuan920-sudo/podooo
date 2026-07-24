@@ -9,10 +9,13 @@ function getModelConfig() {
     || process.env.OPENAI_API_BASE
     || process.env.CCSWITCH_BASE_URL
     || "https://api.deepseek.com").replace(/\/$/, "");
-  const model = process.env.DEEPSEEK_MODEL
+  const configuredModel = process.env.DEEPSEEK_MODEL
     || process.env.CCSWITCH_MODEL
     || process.env.OPENAI_MODEL
     || "deepseek-chat";
+  const model = configuredModel === "deepseek-chat" && !baseUrl.includes("api.deepseek.com")
+    ? "deepseek-v4-flash"
+    : configuredModel;
   const chatUrl = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
   return { apiKey, chatUrl, model };
 }
