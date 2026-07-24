@@ -2,11 +2,16 @@ const WESTERN_SKILL_SOURCE = {
   name: "Astro — Western Tropical interpretation rules",
   repository: "https://github.com/aryaminus/astro",
   license: "MIT",
-  adaptedFor: "Podo"
+  adaptedFor: "Podo",
+  scope: "western-chart"
 };
 
 const WESTERN_SKILL_RULES = `
 遵循以下西洋占星解读规则：
+
+【适用边界】
+- 本规则只用于 Podo 的“星盘”板块，不用于“印占”板块。
+- 只解读 Tropical 热带黄道的西洋占星结构化数据，不读取或引用 Vedic Skill、Lahiri Ayanamsa、Nakshatra、Vimshottari Dasha、D1/D9/D10 或 Yoga。
 
 【可信度纪律】
 - 星体、度数、宫位、逆行、相位只允许引用输入 JSON；绝不猜测或自行改写。

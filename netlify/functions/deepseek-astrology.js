@@ -3,6 +3,9 @@ const {
   WESTERN_SKILL_SOURCE
 } = require("./western-skill-rules");
 
+const WESTERN_SKILL_SCOPE = "western-chart";
+const WESTERN_SKILL_REPOSITORY = "https://github.com/aryaminus/astro";
+
 function getModelConfig() {
   const apiKey = process.env.DEEPSEEK_API_KEY
     || process.env.OPENAI_API_KEY
@@ -22,6 +25,14 @@ function getModelConfig() {
   return { apiKey, chatUrl, model };
 }
 
+function isWesternChart(chart) {
+  return chart
+    && chart.zodiac === "Tropical"
+    && chart.interpretationSkill?.scope === WESTERN_SKILL_SCOPE
+    && chart.interpretationSkill?.source === WESTERN_SKILL_REPOSITORY
+    && chart.natal?.points?.length;
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -34,6 +45,20 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Invalid JSON" };
   }
 
+  const profile = payload.profile || {};
+  const chart = payload.chart || {};
+  const options = payload.options || {};
+  if (!isWesternChart(chart)) {
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "Western chart data required",
+        detail: "该接口仅接受“星盘”板块生成的热带黄道西洋占星数据。"
+      })
+    };
+  }
+
   const { apiKey, chatUrl, model } = getModelConfig();
   if (!apiKey) {
     return {
@@ -43,11 +68,14 @@ exports.handler = async (event) => {
     };
   }
 
-  const profile = payload.profile || {};
-  const chart = payload.chart || {};
-  const options = payload.options || {};
   const prompt = `
 你是一位专业、稳重、可信赖的西洋占星师。请根据以下结构化星盘数据，用中文进行深入解读。
+
+系统边界：
+- 当前 Skill 只服务 Podo 的“星盘”板块。
+- 只使用热带黄道、西洋占星宫制、行星尊贵、宫主星和西洋占星相位规则。
+- 严禁混入印度占星的恒星黄道、Lahiri Ayanamsa、Nakshatra、Vimshottari Dasha、D1/D9/D10、Yoga 或 Vedic Skill 规则。
+- 如果输入出现印度占星字段，不得引用或解读。
 
 规则来源：
 ${JSON.stringify(WESTERN_SKILL_SOURCE, null, 2)}
@@ -85,7 +113,7 @@ ${JSON.stringify(chart, null, 2)}
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: "你是专业西洋占星解读师，回答必须使用中文，语气温和、具体、可信赖。" },
+        { role: "system", content: "你是 Podo“星盘”板块的专业西洋占星解读师。只采用西洋占星体系，不得混入印度占星规则。回答必须使用中文，语气温和、具体、可信赖。" },
         { role: "user", content: prompt }
       ],
       temperature: 0.72,

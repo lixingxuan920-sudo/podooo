@@ -535,6 +535,7 @@ def calculate_western_chart(profile: dict[str, Any], options: dict[str, Any] | N
             "name": "Astro Western interpretation rules",
             "source": "https://github.com/aryaminus/astro",
             "license": "MIT",
+            "scope": "western-chart",
         },
         "chartType": chart_type,
         "subject": {**location, "birthDateTime": local_dt.isoformat()},
