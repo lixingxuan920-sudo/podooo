@@ -1,10 +1,12 @@
 const { handler: deepseekVedicHandler } = require("./deepseek-vedic.js");
 const { setBlueprintJob, validJobId } = require("./blueprint-job-store.js");
 
+// Long reports use the same persisted professional chart evidence across all segments.
+
 const REPORT_SEGMENTS = [
-  "这是首次完整 Life Blueprint 的第一部分。请写一段约 1600 至 2200 个中文字符、连续流畅的专业印度占星报告，分析命盘整体格局、上升与命主星、太阳月亮、Nakshatra、九大行星强弱、核心性格、人生主题、家庭、学习、健康与重点宫位。每项判断引用具体盘面依据。不要说这是追问，不要提没有保存报告，不要使用数字编号、目录、Markdown 标题或列表。",
-  "这是首次完整 Life Blueprint 的第二部分，直接承接前文，不要重复出生资料。请写一段约 1600 至 2200 个中文字符、连续流畅的专业印度占星报告，深入分析事业与财富、适合行业和岗位、赚钱模式、创业管理体制技术商业艺术咨询的适配度、事业高峰与谨慎期。必须结合第 2、6、10、11 宫、宫主、AmK、D10、当前大运与小运等真实盘面依据。不要使用数字编号、目录、Markdown 标题或列表。",
-  "这是首次完整 Life Blueprint 的第三部分，直接承接前文，不要重复出生资料。请写一段约 1800 至 2400 个中文字符、连续流畅的专业印度占星报告，分析婚姻感情、伴侣特质、关系课题和时间窗口，结合第 5、7 宫、Venus、Moon、DK、D9；核验重要 Yoga，证据不足就明确限制；结合 Vimshottari Mahadasha 与 Antardasha 解读未来三到五年，并给出事业、财富、感情、健康和成长的现实行动建议，最后自然总结人生优势、主要课题与未来重点。不要使用数字编号、目录、Markdown 标题或列表。"
+  "这是首次完整 Life Blueprint 的第1—3部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：1. 命盘整体格局；2. 行星强弱与重点配置；3. 十二宫位解读。必须展开上升、命主星、太阳、月亮、九大行星、尊贵/燃烧/逆行、Shadbala、十二宫审计，并说明每项判断的具体证据。只使用统一evidence ledger和structured_data中的真实数据；无法确认的Yoga或配置必须写“当前数据不足以确认”。",
+  "这是首次完整 Life Blueprint 的第4—6部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：4. 事业与财富；5. 婚姻与感情；6. 大运Dasha分析。事业必须调用vedic-career规则并结合2、6、10、11宫、L10、AmK、D10、强星和真实Dasha；感情必须调用vedic-love规则并结合5、7宫、L7、Venus、Moon、DK、UL、D9、Rahu/Ketu和真实Dasha；时间只可使用真实起止日期，不能猜结婚年份或高峰年份。",
+  "这是首次完整 Life Blueprint 的第7—9部分及总结。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：7. Navamsa D9解读；8. 重要瑜伽与特殊组合；9. 现实建议；最后总结人生优势、主要课题、未来几年重点方向和当前最应该做的三件事。逐项核验D1成立依据、激活大运/小运、D9兑现度；证据不足写“当前数据不足以确认”。健康只能给生活方式提醒，不作医学诊断。"
 ];
 
 async function generateSegment(payload, question) {
@@ -49,7 +51,7 @@ exports.handler = async (event) => {
 
     await setBlueprintJob(event, jobId, {
       jobId,
-      status: "processing",
+      status: "generating_report",
       progress: 25,
       createdAt,
       updatedAt: new Date().toISOString()
@@ -57,17 +59,29 @@ exports.handler = async (event) => {
 
     const segments = await Promise.all(REPORT_SEGMENTS.map((question) => generateSegment(payload, question)));
     const blueprint = segments.join("\n\n").trim();
+    if (blueprint.length < 8000) {
+      throw new Error(`Life Blueprint 字数不足：${blueprint.length}，需要至少8000个中文字符。`);
+    }
     const summary = blueprint.replace(/\s+/g, " ").slice(0, 420);
+    const chartData = payload.chartData || {};
     await setBlueprintJob(event, jobId, {
       jobId,
-      status: "completed",
+      status: "merging_report",
       progress: 100,
       blueprint,
       summary,
-      chartData: payload.chartData || payload.chart || {},
+      chartData,
+      birthData: payload.profile || {},
+      structuredDataMarkdown: chartData.structuredDataMarkdown || payload.skillResult?.structuredDataMarkdown || "",
+      professionalChart: chartData.professionalChart || payload.skillResult?.professionalChart || null,
+      calculationMeta: chartData.calculationMeta || payload.skillResult?.calculationMeta || null,
+      evidenceLedger: chartData.evidenceLedger || payload.skillResult?.evidenceLedger || null,
+      skillVersion: payload.skillResult?.calculationMeta?.upstreamVersion || "v7.0",
+      skillCommit: payload.skillResult?.calculationMeta?.commit || "7a6e33e23dc1f45107af2f249848241bb4d22b67",
       createdAt,
       updatedAt: new Date().toISOString()
     });
+    await setBlueprintJob(event, jobId, { status: "completed", progress: 100, updatedAt: new Date().toISOString() });
   } catch (error) {
     if (validJobId(jobId)) {
       await setBlueprintJob(event, jobId, {
