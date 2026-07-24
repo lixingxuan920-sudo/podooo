@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from vedic_skill_rules import LIFE_BLUEPRINT_SKILL_RULES, VEDIC_SKILL_SOURCE
+from vedic_calculator_adapter import calculate_professional_chart
 
 
 SIGNS = [
@@ -251,7 +252,7 @@ def set_job(job_id: str, **updates: Any) -> None:
 def run_blueprint_job(job_id: str, payload: VedicRequest) -> None:
     try:
         set_job(job_id, status="running", step="calculate_chart", progress=20)
-        chart_result = calculate_chart(payload.profile)
+        chart_result = calculate_chart(payload.profile, payload.options)
         chart_data = {
             "profile": payload.profile,
             "options": payload.options,
@@ -513,64 +514,29 @@ def chart_to_markdown(profile: dict[str, Any], local_dt: datetime, lat: float, l
     return "\n".join(lines)
 
 
-def calculate_chart(profile: dict[str, Any]) -> dict[str, Any]:
-    local_dt, lat, lon, tz_name, second = parse_birth(profile)
-    jd = calc_julian_day(local_dt)
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
-    ayanamsa = swe.get_ayanamsa_ut(jd)
-    lagna = calc_lagna(jd, lat, lon, ayanamsa)
-    planets: dict[str, Any] = {}
-    for name, planet_id in PLANETS:
-        planets[name] = calc_planet(jd, planet_id, ayanamsa, lagna["sign_index"])
-    rahu_tropical_lon, _lat, _distance, _speed = calc_ut_values(jd, swe.MEAN_NODE)
-    rahu_lon = sidereal_longitude(rahu_tropical_lon, ayanamsa)
-    ketu_lon = (rahu_lon + 180) % 360
-    for name, lon_value in [("Rahu", rahu_lon), ("Ketu", ketu_lon)]:
-        sidx = sign_index(lon_value)
-        planets[name] = {
-            "longitude": round(lon_value, 8),
-            "sign": SIGNS[sidx],
-            "sign_index": sidx,
-            "house": house_from_lagna(sidx, lagna["sign_index"]),
-            "deg_str": deg_string(lon_value),
-            "retrograde": True,
-            "nakshatra": nakshatra_for(lon_value),
-        }
-    dashas = vimshottari_dashas(planets["Moon"]["longitude"], local_dt.date())
-    chart = {
-        "ayanamsa": ayanamsa,
-        "julian_day": jd,
-        "lagna": lagna,
-        "planets": planets,
-        "dashas": dashas,
-    }
-    markdown = chart_to_markdown(profile, local_dt, lat, lon, tz_name, second, chart)
-    return {
-        "structuredDataMarkdown": markdown,
-        "calculationMeta": {
-            "engine": "vedic-python-api",
-            "timezone": tz_name,
-            "lat": lat,
-            "lon": lon,
-            "second": second,
-            "julianDay": jd,
-            "ayanamsa": ayanamsa,
-            "warnings": [
-                "公网 API 当前提供 Swiss Ephemeris D1、Nakshatra 与 Vimshottari Dasha；SAV/BAV、Shadbala、完整分盘量化待接入 PyJHora/JHora 校验。"
-            ],
-        },
-    }
+def calculate_chart(
+    profile: dict[str, Any],
+    options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    return calculate_professional_chart(profile, options)
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"ok": "true", "engine": "vedic-python-api"}
+def health() -> dict[str, Any]:
+    return {
+        "ok": "true",
+        "engine": "vedic-calculator",
+        "upstreamVersion": "v7.0",
+        "commit": "7a6e33e23dc1f45107af2f249848241bb4d22b67",
+        "ayanamsa": "TRUE_CITRA / Lahiri",
+        "nodeMode": "Mean Node",
+    }
 
 
 @app.post("/calculate")
 def calculate(payload: VedicRequest, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
     require_api_key(x_vedic_api_key)
-    result = calculate_chart(payload.profile)
+    result = calculate_chart(payload.profile, payload.options)
     return {"ok": True, **result}
 
 

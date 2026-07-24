@@ -4,14 +4,17 @@
 
 它提供：
 
-- Swiss Ephemeris 真实星历
-- Lahiri Ayanamsa
-- D1 本命盘上升与九曜落座
+- `vedic-astro-skills` v7.0 的 `vedic-calculator` 原生排盘引擎
+- Swiss Ephemeris 真实星历与 TRUE_CITRA / Lahiri Ayanamsa
+- D1 本命盘、15 张分盘（D1-D60）
 - Nakshatra 月宿与 Pada
-- Vimshottari Dasha 大运
+- Vimshottari Mahadasha 与 Antardasha
+- Shadbala、SAV/BAV、Chara Karakas、AL/UL、宫主表和尊贵度
+- SAV=337、Rahu/Ketu 对冲等硬校验
 - 可选 `VEDIC_API_KEY` 保护接口
 
-当前不会伪造 SAV/BAV、Shadbala、完整分盘量化值。这些模块需要后续接入完整 PyJHora/JHora 校验后再启用。
+计算代码固定到上游提交 `7a6e33e23dc1f45107af2f249848241bb4d22b67`；
+校验失败时接口直接报错，不回退到近似排盘。
 
 ## 本地运行
 
