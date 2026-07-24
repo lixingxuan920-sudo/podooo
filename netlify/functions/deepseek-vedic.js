@@ -348,7 +348,7 @@ exports.handler = async (event) => {
   });
 
   let response = await requestModel(model);
-  if (!response.ok && model === "deepseek-chat") {
+  if (!response.ok) {
     const errorText = await response.text().catch(() => "");
     if (errorText.includes("deepseek-v4-pro") || errorText.includes("deepseek-v4-flash")) {
       response = await requestModel("deepseek-v4-flash");
