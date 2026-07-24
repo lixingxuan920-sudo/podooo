@@ -5,6 +5,12 @@ node_modules/
 .env.*
 .DS_Store
 Thumbs.db
+.test-venv*/
+.playwright-*/
+.work/
+pip-metadata-*/
+pip-unpack-*/
 __pycache__/
+*.py[cod]
 vedic-python-api/.venv/
 vedic-python-api/__pycache__/

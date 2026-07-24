@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=49" />
   </head>
   <body>
     <header class="site-header">
@@ -297,7 +297,7 @@
         <div class="astrology-layout">
           <div class="profile-form">
             <h2>出生资料</h2>
-            <p class="disclaimer">星盘需要生日、出生时间和出生城市。当前为本地近似星盘，适合性格和能量结构参考。</p>
+            <p class="disclaimer">使用 Swiss Ephemeris 真实星历计算。出生时间会影响上升、天顶与十二宫，请尽量精确。</p>
             <div class="compact-fields">
               <div>
                 <label for="astroBirthDate">生日</label>
@@ -309,18 +309,27 @@
               </div>
             </div>
             <label for="astroBirthCity">出生城市</label>
-            <input id="astroBirthCity" type="text" placeholder="城市即可，例如：上海" />
-            <label for="astroChartType">星盘类型</label>
-            <select id="astroChartType">
-              <option value="natal">本命盘</option>
-              <option value="synastry">合盘 / 比较盘</option>
-              <option value="composite">组合盘</option>
-              <option value="transit">流年盘</option>
-              <option value="solar-return">日返盘</option>
-              <option value="lunar-return">月返盘</option>
-              <option value="firdaria">法达盘</option>
-              <option value="profection">小限盘</option>
-            </select>
+            <input id="astroBirthCity" type="text" placeholder="例如：上海，或 Singapore" />
+            <div class="compact-fields">
+              <div>
+                <label for="astroChartType">星盘类型</label>
+                <select id="astroChartType">
+                  <option value="natal">本命盘</option>
+                  <option value="transit">本命盘 + 行运盘</option>
+                  <option value="synastry">合盘 / 比较盘</option>
+                  <option value="composite">组合盘</option>
+                </select>
+              </div>
+              <div>
+                <label for="astroHouseSystem">宫制</label>
+                <select id="astroHouseSystem">
+                  <option value="placidus">Placidus 普拉西德</option>
+                  <option value="whole-sign">Whole Sign 整宫制</option>
+                  <option value="equal">Equal 等宫制</option>
+                  <option value="koch">Koch 科赫</option>
+                </select>
+              </div>
+            </div>
             <details class="intake-details">
               <summary>合盘对象 / 推运目标资料</summary>
               <label for="astroPartnerName">对象称呼</label>
@@ -338,12 +347,12 @@
               <label for="astroPartnerBirthCity">对象出生城市</label>
               <input id="astroPartnerBirthCity" type="text" placeholder="城市即可，例如：北京" />
             </details>
-            <label for="astroTargetDate">推运 / 返照日期</label>
+            <label for="astroTargetDate">行运日期</label>
             <input id="astroTargetDate" type="date" />
-            <button class="button primary full" id="refreshAstrologyButton" type="button">生成/更新星盘</button>
+            <button class="button primary full" id="refreshAstrologyButton" type="button">生成专业星盘</button>
           </div>
           <div class="profile-reading astrology-reading" id="astrologyReading">
-            <p>请先在首页填写生日、出生时间和出生城市，然后生成个人星盘。</p>
+            <p>填写生日、准确出生时间和出生城市后，即可生成真实星历星盘。</p>
           </div>
         </div>
       </section>
@@ -647,9 +656,9 @@
       <button class="text-button" id="dismissInstallButton" type="button">稍后</button>
     </div>
 
-    <script src="astrology-skill.js?v=37"></script>
+    <script src="astrology-skill.js?v=49"></script>
     <script src="indian-astrology-skill.js?v=37"></script>
     <script src="tarot-skill.js?v=37"></script>
-    <script src="app.js?v=37"></script>
+    <script src="app.js?v=49"></script>
   </body>
 </html>

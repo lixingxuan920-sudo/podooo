@@ -18,7 +18,9 @@ PWA App：网站已经支持添加到手机主屏幕。重新部署后，用手�
 
 个人档案：可以填写称呼、生日、出生时间、出生城市和现居城市。为了隐私安全，不建议填写具体门牌地址。当前版本会基础推算太阳星座、生肖和年柱五行倾向，并把这些信息作为解读语境。真正精确的星盘需要天文星历，完整八字需要节气与农历换算，后续可以接入专业命盘库或 API。
 
-星盘 skill：`astrology-skill.js` 会根据生日、出生时间生成基础星盘视图，包括太阳、月亮、上升的近似位置、元素倾向和占星解读。当前为本地近似推算，不等同于专业天文星历排盘。
+西洋占星：网页通过 `/.netlify/functions/western-chart` 调用 Render 后端的 `/western/calculate`。后端使用 Swiss Ephemeris、出生城市经纬度、IANA 历史时区和所选宫制，计算热带黄道十大行星、北交点、上升、天顶、十二宫、逆行状态与主要相位；支持本命盘、本命＋行运叠盘、比较盘和组合盘。`astrology-skill.js` 负责把结构化数据绘制成响应式 SVG 星盘；原本地近似算法只保留给旧档案摘要，不再作为专业排盘结果。
+
+西占解读层：规则适配自 MIT 许可的 [aryaminus/astro](https://github.com/aryaminus/astro)，坚持“先计算、后解读”，并结合大三角、元素与模式、行星尊贵、宫主星、紧密相位和相位格局生成报告。来源与适配边界见 `WESTERN_ASTROLOGY_SKILL_SOURCE.md`。
 
 印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面。公网专业排盘由 `vedic-python-api` 提供，使用 Swiss Ephemeris、Lahiri Ayanamsa、Python 3.11.9、FastAPI 和 pyswisseph 生成 D1 本命盘、上升 Lagna、九曜、月宿 Nakshatra、Rahu/Ketu 和 Vimshottari Dasha。网页本地近似盘只作为后端不可用时的备用显示。
 

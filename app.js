@@ -251,6 +251,7 @@ els.astroBirthDate = document.querySelector("#astroBirthDate");
 els.astroBirthTime = document.querySelector("#astroBirthTime");
 els.astroBirthCity = document.querySelector("#astroBirthCity");
 els.astroChartType = document.querySelector("#astroChartType");
+els.astroHouseSystem = document.querySelector("#astroHouseSystem");
 els.astroPartnerName = document.querySelector("#astroPartnerName");
 els.astroPartnerBirthDate = document.querySelector("#astroPartnerBirthDate");
 els.astroPartnerBirthTime = document.querySelector("#astroPartnerBirthTime");
@@ -690,6 +691,7 @@ function persistProfileFromAstrologyFields() {
     birthTime: els.astroBirthTime.value,
     birthCity: els.astroBirthCity.value.trim(),
     astroChartType: els.astroChartType.value,
+    astroHouseSystem: els.astroHouseSystem.value,
     astroPartner: {
       name: els.astroPartnerName.value.trim(),
       birthDate: els.astroPartnerBirthDate.value,
@@ -1068,37 +1070,63 @@ async function renderAstrologyPage() {
   }
   const options = {
     chartType: els.astroChartType.value,
+    houseSystem: els.astroHouseSystem.value,
     partner,
     targetDate: els.astroTargetDate.value
   };
-  const chart = options.chartType === "composite"
-    ? window.AstrologySkill.buildComposite(profile, partner)
-    : window.AstrologySkill.buildChart(profile, options);
   els.astrologyReading.innerHTML = `
-    ${window.AstrologySkill.reading(profile, options)}
-    <div class="deepseek-reading" id="deepseekAstrologyReading">
-      <h3>DeepSeek 专业星盘解读</h3>
-      <p>正在连接 DeepSeek 生成更深入的星盘解读……</p>
+    <div class="astro-loading" role="status">
+      <span class="astro-loading-orbit" aria-hidden="true">☉</span>
+      <div>
+        <h3>正在计算真实星历</h3>
+        <p>定位出生城市、换算历史时区并计算行星、宫位与相位……</p>
+      </div>
     </div>
   `;
-  const deepseekBox = document.querySelector("#deepseekAstrologyReading");
-  if (!chart || !deepseekBox) return;
+
   try {
-    const response = await fetch("/.netlify/functions/deepseek-astrology", {
+    const chartResponse = await fetch("/.netlify/functions/western-chart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile, chart, options })
+      body: JSON.stringify({ profile, options })
     });
-    if (!response.ok) throw new Error("DeepSeek unavailable");
-    const data = await response.json();
-    deepseekBox.innerHTML = `
-      <h3>DeepSeek 专业星盘解读</h3>
-      ${formatReadingText(data.reading)}
+    const chartData = await chartResponse.json();
+    if (!chartResponse.ok || !chartData.ok) {
+      throw new Error(chartData.detail || chartData.error || "真实星历计算失败");
+    }
+    els.astrologyReading.innerHTML = `
+      ${window.AstrologySkill.professionalReading(chartData, options)}
+      <div class="deepseek-reading" id="deepseekAstrologyReading">
+        <h3>AI 专业解读</h3>
+        <p>正在根据真实星历数据生成完整解读……</p>
+      </div>
     `;
-  } catch {
-    deepseekBox.innerHTML = `
-      <h3>DeepSeek 专业星盘解读</h3>
-      <p>当前本地预览还没有读取到模型配置，所以先显示本地结构化解读。使用 ccswitch 时，请确保本地服务能读取 <strong>OPENAI_API_KEY / OPENAI_BASE_URL</strong> 或 <strong>CCSWITCH_API_KEY / CCSWITCH_BASE_URL</strong>；部署到 Netlify 时也要配置对应环境变量。</p>
+    const deepseekBox = document.querySelector("#deepseekAstrologyReading");
+    try {
+      const response = await fetch("/.netlify/functions/deepseek-astrology", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile, chart: chartData, options })
+      });
+      if (!response.ok) throw new Error("AI 解读服务不可用");
+      const data = await response.json();
+      deepseekBox.innerHTML = `
+        <h3>AI 专业解读</h3>
+        ${formatReadingText(data.reading)}
+      `;
+    } catch {
+      deepseekBox.innerHTML = `
+        <h3>AI 专业解读</h3>
+        <p>真实星盘已经生成；当前 AI 模型未连接，所以暂不显示长篇解读。</p>
+      `;
+    }
+  } catch (error) {
+    els.astrologyReading.innerHTML = `
+      <div class="astro-error" role="alert">
+        <h3>这次没有生成星盘</h3>
+        <p>${String(error.message || error)}</p>
+        <p>请检查出生日期、准确时间和城市名称后重试。</p>
+      </div>
     `;
   }
 }
@@ -2133,6 +2161,7 @@ function renderProfile() {
   els.astroBirthTime.value = profile.birthTime || "";
   els.astroBirthCity.value = profile.birthCity || "";
   els.astroChartType.value = profile.astroChartType || "natal";
+  els.astroHouseSystem.value = profile.astroHouseSystem || "placidus";
   els.astroPartnerName.value = profile.astroPartner?.name || "";
   els.astroPartnerBirthDate.value = profile.astroPartner?.birthDate || "";
   els.astroPartnerBirthTime.value = profile.astroPartner?.birthTime || "";
