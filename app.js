@@ -290,6 +290,12 @@ els.vedicPartnerBirthTime = document.querySelector("#vedicPartnerBirthTime");
 els.vedicPartnerBirthCity = document.querySelector("#vedicPartnerBirthCity");
 els.loadPdfIndianButton = document.querySelector("#loadPdfIndianButton");
 els.resolveIndianLocationButton = document.querySelector("#resolveIndianLocationButton");
+els.startVedicFormButton = document.querySelector("#startVedicFormButton");
+els.copyIndianReadingButton = document.querySelector("#copyIndianReadingButton");
+els.shareIndianReadingButton = document.querySelector("#shareIndianReadingButton");
+els.downloadIndianReadingButton = document.querySelector("#downloadIndianReadingButton");
+els.indianReadingProgress = document.querySelector("#indianReadingProgress");
+els.appMain = document.querySelector(".app-main");
 els.profileReading = document.querySelector("#profileReading");
 els.homeHistoryList = document.querySelector("#homeHistoryList");
 els.showHistoryButton = document.querySelector("#showHistoryButton");
@@ -378,11 +384,11 @@ function verifyLocalCode(account, code) {
 
 function getCurrentUser() {
   const stored = localStorage.getItem("lunaArcanaCurrentUser");
-  return normalizeUserName(stored || "访客");
+  return normalizeUserName(stored && stored !== "访客" ? stored : "Podo");
 }
 
 function isLoggedIn() {
-  return getCurrentUser() !== "访客";
+  return true;
 }
 
 function userStorageKey(base) {
@@ -398,17 +404,17 @@ function renderLoginState() {
     els.currentUserLabel.textContent = `当前用户：${user}`;
   }
   if (els.authScreen && els.appDashboard) {
-    els.authScreen.hidden = isLoggedIn();
-    els.appDashboard.hidden = !isLoggedIn();
+    els.authScreen.hidden = true;
+    els.appDashboard.hidden = false;
   }
 }
 
 function showAstraeaLanding() {
-  document.body.classList.add("astraea-landing-active");
-  if (els.astraeaHomePage) els.astraeaHomePage.hidden = false;
-  if (els.moduleChooserPage) els.moduleChooserPage.hidden = true;
-  setAstraeaTab(state.astraeaTab || "home");
-  renderAstraeaCarousel();
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
+  document.body.classList.remove("astraea-landing-active");
+  if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
+  if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
 }
 
 function showModuleChooser() {
@@ -417,6 +423,8 @@ function showModuleChooser() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   if (els.astraeaHomePage) els.astraeaHomePage.hidden = true;
   if (els.moduleChooserPage) els.moduleChooserPage.hidden = false;
@@ -565,19 +573,50 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function formatReadingText(text) {
-  const cleaned = String(text || "")
-    .replace(/^#{1,6}\s*/gm, "")
+function cleanReadingText(text) {
+  return String(text || "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/\*(.*?)\*/g, "$1")
-    .replace(/^\s*[-*]\s+/gm, "")
     .replace(/^\s*>+\s*/gm, "")
     .trim();
+}
+
+function formatReadingText(text) {
+  const cleaned = cleanReadingText(text);
   return escapeHtml(cleaned)
     .split(/\n{2,}/)
     .filter(Boolean)
     .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br>")}</p>`)
     .join("");
+}
+
+function splitBlueprintSections(text) {
+  const cleaned = cleanReadingText(text);
+  if (!cleaned) return [];
+  const headingPattern = /^(Executive Summary|执行摘要|核心摘要|总览|第[一二三四五六七八九十百0-9]+章(?:[：:\s].*)?|Chapter\s+\d+(?:[：:\s].*)?)$/i;
+  const sections = [];
+  let current = { title: "核心摘要", body: [] };
+
+  cleaned.split("\n").forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (headingPattern.test(line)) {
+      if (current.body.some(Boolean)) sections.push(current);
+      current = { title: line.replace(/[：:]$/, ""), body: [] };
+      return;
+    }
+    current.body.push(rawLine);
+  });
+  if (current.body.some(Boolean)) sections.push(current);
+
+  if (sections.length > 1) return sections;
+  const paragraphs = cleaned.split(/\n{2,}/).filter(Boolean);
+  if (paragraphs.length < 4) return sections;
+  return paragraphs.reduce((groups, paragraph, index) => {
+    const groupIndex = Math.floor(index / 3);
+    if (!groups[groupIndex]) groups[groupIndex] = { title: groupIndex === 0 ? "核心摘要" : `深度解读 ${groupIndex + 1}`, body: [] };
+    groups[groupIndex].body.push(paragraph);
+    return groups;
+  }, []);
 }
 
 async function sendVerificationCode() {
@@ -1089,16 +1128,20 @@ async function renderAstrologyPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ profile, chart, options })
     });
-    if (!response.ok) throw new Error("DeepSeek unavailable");
+    if (!response.ok) {
+      const issue = await response.json().catch(() => ({}));
+      throw new Error(issue.error || "DeepSeek unavailable");
+    }
     const data = await response.json();
     deepseekBox.innerHTML = `
       <h3>DeepSeek 专业星盘解读</h3>
       ${formatReadingText(data.reading)}
     `;
-  } catch {
+  } catch (error) {
+    const missingKey = /key is not configured/i.test(error?.message || "");
     deepseekBox.innerHTML = `
       <h3>DeepSeek 专业星盘解读</h3>
-      <p>当前本地预览还没有读取到模型配置，所以先显示本地结构化解读。使用 ccswitch 时，请确保本地服务能读取 <strong>OPENAI_API_KEY / OPENAI_BASE_URL</strong> 或 <strong>CCSWITCH_API_KEY / CCSWITCH_BASE_URL</strong>；部署到 Netlify 时也要配置对应环境变量。</p>
+      <p>${missingKey ? "当前预览环境没有读取到 DEEPSEEK_API_KEY；正式环境中的 DeepSeek 不受影响。请在 Netlify 将该变量的作用域同时开放给 Deploy Preview。" : "DeepSeek 暂时没有返回结果，页面已保留本地结构化解读，请稍后重试。"}</p>
     `;
   }
 }
@@ -1156,7 +1199,7 @@ async function fetchVedicSkillResult(profile, options, chart) {
     if (!response.ok) {
       return {
         ok: false,
-        bridge: { source: "web-fallback", calculatorReady: false, reason: "专业排盘接口暂时不可用。" },
+        bridge: { source: "professional-backend", calculatorReady: false, reason: "专业星历计算暂时失败，请稍后重试。" },
         structuredDataMarkdown: "",
         calculationMeta: null
       };
@@ -1165,7 +1208,7 @@ async function fetchVedicSkillResult(profile, options, chart) {
   } catch {
     return {
       ok: false,
-      bridge: { source: "web-fallback", calculatorReady: false, reason: "当前页面无法连接本机 Python 排盘服务。" },
+      bridge: { source: "professional-backend", calculatorReady: false, reason: "专业星历计算暂时失败，请稍后重试。" },
       structuredDataMarkdown: "",
       calculationMeta: null
     };
@@ -1225,9 +1268,14 @@ function saveChartCache(signature, chartData) {
 async function getOrCreateVedicChartData(profile, options, chart) {
   const signature = stableVedicSignature(profile, options);
   const cache = getChartCache();
-  if (cache[signature]) return cache[signature];
+  if (cache[signature]?.skillResult?.ok && cache[signature]?.professionalChart && cache[signature]?.calculationMeta?.commit === "7a6e33e23dc1f45107af2f249848241bb4d22b67") {
+    return cache[signature];
+  }
   const skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null)
     || await fetchVedicSkillResult(profile, options, chart);
+  if (!skillResult?.ok || !skillResult.professionalChart || skillResult.calculationMeta?.commit !== "7a6e33e23dc1f45107af2f249848241bb4d22b67") {
+    throw new Error(skillResult?.bridge?.reason || "专业星历计算暂时失败，请稍后重试。");
+  }
   state.indianSkillResult = skillResult;
   const chartData = {
     signature,
@@ -1237,6 +1285,8 @@ async function getOrCreateVedicChartData(profile, options, chart) {
     skillResult,
     structuredData: chart?.structuredData || {},
     structuredDataMarkdown: skillResult?.structuredDataMarkdown || "",
+    professionalChart: skillResult?.professionalChart || null,
+    evidenceLedger: skillResult?.evidenceLedger || null,
     calculationMeta: skillResult?.calculationMeta || null,
     pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
   };
@@ -1291,25 +1341,60 @@ function findMasterReading(profile, options) {
 }
 
 function renderVedicProgress(activeStep = 0) {
+  const messages = [
+    "Reading your birth chart...",
+    "Calculating planetary positions...",
+    "Interpreting Nakshatras...",
+    "Consulting ancient wisdom...",
+    "Generating AI insights...",
+    "Shaping your Life Blueprint...",
+    "Finishing your personal reading..."
+  ];
+  const safeStep = Math.min(Math.max(0, activeStep), messages.length - 1);
   return `
-    <div class="vedic-progress compact">
-      <span class="active">
-        <b>${Math.max(1, activeStep + 1)}</b>
-        正在生成 Life Blueprint，请保持页面打开
-      </span>
+    <div class="vedic-loading-stage" role="status" aria-live="polite">
+      <div class="vedic-loading-cosmos" aria-hidden="true">
+        <div class="vedic-loading-orbit"></div>
+        <div class="vedic-loading-moon">
+          <svg class="lucide" viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 7 7c0-3-2-5-4-6 0 5-4 9-9 9-1 0-1 0-1-.1A7 7 0 0 0 12 3Z" /></svg>
+        </div>
+      </div>
+      <p class="vedic-kicker">A moment of reflection</p>
+      <h4>${messages[safeStep]}</h4>
+      <div class="vedic-loading-track"><span style="width:${Math.max(12, ((safeStep + 1) / messages.length) * 100)}%"></span></div>
+      <p>正在生成完整 Life Blueprint，请保持页面打开。通常需要 2–5 分钟。</p>
     </div>
-    <p class="disclaimer">这一步已交给 Render 长任务处理，通常需要 2-5 分钟。完成后会生成一份完整专业长报告。</p>
   `;
 }
 
 function renderBlueprintReport(record) {
+  const sections = splitBlueprintSections(record.masterReading);
   return `
     <article class="blueprint-report">
+      <header class="blueprint-report-header">
+        <div>
+          <span class="blueprint-status"><i></i>完整解读已保存</span>
+          <h4>你的 Life Blueprint</h4>
+          <p>长解读已经按章节整理。点击章节即可展开阅读，后续追问会继续引用这份报告。</p>
+        </div>
+        <span class="blueprint-count">${sections.length || 1} 个章节</span>
+      </header>
       <div class="blueprint-toolbar">
-        <span>完整长报告已自动保存</span>
-        <button class="text-button" type="button" disabled>导出 PDF（后续）</button>
+        <span>首次生成后会保存在当前设备</span>
+        <span>可使用页面上方的 PDF 按钮导出</span>
       </div>
-      <div class="typewriter-text">${formatReadingText(record.masterReading)}</div>
+      <div class="blueprint-chapters">
+        ${sections.length ? sections.map((section, index) => `
+          <details class="blueprint-chapter" ${index === 0 ? "open" : ""}>
+            <summary>
+              <span class="blueprint-index">${String(index + 1).padStart(2, "0")}</span>
+              <strong>${escapeHtml(section.title)}</strong>
+              <svg class="lucide" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </summary>
+            <div class="typewriter-text">${formatReadingText(section.body.join("\n"))}</div>
+          </details>
+        `).join("") : `<div class="typewriter-text">${formatReadingText(record.masterReading)}</div>`}
+      </div>
     </article>
   `;
 }
@@ -1362,6 +1447,17 @@ async function createBlueprintJob(profile, options, chart, chartData) {
   }, 30000);
 }
 
+async function generateBlueprintDirect(profile, options, chart, chartData) {
+  return postJsonWithTimeout("/api/generate-blueprint", {
+    profile,
+    options,
+    chart,
+    chartData,
+    skillResult: chartData?.skillResult || null,
+    pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
+  }, 58000);
+}
+
 async function waitForBlueprintJob(jobId, onProgress) {
   for (let attempt = 0; attempt < 90; attempt += 1) {
     const response = await fetch(`/api/blueprint/${encodeURIComponent(jobId)}`);
@@ -1385,11 +1481,34 @@ async function renderIndianPage() {
     els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
     return;
   }
-  const options = getIndianOptions();
+  const options = {
+    ...getIndianOptions(),
+    professionalChart: state.indianSkillResult?.professionalChart || null
+  };
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   els.indianReading.innerHTML = window.IndianAstrologySkill.chartView(profile, options);
+  const blueprintActions = els.indianReading.querySelector(".chart-actions");
+  if (blueprintActions) {
+    blueprintActions.outerHTML = `
+      <section class="vedic-blueprint-entry" aria-labelledby="vedicBlueprintEntryTitle">
+        <div class="vedic-blueprint-entry-copy">
+          <span class="vedic-blueprint-label">02 · 深度解读</span>
+          <h4 id="vedicBlueprintEntryTitle">生成完整 Life Blueprint</h4>
+          <p>系统会结合 D1、月亮、月宿、业力轴与大运，整理为可折叠的章节长报告。首次生成约需 2–5 分钟，之后可直接读取并继续追问。</p>
+          <div class="vedic-blueprint-points">
+            <span>完整章节</span><span>自动保存</span><span>持续咨询</span>
+          </div>
+        </div>
+        <button class="button primary" id="startIndianReadingButton" type="button">开始生成完整解读</button>
+      </section>
+    `;
+  }
   if (!chart) return;
-  warmVedicSkillResult(profile, options, chart);
+  if (!options.professionalChart) {
+    warmVedicSkillResult(profile, options, chart).then((skillResult) => {
+      if (skillResult?.ok && skillResult.professionalChart) renderIndianPage();
+    });
+  }
 }
 
 async function renderIndianInterpretation() {
@@ -1399,7 +1518,10 @@ async function renderIndianInterpretation() {
     els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
     return;
   }
-  const options = getIndianOptions();
+  const options = {
+    ...getIndianOptions(),
+    professionalChart: state.indianSkillResult?.professionalChart || null
+  };
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   const deepseekBox = document.querySelector("#deepseekIndianReading");
   if (!chart || !deepseekBox) return;
@@ -1437,15 +1559,26 @@ async function renderIndianInterpretation() {
     chartData = await getOrCreateVedicChartData(profile, options, chart);
     activeProgress = 3;
 
-    const started = await createBlueprintJob(profile, options, chart, chartData);
-    const job = await waitForBlueprintJob(started.jobId, (current) => {
-      activeProgress = Math.max(activeProgress, Math.floor((current.progress || 0) / 15));
+    let job = null;
+    try {
+      const started = await createBlueprintJob(profile, options, chart, chartData);
+      job = await waitForBlueprintJob(started.jobId, (current) => {
+        activeProgress = Math.max(activeProgress, Math.floor((current.progress || 0) / 15));
+        deepseekBox.innerHTML = `
+          <h3>Life Blueprint</h3>
+          ${renderVedicProgress(activeProgress)}
+        `;
+      });
+    } catch {
+      activeProgress = 5;
       deepseekBox.innerHTML = `
         <h3>Life Blueprint</h3>
         ${renderVedicProgress(activeProgress)}
       `;
-    });
+      job = await generateBlueprintDirect(profile, options, chart, chartData);
+    }
     const masterReading = job.blueprint || "";
+    if (!masterReading.trim()) throw new Error("完整解读暂时没有返回有效内容");
     const masterRecord = {
       id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
       signature: stableVedicSignature(profile, options),
@@ -1469,31 +1602,16 @@ async function renderIndianInterpretation() {
     renderIndianBlueprint(masterRecord, "这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。");
   } catch (error) {
     window.clearInterval(progressTimer);
-    const fallbackReading = window.IndianAstrologySkill.reading(profile, options);
-    const masterRecord = {
-      id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
-      signature: stableVedicSignature(profile, options),
-      userId: getCurrentUser(),
-      birthData: profile,
-      chartJson: chart,
-      chartData,
-      skillResult: chartData?.skillResult || null,
-      masterReading: fallbackReading.replace(/<[^>]+>/g, "\n"),
-      summary: "DeepSeek 暂时不可用，已显示本地基础解读。配置模型后可重新生成更完整的 Life Blueprint。",
-      favoriteChapters: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    state.indianMasterReading = masterRecord;
-    state.indianContext = { profile, chart, options, skillResult: chartData?.skillResult || null, chartData, masterReading: masterRecord.masterReading };
+    state.indianMasterReading = null;
+    state.indianContext = null;
     state.indianChatHistory = [];
-    const reason = error?.message ? `原因：${error.message}` : "原因：长任务暂时没有返回。";
+    const reason = error?.message ? `原因：${error.message}` : "原因：专业星历或完整解读服务暂时没有返回。";
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
-      <p class="disclaimer">Render 长任务没有生成专业版，先显示本地基础蓝图，避免页面卡住。${escapeHtml(reason)}</p>
-      ${fallbackReading}
-      ${indianChatMarkup()}
+      <p class="disclaimer">专业星历计算暂时失败，请稍后重试。不会使用本地近似星盘或假报告。${escapeHtml(reason)}</p>
+      <button class="button primary" id="retryIndianReadingButton" type="button">重试专业计算</button>
     `;
+    document.querySelector("#retryIndianReadingButton")?.addEventListener("click", () => renderIndianInterpretation());
   }
 }
 
@@ -1587,6 +1705,8 @@ function showAstrologyFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   persistProfileFromFields();
   renderAstrologyPage();
@@ -1597,6 +1717,7 @@ function showAstrologyFlow() {
   els.astrologySection.hidden = false;
   location.hash = "astrology";
   updateActiveTab("astrology");
+  setExperienceStage("astrology", "form");
 }
 
 function showIndianFlow() {
@@ -1605,7 +1726,9 @@ function showIndianFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
   document.body.classList.remove("astraea-landing-active");
+  document.body.classList.add("indian-wellness-active");
   persistProfileFromFields();
   renderIndianPage();
   els.home.hidden = true;
@@ -1615,9 +1738,12 @@ function showIndianFlow() {
   els.indianAstrologySection.hidden = false;
   location.hash = "indianAstrology";
   updateActiveTab("indianAstrology");
+  setExperienceStage("vedic", "intro");
 }
 
 function showHomeFlow() {
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = false;
   els.drawSection.hidden = true;
@@ -1637,6 +1763,8 @@ function showHistoryFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   renderHistory();
   els.home.hidden = true;
@@ -1655,6 +1783,8 @@ function showTarotFlow() {
     showHomeFlow();
     return;
   }
+  document.body.classList.add("cream-app-active");
+  document.body.classList.remove("indian-wellness-active");
   document.body.classList.remove("astraea-landing-active");
   els.home.hidden = true;
   els.astrologySection.hidden = true;
@@ -1668,6 +1798,19 @@ function showTarotFlow() {
   renderDeck();
   location.hash = "draw";
   updateActiveTab("draw");
+  setExperienceStage("tarot", "question");
+}
+
+function setExperienceStage(experience, stage) {
+  document.querySelectorAll(`[data-experience-panel="${experience}"]`).forEach((panel) => {
+    panel.hidden = panel.dataset.stage !== stage;
+  });
+  document.querySelectorAll(`[data-experience-tab="${experience}"]`).forEach((button) => {
+    const active = button.dataset.stage === stage;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  document.querySelector(".app-main")?.scrollTo({ top: 0 });
 }
 
 function enterDrawFlow() {
@@ -1683,6 +1826,7 @@ function enterDrawFlow() {
     return;
   }
   persistProfileFromFields();
+  setExperienceStage("tarot", "spread");
   els.home.hidden = true;
   els.astrologySection.hidden = true;
   els.indianAstrologySection.hidden = true;
@@ -2616,8 +2760,75 @@ document.querySelectorAll("[data-tab-target]").forEach((tab) => {
     if (target === "history") showHistoryFlow();
   });
 });
-els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
-els.refreshIndianButton.addEventListener("click", renderIndianPage);
+els.refreshAstrologyButton.addEventListener("click", async () => {
+  await renderAstrologyPage();
+  setExperienceStage("astrology", "reading");
+});
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-experience-tab]");
+  if (!tab) return;
+  setExperienceStage(tab.dataset.experienceTab, tab.dataset.stage);
+});
+els.startVedicFormButton?.addEventListener("click", () => {
+  setExperienceStage("vedic", "form");
+  window.setTimeout(() => els.indianBirthDate?.focus(), 250);
+});
+
+els.refreshIndianButton.addEventListener("click", async () => {
+  const label = els.refreshIndianButton.querySelector("span");
+  const originalLabel = label?.textContent || "Read my chart";
+  els.refreshIndianButton.disabled = true;
+  els.refreshIndianButton.setAttribute("aria-busy", "true");
+  try {
+    if (label) label.textContent = "正在生成星盘…";
+    await renderIndianPage();
+    setExperienceStage("vedic", "reading");
+    if (label) label.textContent = "正在生成完整解读…";
+    await renderIndianInterpretation();
+  } finally {
+    if (label) label.textContent = originalLabel;
+    els.refreshIndianButton.disabled = false;
+    els.refreshIndianButton.removeAttribute("aria-busy");
+  }
+});
+
+function setVedicToolbarFeedback(button, message) {
+  const label = button?.querySelector("span");
+  if (!button || !label) return;
+  const original = label.textContent;
+  label.textContent = message;
+  window.setTimeout(() => { label.textContent = original; }, 1500);
+}
+
+els.copyIndianReadingButton?.addEventListener("click", async () => {
+  const text = els.indianReading?.innerText.trim();
+  if (!text) return;
+  await navigator.clipboard?.writeText(text);
+  setVedicToolbarFeedback(els.copyIndianReadingButton, "已复制");
+});
+
+els.shareIndianReadingButton?.addEventListener("click", async () => {
+  const text = els.indianReading?.innerText.trim().slice(0, 420) || "我的 Podo 印度占星解读";
+  if (navigator.share) {
+    await navigator.share({ title: "My Podo Reading", text, url: window.location.href }).catch(() => {});
+  } else {
+    await navigator.clipboard?.writeText(window.location.href);
+  }
+  setVedicToolbarFeedback(els.shareIndianReadingButton, "已分享");
+});
+
+els.downloadIndianReadingButton?.addEventListener("click", () => {
+  window.print();
+});
+
+els.appMain?.addEventListener("scroll", () => {
+  if (!document.body.classList.contains("indian-wellness-active") || !els.indianReadingProgress) return;
+  const total = els.appMain.scrollHeight - els.appMain.clientHeight;
+  const progress = total > 0 ? (els.appMain.scrollTop / total) * 100 : 0;
+  const bar = els.indianReadingProgress.querySelector("span");
+  if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+}, { passive: true });
+
 els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
 els.loadJhoraSouthGraftonButton.addEventListener("click", loadJhoraSouthGraftonSample);
 els.resolveIndianLocationButton.addEventListener("click", resolveIndianLocation);
@@ -2648,8 +2859,18 @@ els.indianBirthTime.addEventListener("change", () => {
   if (second) els.indianBirthSecond.value = second;
 });
 els.indianReading.addEventListener("click", (event) => {
-  if (event.target.closest("#startIndianReadingButton")) {
-    renderIndianInterpretation();
+  const startButton = event.target.closest("#startIndianReadingButton");
+  if (startButton) {
+    startButton.disabled = true;
+    startButton.setAttribute("aria-busy", "true");
+    const original = startButton.textContent;
+    startButton.textContent = "正在生成完整解读…";
+    renderIndianInterpretation().finally(() => {
+      if (!startButton.isConnected) return;
+      startButton.disabled = false;
+      startButton.removeAttribute("aria-busy");
+      startButton.textContent = original;
+    });
   }
   const topicButton = event.target.closest("[data-indian-topic]");
   if (topicButton) {
@@ -2706,7 +2927,12 @@ els.profileForm.addEventListener("submit", (event) => {
 els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   await loginAccount();
-  if (isLoggedIn()) showAstraeaLanding();
+  if (isLoggedIn()) {
+    const pendingView = localStorage.getItem("lunaArcanaPendingView");
+    localStorage.removeItem("lunaArcanaPendingView");
+    if (pendingView === "indianAstrology") showIndianFlow();
+    else showAstraeaLanding();
+  }
   state.selectedCards = [];
   state.currentReading = null;
   state.favorite = false;
@@ -2722,7 +2948,7 @@ els.showProfileButton.addEventListener("click", () => {
   }
 });
 els.logoutButton.addEventListener("click", () => {
-  localStorage.setItem("lunaArcanaCurrentUser", "访客");
+  localStorage.setItem("lunaArcanaCurrentUser", "Podo");
   state.selectedCards = [];
   state.currentReading = null;
   state.favorite = false;
@@ -2785,7 +3011,19 @@ renderHistory();
 renderProfile();
 renderAstraeaCarousel();
 const initialView = location.hash.replace("#", "") || "home";
-if (initialView === "home" && isLoggedIn()) {
+if (initialView === "indianAstrology") {
+  if (isLoggedIn()) showIndianFlow();
+  else {
+    localStorage.setItem("lunaArcanaPendingView", "indianAstrology");
+    showHomeFlow();
+  }
+} else if (initialView === "astrology" && isLoggedIn()) {
+  showAstrologyFlow();
+} else if (initialView === "draw" && isLoggedIn()) {
+  showTarotFlow();
+} else if (initialView === "history" && isLoggedIn()) {
+  showHistoryFlow();
+} else if (initialView === "home" && isLoggedIn()) {
   showAstraeaLanding();
 }
 updateActiveTab(initialView);
