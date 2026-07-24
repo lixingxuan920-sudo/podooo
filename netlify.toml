@@ -6,6 +6,12 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[context.deploy-preview.environment]
+  VEDIC_API_URL = "https://podooo.onrender.com"
+
+[context.branch-deploy.environment]
+  VEDIC_API_URL = "https://podooo.onrender.com"
+
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["sweph"]
