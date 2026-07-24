@@ -25,7 +25,9 @@ function getModelConfig() {
   const selected = providers[provider] || providers.deepseek;
   const apiKey = selected.apiKey;
   const baseUrl = selected.baseUrl.replace(/\/$/, "");
-  const model = selected.model;
+  const model = selected.model === "deepseek-chat" && !baseUrl.includes("api.deepseek.com")
+    ? "deepseek-v4-flash"
+    : selected.model;
   const chatUrl = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
   return { apiKey, chatUrl, model, provider };
 }
