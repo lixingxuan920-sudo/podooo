@@ -52,8 +52,8 @@
   ];
 
   const vedicSkillRuntime = {
-    sourceRepo: "CNWU16/vedic-astro-skills",
-    sourceUrl: "https://github.com/CNWU16/vedic-astro-skills",
+    sourceRepo: "lixingxuan920-sudo/vedic-astro-skills",
+    sourceUrl: "https://github.com/lixingxuan920-sudo/vedic-astro-skills",
     adapter: "web-vedic-skill-adapter",
     calculatorFoundation: "vedic-calculator",
     canonicalOutput: "structured_data.md",
@@ -382,6 +382,148 @@
     return chart;
   }
 
+  function buildChartFromSkill(profile, options = {}, professionalChart = null, calculationMeta = null) {
+    if (!profile.birthDate || !professionalChart?.lagna || !professionalChart?.planets) return null;
+    const protocol = skillProtocols[options.vedicModule] || skillProtocols.reader;
+    const planetNames = {
+      sun: "Sun",
+      moon: "Moon",
+      mars: "Mars",
+      mercury: "Mercury",
+      jupiter: "Jupiter",
+      venus: "Venus",
+      saturn: "Saturn",
+      rahu: "Rahu",
+      ketu: "Ketu"
+    };
+    const lagnaIndex = Number(professionalChart.lagna.sign_idx);
+    const placements = grahas.map((graha) => {
+      const source = graha.key === "lagna"
+        ? professionalChart.lagna
+        : professionalChart.planets[planetNames[graha.key]];
+      const signIndex = Number(source?.sign_idx);
+      return {
+        ...graha,
+        signIndex,
+        sign: rashi[signIndex],
+        house: graha.key === "lagna" ? 1 : Number(source?.house),
+        degree: source?.deg_str || "",
+        longitude: source?.longitude,
+        retrograde: Boolean(source?.retrograde),
+        nakshatra: source?.nakshatra || null,
+        dignity: professionalChart.dignity?.[planetNames[graha.key]]?.compound || ""
+      };
+    });
+    if (placements.some((item) => !Number.isInteger(item.signIndex))) return null;
+
+    const divisionInfo = {
+      D1: ["D-1", "Rasi", "本命与整体人生"],
+      D2: ["D-2", "Hora", "财富与资源"],
+      D3: ["D-3", "Drekkana", "手足、勇气、行动"],
+      D4: ["D-4", "Chaturthamsha", "房产、根基、内在安全"],
+      D5: ["D-5", "Panchamsha", "权力、声望与创造表达"],
+      D7: ["D-7", "Saptamsha", "子女、创造力、延续"],
+      D9: ["D-9", "Navamsa", "婚姻、灵魂成熟、幸运"],
+      D10: ["D-10", "Dasamsa", "事业、公众角色"],
+      D12: ["D-12", "Dwadasamsa", "父母、家族模式"],
+      D16: ["D-16", "Shodasamsa", "舒适、车辆、生活品质"],
+      D20: ["D-20", "Vimsamsa", "修行与精神道路"],
+      D24: ["D-24", "Chaturvimsamsa", "教育与知识"],
+      D27: ["D-27", "Bhamsa", "力量与弱点"],
+      D30: ["D-30", "Trimshamsa", "隐性压力、困难模式"],
+      D60: ["D-60", "Shastiamsa", "深层业力与根源倾向"]
+    };
+    const divisionalCharts = Object.entries(professionalChart.divisional_charts || {})
+      .filter(([, data]) => data && !data.error)
+      .map(([key, data]) => {
+        const [code, name, focus] = divisionInfo[key] || [key, key, "专业分盘"];
+        const lagnaSignIndex = Number(data.Lagna?.sign_idx);
+        const moonSignIndex = Number(data.Moon?.sign_idx);
+        return {
+          code,
+          name,
+          focus,
+          lagnaSign: rashi[lagnaSignIndex] || data.Lagna?.sign || "—",
+          moonSign: rashi[moonSignIndex] || data.Moon?.sign || "—",
+          keyGraha: data,
+          source: "vedic-calculator"
+        };
+      });
+    const dashaTimeline = (professionalChart.dashas || []).map((item) => ({
+      lord: item.planet,
+      from: item.start,
+      to: item.end,
+      theme: item.is_current ? `${item.planet} 当前大运` : `${item.planet} 大运`,
+      isCurrent: Boolean(item.is_current),
+      antardashas: item.antardashas || []
+    }));
+    const strengthSummary = Object.entries(professionalChart.shadbala || {})
+      .filter(([, value]) => value && typeof value === "object" && Number.isFinite(Number(value.total_rupas)))
+      .map(([name, value]) => ({
+        graha: name,
+        sign: professionalChart.planets[name]?.sign || "",
+        house: professionalChart.planets[name]?.house || "",
+        shadbala: Number(value.total_rupas).toFixed(2),
+        strengthPct: Number(value.strength_pct || 0).toFixed(1),
+        dignity: professionalChart.dignity?.[name]?.compound || value.classification || ""
+      }));
+    const ashtakavarga = Array.from({ length: 12 }, (_, index) => {
+      const item = professionalChart.sav_by_house?.[index + 1] || {};
+      return {
+        house: index + 1,
+        sign: rashi[(lagnaIndex + index) % 12],
+        bindu: Number(item.value || 0)
+      };
+    });
+    const moonNakshatra = professionalChart.planets.Moon?.nakshatra;
+    const birthDate = new Date(`${profile.birthDate}T12:00:00`);
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const chart = {
+      system: "south-indian-rashi",
+      ayanamsa: `TRUE_CITRA / Lahiri (${Number(professionalChart.ayanamsa).toFixed(6)}°)`,
+      skillRuntime: vedicSkillRuntime,
+      skillProtocol: protocol,
+      calculationMeta,
+      professionalChart,
+      preciseBirth: {
+        date: profile.birthDate || "",
+        time: formattedBirthTime(profile),
+        seconds: profile.birthSecond || "",
+        place: profile.birthCity || "",
+        longitude: profile.longitude || "",
+        latitude: profile.latitude || "",
+        timezone: calculationMeta?.timezone || profile.timezone || "",
+        ayanamsa: "TRUE_CITRA / Lahiri",
+        nodeMode: "Mean Node"
+      },
+      lagna: lagnaIndex,
+      nakshatra: moonNakshatra
+        ? `${moonNakshatra.name} · Pada ${moonNakshatra.pada}`
+        : "—",
+      panchanga: {
+        weekday: weekdays[birthDate.getDay()],
+        tithi: "calculator未提供",
+        nakshatra: moonNakshatra?.name || "—",
+        yoga: "calculator未提供",
+        karana: "calculator未提供",
+        hora: "calculator未提供"
+      },
+      placements,
+      divisionalCharts,
+      dashaTimeline,
+      strengthSummary,
+      ashtakavarga,
+      partnerChart: null
+    };
+    chart.structuredData = buildStructuredData(profile, chart, options);
+    chart.structuredData.metadata.calculatorCommit = professionalChart.provenance?.commit || "";
+    chart.structuredData.calculation_settings.precisionMode = "vedic-calculator-v7.0-fail-fast";
+    chart.structuredData.calculation_settings.professionalBackendNeeded = false;
+    chart.structuredData.validation.savTotal = professionalChart.validation?.savTotal;
+    chart.structuredData.validation.savValid = professionalChart.validation?.savValid;
+    return chart;
+  }
+
   function buildPanchanga(profile, nakIndex) {
     const date = new Date(`${profile.birthDate || "2000-01-01"}T12:00:00`);
     const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -452,8 +594,8 @@
     }));
   }
 
-  function southIndianChart(profile) {
-    const chart = buildChart(profile);
+  function southIndianChart(profile, suppliedChart = null) {
+    const chart = suppliedChart || buildChart(profile);
     if (!chart) return "";
     return `
       <div class="vedic-chart south-indian-chart" aria-label="南印度式 Rashi 命盘">
@@ -483,7 +625,7 @@
         ${chart.placements.map((item) => `
           <article>
             <strong>${item.abbr} ${item.name}</strong>
-            <span>${item.sign} · 第${item.house}宫</span>
+            <span>${item.sign} · 第${item.house}宫${item.degree ? ` · ${item.degree}` : ""}${item.retrograde ? " · 逆行" : ""}</span>
             <p>${item.role}</p>
           </article>
         `).join("")}
@@ -625,8 +767,8 @@
     `;
   }
 
-  function chartView(profile, options = {}) {
-    const chart = buildChart(profile, options);
+  function chartView(profile, options = {}, suppliedChart = null) {
+    const chart = suppliedChart || buildChart(profile, options);
     if (!chart) {
       return "<p>请先填写生日、出生时间和出生城市，然后生成印度星盘。</p>";
     }
@@ -637,20 +779,28 @@
     const hasCoordinates = Boolean(profile.latitude && profile.longitude);
     return `
       <div class="vedic-chart-panel">
-        <div class="astro-tags">
-          <span>上升 ${lagna.sign}</span>
-          <span>月亮 ${moon.sign}</span>
-          <span>${chart.nakshatra}</span>
-          <span>Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+        <div class="vedic-chart-hero-card">
+          <div class="vedic-chart-overview">
+            <p class="vedic-kicker">Birth chart · D1</p>
+            <h3>Your celestial signature</h3>
+            <p>以柔和、清晰的方式查看构成本次解读的核心落点。</p>
+            <div class="astro-tags">
+              <span>上升 Ascendant · ${lagna.sign}</span>
+              <span>月亮 Moon · ${moon.sign}</span>
+              <span>月宿 Nakshatra · ${chart.nakshatra}</span>
+              <span>业力轴 · Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+              ${chart.calculationMeta?.engine === "vedic-calculator" ? "<span>vedic-calculator v7.0 · Lahiri</span>" : ""}
+            </div>
+            <div class="vedic-birth-line">
+              <strong>${profile.birthCity || "出生地未填写"}</strong>
+              <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
+              <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
+            </div>
+          </div>
+          ${southIndianChart(profile, chart)}
         </div>
-        <div class="vedic-birth-line">
-          <strong>${profile.birthCity || "出生地未填写"}</strong>
-          <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
-          <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
-        </div>
-        ${southIndianChart(profile)}
-        <details class="vedic-data-panel complete-chart-panel" open>
-          <summary>完整印度星盘数据</summary>
+        <details class="vedic-data-panel complete-chart-panel">
+          <summary>展开完整印度星盘数据</summary>
           ${chartTable(chart)}
           ${computedDataPanel(chart)}
         </details>
@@ -696,6 +846,7 @@
 
   window.IndianAstrologySkill = {
     buildChart,
+    buildChartFromSkill,
     chartView,
     reading: localReading,
     southIndianChart,

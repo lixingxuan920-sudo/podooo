@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { calculateVedicChart } = require("./vedic-ephemeris.js");
 
 const REQUIRED_SKILLS = [
   "vedic-calculator",
@@ -361,45 +362,62 @@ print(json.dumps({
   }
 }
 
-async function runRemoteCalculator(payload) {
-  const baseUrl = (process.env.VEDIC_API_URL || "").replace(/\/$/, "");
-  if (!baseUrl) {
-    return { ok: false, reason: "未配置 VEDIC_API_URL。" };
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number(process.env.VEDIC_API_TIMEOUT_MS || 90000));
+function runBundledCalculator(payload) {
   try {
-    const response = await fetch(`${baseUrl}/calculate`, {
+    return calculateVedicChart(payload.profile || {});
+  } catch (error) {
+    return {
+      ok: false,
+      reason: `内置 Swiss Ephemeris 计算失败：${error.message}`
+    };
+  }
+}
+
+function vedicApiBaseUrl() {
+  return (process.env.VEDIC_API_URL || "https://podooo.onrender.com").replace(/\/$/, "");
+}
+
+async function runRemoteCalculator(payload) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 55000);
+  try {
+    const response = await fetch(`${vedicApiBaseUrl()}/calculate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(process.env.VEDIC_API_KEY ? { "X-Vedic-Api-Key": process.env.VEDIC_API_KEY } : {})
+        ...(process.env.VEDIC_API_KEY
+          ? { "X-Vedic-Api-Key": process.env.VEDIC_API_KEY }
+          : {})
       },
       body: JSON.stringify(payload),
       signal: controller.signal
     });
-    const text = await response.text();
     if (!response.ok) {
       return {
         ok: false,
-        reason: `公网 Python 排盘接口返回 ${response.status}: ${text.slice(0, 500)}`
+        reason: `vedic-calculator API returned HTTP ${response.status}.`
       };
     }
-    const data = JSON.parse(text);
-    return {
-      ok: Boolean(data.ok),
-      structuredDataMarkdown: data.structuredDataMarkdown || "",
-      calculationMeta: data.calculationMeta || null,
-      reason: data.ok ? "" : "公网 Python 排盘接口未返回有效结果。"
-    };
+    const data = await response.json();
+    const canonical = data?.calculationMeta?.engine === "vedic-calculator"
+      && data?.professionalChart?.provenance?.commit
+      && data?.structuredDataMarkdown;
+    if (!canonical) {
+      return {
+        ok: false,
+        reason: "排盘服务尚未运行 vedic-calculator v7.0，拒绝使用旧版近似结果。"
+      };
+    }
+    return { ok: true, ...data };
   } catch (error) {
     return {
       ok: false,
-      reason: `公网 Python 排盘接口不可用：${error.message}`
+      reason: error.name === "AbortError"
+        ? "vedic-calculator API 计算超时。"
+        : `vedic-calculator API 不可用：${error.message}`
     };
   } finally {
-    clearTimeout(timer);
+    clearTimeout(timeout);
   }
 }
 
@@ -423,29 +441,41 @@ exports.handler = async (event) => {
   const allInstalled = REQUIRED_SKILLS.every((name) => skills.find((item) => item.name === name)?.installed);
   const calculatorSkill = skills.find((item) => item.name === "vedic-calculator");
   const remoteCalculator = await runRemoteCalculator(payload);
+  const localCalculator = !remoteCalculator.ok && calculatorSkill?.installed
+    ? runCalculator(payload.profile || {}, options, calculatorSkill.path)
+    : { ok: false, reason: "运行环境未安装本地 calculator。" };
+  const bundledCalculator = !remoteCalculator.ok && !localCalculator.ok
+    ? runBundledCalculator(payload)
+    : { ok: false, reason: "无需调用内置降级星历。" };
   const calculator = remoteCalculator.ok
     ? remoteCalculator
-    : (calculatorSkill?.installed
-      ? runCalculator(payload.profile || {}, options, calculatorSkill.path)
-      : { ok: false, reason: remoteCalculator.reason || "本机尚未安装 vedic-calculator，当前使用网页 fallback 排盘数据。" });
-  const calculatorSource = remoteCalculator.ok
-    ? "vedic-python-api"
-    : (calculator.ok ? "vedic-calculator" : "web-fallback");
+    : (localCalculator.ok ? localCalculator : bundledCalculator);
+  const professionalReady = calculator.ok
+    && calculator.calculationMeta?.engine === "vedic-calculator"
+    && Boolean(calculator.professionalChart);
+  const calculatorSource = professionalReady
+    ? "vedic-calculator"
+    : (bundledCalculator.ok ? "swiss-ephemeris-lahiri-limited" : "unavailable");
+  const failureReason = remoteCalculator.reason
+    || localCalculator.reason
+    || bundledCalculator.reason
+    || "专业排盘服务不可用。";
 
   const body = {
-    ok: true,
+    ok: professionalReady,
     bridge: {
       installed: allInstalled,
       skills,
       roots,
       source: calculatorSource,
-      calculatorReady: calculator.ok,
-      reason: calculator.ok ? "" : calculator.reason,
+      calculatorReady: professionalReady,
+      reason: professionalReady ? "" : failureReason,
       activeRoute
     },
     activeRoute,
     skillGuidance,
     structuredDataMarkdown: calculator.structuredDataMarkdown || "",
+    professionalChart: calculator.professionalChart || null,
     calculationMeta: calculator.calculationMeta || null
   };
 

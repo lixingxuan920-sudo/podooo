@@ -1,0 +1,12 @@
+{
+  "name": "podooo",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^10.7.9",
+    "sweph": "2.10.3-7"
+  }
+}

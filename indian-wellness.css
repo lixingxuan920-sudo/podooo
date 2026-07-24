@@ -1,0 +1,1372 @@
+/* Premium Korean wellness skin for the Vedic experience.
+   All selectors are presentation-only; calculation and API behavior remain in app.js. */
+
+body.indian-wellness-active {
+  --vedic-bg: #f8f4f6;
+  --vedic-surface: #ffffff;
+  --vedic-soft: #f3ecef;
+  --vedic-primary: #e8ccd8;
+  --vedic-primary-hover: #dcb9c8;
+  --vedic-graphite: #6c6c6a;
+  --vedic-border: #e7dde1;
+  --vedic-ink: #4e4e4c;
+  --vedic-muted: #7f7d7c;
+  --vedic-success: #a9c8b8;
+  --vedic-warning: #f5cfa7;
+  --vedic-error: #e9b8b8;
+  --vedic-shadow: 0 10px 30px rgba(75, 65, 70, 0.07);
+  --vedic-shadow-lift: 0 18px 44px rgba(75, 65, 70, 0.12);
+  color: var(--vedic-ink);
+  background: var(--vedic-bg);
+  font-family: "Pretendard", "HarmonyOS Sans SC", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.indian-wellness-active .app-main {
+  padding-top: 0;
+  padding-bottom: 0;
+  background: var(--vedic-bg);
+  scroll-padding-top: 96px;
+}
+
+body.indian-wellness-active .site-header {
+  z-index: 80;
+  top: 16px;
+  left: 50%;
+  right: auto;
+  width: min(1200px, calc(100% - 48px));
+  height: 64px;
+  padding: 8px 12px 8px 18px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(238, 231, 222, 0.86);
+  border-radius: 22px;
+  color: var(--vedic-ink);
+  background: rgba(255, 253, 248, 0.78);
+  box-shadow: 0 8px 28px rgba(57, 47, 39, 0.055);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.indian-wellness-active .site-header .brand {
+  color: var(--vedic-ink);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+body.indian-wellness-active .site-header .brand::before {
+  content: "podo";
+  font-size: 23px;
+}
+
+body.indian-wellness-active .site-header .brand::after {
+  content: "";
+  order: -1;
+  width: 32px;
+  height: 32px;
+  margin-right: 9px;
+  display: inline-block;
+  vertical-align: middle;
+  border: 1px solid var(--vedic-border);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 67% 35%, var(--vedic-bg) 0 42%, transparent 43%),
+    #c9b9aa;
+}
+
+body.indian-wellness-active .site-header .nav {
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+}
+
+body.indian-wellness-active .site-header .nav a:hover {
+  color: var(--vedic-ink);
+}
+
+body.indian-wellness-active .fixed-app-icon {
+  display: none;
+}
+
+body.indian-wellness-active .app-tabbar {
+  border-color: var(--vedic-border);
+  color: var(--vedic-muted);
+  background: rgba(255, 253, 248, 0.9);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.indian-wellness-active .app-tabbar a.active {
+  color: var(--vedic-ink);
+  background: var(--vedic-primary);
+}
+
+.vedic-wellness-page {
+  min-height: 100vh;
+  padding: 0 !important;
+  color: var(--vedic-ink);
+  background: var(--vedic-bg);
+}
+
+.vedic-wellness-page .lucide {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vedic-reading-progress {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  pointer-events: none;
+}
+
+.vedic-reading-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 0 999px 999px 0;
+  background: var(--vedic-success);
+  transition: width 120ms linear;
+}
+
+.vedic-wellness-hero {
+  position: relative;
+  min-height: 860px;
+  padding: 150px 24px 90px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--vedic-border);
+  background:
+    radial-gradient(circle at 74% 43%, rgba(234, 223, 211, 0.68), transparent 30%),
+    linear-gradient(145deg, #fffdf8 10%, #fbf7f1 100%);
+}
+
+.vedic-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
+}
+
+.vedic-hero-inner {
+  position: relative;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.06fr 0.94fr;
+  align-items: center;
+  gap: 64px;
+}
+
+.vedic-hero-copy {
+  padding-top: 24px;
+  animation: vedicFadeUp 0.45s ease both;
+}
+
+.vedic-kicker {
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.vedic-kicker > span {
+  width: 32px;
+  height: 1px;
+  background: var(--vedic-primary-hover);
+}
+
+.vedic-kicker .lucide {
+  width: 14px;
+  height: 14px;
+}
+
+.vedic-hero-copy h1 {
+  margin: 0;
+  max-width: 720px;
+  color: var(--vedic-ink);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(66px, 7.1vw, 106px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+}
+
+.vedic-hero-copy h1 em {
+  color: #8a7d73;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 400;
+}
+
+.vedic-hero-subtitle {
+  margin: 34px 0 0;
+  color: #746d68;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 27px;
+  line-height: 1.25;
+}
+
+.vedic-hero-actions {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.vedic-wellness-page .button {
+  min-height: 52px;
+  border-radius: 18px;
+  padding: 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: "Pretendard", "HarmonyOS Sans SC", "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.vedic-wellness-page .button:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.vedic-wellness-page .button.primary {
+  border-color: var(--vedic-ink);
+  color: var(--vedic-bg);
+  background: var(--vedic-ink);
+  box-shadow: 0 10px 24px rgba(74, 69, 66, 0.16);
+}
+
+.vedic-wellness-page .button.primary:hover {
+  border-color: #383431;
+  background: #383431;
+  box-shadow: 0 14px 30px rgba(74, 69, 66, 0.2);
+}
+
+.vedic-wellness-page .button.secondary {
+  border-color: var(--vedic-border);
+  color: var(--vedic-ink);
+  background: var(--vedic-soft);
+  box-shadow: none;
+}
+
+.vedic-wellness-page .button.secondary:hover {
+  background: var(--vedic-primary);
+}
+
+.vedic-quiet-link {
+  min-height: 44px;
+  padding: 8px 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-bottom: 1px solid var(--vedic-border);
+  color: var(--vedic-ink);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.vedic-quiet-link .lucide {
+  width: 16px;
+  height: 16px;
+}
+
+.vedic-trust-row {
+  margin-top: 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+}
+
+.vedic-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vedic-trust-row .lucide {
+  width: 14px;
+  height: 14px;
+  color: #789a88;
+}
+
+.vedic-moon-scene {
+  position: relative;
+  width: 520px;
+  height: 590px;
+  max-width: 100%;
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  animation: vedicFadeScale 0.65s 0.08s ease both;
+}
+
+.vedic-moon {
+  position: relative;
+  z-index: 2;
+  width: 290px;
+  height: 290px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(138deg, #fffdfa, #e8ddd1);
+  box-shadow: inset -28px -25px 55px rgba(126, 105, 87, 0.09), 0 38px 80px rgba(87, 73, 61, 0.11);
+}
+
+.vedic-moon span {
+  position: absolute;
+  width: 295px;
+  height: 295px;
+  top: -30px;
+  left: 116px;
+  border-radius: 50%;
+  background: #d7c8b9;
+  opacity: 0.66;
+  filter: blur(2px);
+}
+
+.vedic-orbit {
+  position: absolute;
+  border: 1px solid rgba(173, 155, 139, 0.28);
+  border-radius: 50%;
+}
+
+.vedic-orbit.orbit-a {
+  width: 410px;
+  height: 410px;
+  transform: rotate(-14deg);
+}
+
+.vedic-orbit.orbit-b {
+  width: 510px;
+  height: 310px;
+  transform: rotate(28deg);
+}
+
+.vedic-orbit i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 19%;
+  left: 8%;
+  border-radius: 50%;
+  background: #9f9185;
+}
+
+.vedic-star {
+  position: absolute;
+  color: #9c8e82;
+}
+
+.vedic-star.star-a { top: 80px; right: 86px; width: 20px; height: 20px; }
+.vedic-star.star-b { bottom: 118px; left: 52px; width: 12px; height: 12px; }
+
+.vedic-cloud {
+  position: absolute;
+  z-index: 3;
+  width: 178px;
+  height: 35px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.74);
+  filter: blur(5px);
+}
+
+.vedic-cloud.cloud-a { left: 22px; bottom: 160px; }
+.vedic-cloud.cloud-b { width: 138px; right: 28px; top: 177px; opacity: 0.62; }
+
+.vedic-moon-scene > p {
+  position: absolute;
+  right: 0;
+  bottom: 48px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.vedic-moon-scene > p span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--vedic-border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0;
+}
+
+.vedic-page-shell {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.vedic-intake-section {
+  padding: 126px 0 132px;
+}
+
+.vedic-section-heading {
+  max-width: 720px;
+  margin: 0 auto 48px;
+  text-align: center;
+}
+
+.vedic-section-heading .vedic-kicker {
+  justify-content: center;
+}
+
+.vedic-section-heading h2,
+.vedic-result-header h2 {
+  margin: 0;
+  color: var(--vedic-ink);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(42px, 5vw, 62px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.vedic-section-heading > p:last-child {
+  max-width: 560px;
+  margin: 18px auto 0;
+  color: var(--vedic-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.vedic-intake-card {
+  position: relative;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 54px !important;
+  border: 1px solid var(--vedic-border) !important;
+  border-radius: 24px !important;
+  color: var(--vedic-ink) !important;
+  background: var(--vedic-surface) !important;
+  box-shadow: var(--vedic-shadow) !important;
+  animation: vedicFadeUp 0.45s ease both;
+}
+
+.vedic-privacy-note {
+  position: absolute;
+  top: 22px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--vedic-muted);
+  font-size: 11px;
+}
+
+.vedic-privacy-note .lucide {
+  width: 15px;
+  height: 15px;
+}
+
+.vedic-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.vedic-field-wide {
+  grid-column: 1 / -1;
+}
+
+.vedic-field label,
+.vedic-wellness-page .advanced-vedic-fields label {
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vedic-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vedic-field label .lucide {
+  width: 16px;
+  height: 16px;
+  color: #9b8f86;
+}
+
+.vedic-wellness-page input,
+.vedic-wellness-page select,
+.vedic-wellness-page textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 0 17px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 16px;
+  outline: none;
+  color: var(--vedic-ink);
+  background: #fffefa;
+  font-family: "Inter", "HarmonyOS Sans SC", sans-serif;
+  font-size: 14px;
+  transition: border 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.vedic-wellness-page textarea {
+  padding-top: 14px;
+}
+
+.vedic-wellness-page input:hover,
+.vedic-wellness-page select:hover,
+.vedic-wellness-page textarea:hover {
+  border-color: #ded3c7;
+}
+
+.vedic-wellness-page input:focus,
+.vedic-wellness-page select:focus,
+.vedic-wellness-page textarea:focus {
+  border-color: #cbbba9;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(234, 223, 211, 0.48);
+}
+
+.vedic-wellness-page :focus-visible {
+  outline: 3px solid rgba(169, 200, 184, 0.5);
+  outline-offset: 3px;
+}
+
+.vedic-wellness-page .auto-location-note,
+.vedic-wellness-page .disclaimer {
+  color: var(--vedic-muted) !important;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.vedic-field .auto-location-note {
+  margin: 8px 0 0;
+}
+
+.vedic-wellness-page .advanced-vedic-fields {
+  margin: 30px 0 26px;
+  overflow: hidden;
+  border: 1px solid var(--vedic-border);
+  border-radius: 18px;
+  color: var(--vedic-ink);
+  background: var(--vedic-soft);
+}
+
+.vedic-wellness-page .advanced-vedic-fields summary {
+  min-height: 58px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--vedic-ink);
+  list-style: none;
+  cursor: pointer;
+}
+
+.vedic-wellness-page .advanced-vedic-fields summary::-webkit-details-marker {
+  display: none;
+}
+
+.vedic-wellness-page .advanced-vedic-fields summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.vedic-wellness-page .advanced-vedic-fields .detail-chevron {
+  width: 17px;
+  height: 17px;
+  color: var(--vedic-muted);
+  transition: transform 200ms ease;
+}
+
+.vedic-wellness-page .advanced-vedic-fields[open] {
+  padding: 0 20px 20px;
+}
+
+.vedic-wellness-page .advanced-vedic-fields[open] summary {
+  margin: 0 -20px 20px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--vedic-border);
+}
+
+.vedic-wellness-page .advanced-vedic-fields[open] .detail-chevron {
+  transform: rotate(180deg);
+}
+
+.vedic-wellness-page .advanced-vedic-fields .compact-fields {
+  gap: 14px;
+}
+
+.vedic-wellness-page .advanced-vedic-fields select {
+  margin-bottom: 14px;
+}
+
+.vedic-wellness-page .toggle-row {
+  min-height: 58px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 16px;
+  background: #fffefa;
+}
+
+.vedic-wellness-page .toggle-row input {
+  width: 17px;
+  min-height: 17px;
+}
+
+.vedic-submit-button {
+  width: 100%;
+}
+
+.vedic-system-note {
+  margin: 14px 0 0;
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.vedic-results-section {
+  padding: 118px 0 130px;
+  border-top: 1px solid var(--vedic-border);
+}
+
+.vedic-result-header {
+  margin-bottom: 40px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.vedic-result-header > div:first-child > p:last-child {
+  margin: 18px 0 0;
+  color: var(--vedic-muted);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 21px;
+}
+
+.vedic-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.vedic-result-actions button {
+  min-width: 78px;
+  height: 48px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 16px;
+  color: #6f6863;
+  background: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  transition: transform 200ms ease, background 200ms ease;
+}
+
+.vedic-result-actions button:hover {
+  transform: translateY(-2px);
+  background: #fff;
+}
+
+.vedic-result-actions .lucide {
+  width: 17px;
+  height: 17px;
+}
+
+.vedic-reading-surface {
+  min-height: 420px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--vedic-ink) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.vedic-empty-state {
+  min-height: 420px;
+  padding: 48px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border: 1px dashed #ded5cc;
+  border-radius: 24px;
+  background: var(--vedic-soft);
+  text-align: center;
+}
+
+.vedic-empty-state > span,
+.vedic-loading-moon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #8d8177;
+  background: var(--vedic-surface);
+  box-shadow: var(--vedic-shadow);
+}
+
+.vedic-empty-state > span .lucide {
+  width: 30px;
+  height: 30px;
+}
+
+.vedic-empty-state h3 {
+  margin: 20px 0 6px;
+  color: var(--vedic-ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 31px;
+  font-weight: 500;
+}
+
+.vedic-empty-state p {
+  max-width: 460px;
+  margin: 0;
+  color: var(--vedic-muted);
+  font-size: 13px;
+}
+
+.vedic-wellness-page .vedic-chart-panel {
+  display: grid;
+  gap: 20px;
+  animation: vedicFadeUp 0.45s ease both;
+}
+
+.vedic-wellness-page .vedic-chart-hero-card {
+  min-height: 530px;
+  padding: 54px;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  align-items: center;
+  gap: 60px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 24px;
+  background: var(--vedic-soft);
+  box-shadow: var(--vedic-shadow);
+}
+
+.vedic-wellness-page .vedic-chart-overview h3 {
+  margin: 0 0 14px;
+  color: var(--vedic-ink);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(38px, 5vw, 56px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.vedic-wellness-page .vedic-chart-overview > p {
+  margin: 0 0 24px;
+  color: var(--vedic-muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.vedic-wellness-page .astro-tags {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--vedic-border);
+}
+
+.vedic-wellness-page .astro-tags span {
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--vedic-border);
+  border-radius: 0;
+  color: var(--vedic-ink);
+  background: transparent;
+  font-size: 12px;
+}
+
+.vedic-wellness-page .vedic-birth-line {
+  color: var(--vedic-muted);
+  font-size: 11px;
+}
+
+.vedic-wellness-page .vedic-birth-line strong {
+  color: var(--vedic-ink);
+}
+
+.vedic-wellness-page .vedic-chart {
+  width: min(460px, 100%);
+  margin: 0 auto;
+  border: 1px solid #d9cfc5;
+  border-radius: 2px;
+  background: rgba(255, 253, 248, 0.76);
+}
+
+.vedic-wellness-page .vedic-sign-cell,
+.vedic-wellness-page .vedic-center {
+  min-height: 88px;
+  border-color: #ded5cc;
+  color: var(--vedic-ink);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.vedic-wellness-page .vedic-center {
+  color: #8b7e74;
+  background: var(--vedic-primary);
+}
+
+.vedic-wellness-page .vedic-center strong,
+.vedic-wellness-page .vedic-sign-cell strong {
+  color: var(--vedic-ink);
+}
+
+.vedic-wellness-page .vedic-center span,
+.vedic-wellness-page .vedic-sign-cell small,
+.vedic-wellness-page .vedic-sign-cell .sign-code {
+  color: var(--vedic-muted);
+}
+
+.vedic-wellness-page .vedic-sign-cell.lagna-cell {
+  outline-color: #bfae9e;
+  background: #f0e7de;
+}
+
+.vedic-wellness-page .graha-list b {
+  border-color: var(--vedic-border);
+  color: var(--vedic-ink);
+  background: var(--vedic-surface);
+}
+
+.vedic-wellness-page .complete-chart-panel,
+.vedic-wellness-page .vedic-data-panel,
+.vedic-wellness-page .deepseek-reading {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--vedic-border);
+  border-radius: 24px;
+  color: var(--vedic-ink);
+  background: var(--vedic-surface);
+  box-shadow: var(--vedic-shadow);
+}
+
+.vedic-wellness-page .complete-chart-panel > summary {
+  min-height: 72px;
+  margin: 0;
+  padding: 0 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--vedic-ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 24px;
+  font-weight: 500;
+  list-style: none;
+}
+
+.vedic-wellness-page .complete-chart-panel > summary::after {
+  content: "+";
+  color: var(--vedic-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 20px;
+}
+
+.vedic-wellness-page .complete-chart-panel[open] > summary::after {
+  content: "−";
+}
+
+.vedic-wellness-page .complete-chart-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.vedic-wellness-page .complete-chart-panel[open] > summary {
+  border-bottom: 1px solid var(--vedic-border);
+}
+
+.vedic-wellness-page .complete-chart-panel > .vedic-table,
+.vedic-wellness-page .complete-chart-panel > .vedic-data-panel {
+  margin: 20px;
+}
+
+.vedic-wellness-page .vedic-table {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vedic-wellness-page .vedic-table article {
+  padding: 22px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 20px;
+  color: var(--vedic-ink);
+  background: var(--vedic-soft);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.vedic-wellness-page .vedic-table article:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--vedic-shadow-lift);
+}
+
+.vedic-wellness-page .vedic-table strong {
+  color: var(--vedic-ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.vedic-wellness-page .vedic-table span {
+  color: #8b7e74;
+  font-size: 12px;
+}
+
+.vedic-wellness-page .vedic-table p {
+  color: var(--vedic-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.vedic-wellness-page .vedic-data-panel {
+  padding: 24px;
+  box-shadow: none;
+}
+
+.vedic-wellness-page .vedic-data-panel h3,
+.vedic-wellness-page .deepseek-reading h3,
+.vedic-wellness-page .vedic-chat h4 {
+  color: var(--vedic-ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.vedic-wellness-page .vedic-data-grid,
+.vedic-wellness-page .vedic-module-list {
+  gap: 10px;
+}
+
+.vedic-wellness-page .vedic-data-grid span,
+.vedic-wellness-page .vedic-module-list span,
+.vedic-wellness-page .vedic-position-table div {
+  border-color: var(--vedic-border);
+  border-radius: 14px;
+  color: var(--vedic-muted);
+  background: var(--vedic-soft);
+}
+
+.vedic-wellness-page .vedic-data-grid strong,
+.vedic-wellness-page .vedic-module-list strong,
+.vedic-wellness-page .vedic-position-table strong {
+  color: var(--vedic-ink);
+}
+
+.vedic-wellness-page .chart-actions {
+  margin-top: 10px;
+}
+
+.vedic-wellness-page .deepseek-reading {
+  padding: 34px;
+}
+
+.vedic-wellness-page .blueprint-report {
+  padding: 0;
+  border: 0;
+  color: var(--vedic-ink);
+  background: transparent;
+}
+
+.vedic-wellness-page .blueprint-toolbar {
+  margin-bottom: 18px;
+  color: var(--vedic-muted);
+  font-size: 11px;
+}
+
+.vedic-wellness-page .typewriter-text {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vedic-wellness-page .typewriter-text > p {
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--vedic-border);
+  border-radius: 20px;
+  color: #625c58;
+  background: var(--vedic-soft);
+  font-family: "Cormorant Garamond", "HarmonyOS Sans SC", Georgia, serif;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.vedic-loading-stage {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.vedic-loading-cosmos {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.vedic-loading-moon {
+  width: 86px;
+  height: 86px;
+  animation: vedicMoonBreath 2.4s ease-in-out infinite;
+}
+
+.vedic-loading-moon .lucide {
+  width: 42px;
+  height: 42px;
+}
+
+.vedic-loading-orbit {
+  position: absolute;
+  inset: 2px;
+  border: 1px solid #d8ccc0;
+  border-radius: 50%;
+  animation: vedicOrbitSpin 4s linear infinite;
+}
+
+.vedic-loading-orbit::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a99a8d;
+}
+
+.vedic-loading-stage h4 {
+  min-height: 48px;
+  margin: 0;
+  color: var(--vedic-ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 500;
+}
+
+.vedic-loading-track {
+  width: min(340px, 80vw);
+  height: 3px;
+  margin-top: 26px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--vedic-border);
+}
+
+.vedic-loading-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #a99a8d;
+  transition: width 450ms ease;
+}
+
+.vedic-loading-stage > p {
+  margin: 14px 0 0;
+  color: var(--vedic-muted);
+  font-size: 11px;
+}
+
+.vedic-wellness-page .vedic-chat {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-color: var(--vedic-border);
+}
+
+.vedic-wellness-page .vedic-topic-actions {
+  gap: 10px;
+}
+
+.vedic-wellness-page .vedic-chat-message {
+  padding: 18px;
+  border-color: var(--vedic-border);
+  border-radius: 18px;
+  color: var(--vedic-ink);
+  background: var(--vedic-soft);
+}
+
+.vedic-wellness-page .vedic-chat-message.user {
+  border-color: #cfbfb0;
+  background: #f0e7de;
+}
+
+.vedic-wellness-page .vedic-chat-message strong {
+  color: var(--vedic-ink);
+}
+
+.vedic-wellness-page .vedic-chat-input {
+  gap: 10px;
+}
+
+@keyframes vedicFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vedicFadeScale {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes vedicOrbitSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vedicMoonBreath {
+  50% { transform: scale(1.04); box-shadow: 0 22px 58px rgba(74, 69, 66, 0.15); }
+}
+
+@media (max-width: 980px) {
+  .vedic-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .vedic-hero-copy {
+    max-width: 760px;
+  }
+
+  .vedic-moon-scene {
+    height: 500px;
+    transform: scale(0.9);
+  }
+
+  .vedic-wellness-page .vedic-chart-hero-card {
+    gap: 36px;
+    padding: 40px;
+  }
+}
+
+@media (max-width: 760px) {
+  body.indian-wellness-active .site-header {
+    top: 10px;
+    width: calc(100% - 32px);
+    height: 60px;
+    border-radius: 19px;
+  }
+
+  body.indian-wellness-active .site-header .nav {
+    display: none;
+  }
+
+  .vedic-wellness-hero {
+    min-height: auto;
+    padding: 132px 16px 70px;
+  }
+
+  .vedic-hero-copy h1 {
+    font-size: clamp(52px, 15vw, 76px);
+  }
+
+  .vedic-hero-subtitle {
+    font-size: 23px;
+  }
+
+  .vedic-hero-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vedic-trust-row {
+    gap: 12px 18px;
+    margin-top: 32px;
+  }
+
+  .vedic-moon-scene {
+    width: 430px;
+    max-width: 112%;
+    height: 400px;
+    left: 50%;
+    margin-left: -215px;
+    transform: scale(0.78);
+  }
+
+  .vedic-moon-scene > p {
+    bottom: 0;
+    right: 12px;
+  }
+
+  .vedic-page-shell {
+    width: calc(100% - 32px);
+  }
+
+  .vedic-intake-section {
+    padding: 88px 0 92px;
+  }
+
+  .vedic-section-heading {
+    margin-bottom: 34px;
+  }
+
+  .vedic-section-heading h2,
+  .vedic-result-header h2 {
+    font-size: 43px;
+  }
+
+  .vedic-intake-card {
+    padding: 54px 20px 24px !important;
+  }
+
+  .vedic-privacy-note {
+    left: 21px;
+    right: auto;
+  }
+
+  .vedic-form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .vedic-field-wide {
+    grid-column: auto;
+  }
+
+  .vedic-results-section {
+    padding: 84px 0 100px;
+  }
+
+  .vedic-result-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .vedic-result-actions {
+    width: 100%;
+  }
+
+  .vedic-result-actions button {
+    flex: 1;
+  }
+
+  .vedic-wellness-page .vedic-chart-hero-card {
+    grid-template-columns: 1fr;
+    padding: 28px 22px;
+  }
+
+  .vedic-wellness-page .vedic-table,
+  .vedic-wellness-page .typewriter-text {
+    grid-template-columns: 1fr;
+  }
+
+  .vedic-wellness-page .vedic-data-grid,
+  .vedic-wellness-page .vedic-module-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vedic-wellness-page .deepseek-reading {
+    padding: 24px 18px;
+  }
+
+  .vedic-empty-state {
+    padding: 32px 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vedic-wellness-page .advanced-vedic-fields .compact-fields,
+  .vedic-wellness-page .advanced-vedic-fields .compact-fields.three {
+    grid-template-columns: 1fr;
+  }
+
+  .vedic-wellness-page .vedic-data-grid,
+  .vedic-wellness-page .vedic-module-list,
+  .vedic-wellness-page .vedic-position-table div {
+    grid-template-columns: 1fr;
+  }
+
+  .vedic-wellness-page .vedic-sign-cell,
+  .vedic-wellness-page .vedic-center {
+    min-height: 72px;
+    padding: 6px;
+  }
+
+  .vedic-wellness-page .vedic-sign-cell small {
+    display: none;
+  }
+
+  .vedic-wellness-page .vedic-topic-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vedic-wellness-page *,
+  .vedic-wellness-page *::before,
+  .vedic-wellness-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body.indian-wellness-active {
+    overflow: visible;
+    background: white;
+  }
+
+  body.indian-wellness-active .site-header,
+  body.indian-wellness-active .app-tabbar,
+  .vedic-wellness-hero,
+  .vedic-intake-section,
+  .vedic-result-actions,
+  .vedic-reading-progress,
+  .vedic-chat {
+    display: none !important;
+  }
+
+  body.indian-wellness-active .app-main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .vedic-page-shell {
+    width: 100%;
+  }
+
+  .vedic-results-section {
+    padding: 20px 0;
+  }
+
+  .vedic-wellness-page .vedic-chart-hero-card,
+  .vedic-wellness-page .vedic-table article,
+  .vedic-wellness-page .typewriter-text > p {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}

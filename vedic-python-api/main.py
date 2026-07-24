@@ -16,6 +16,9 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from vedic_skill_rules import LIFE_BLUEPRINT_SKILL_RULES, VEDIC_SKILL_SOURCE
+from vedic_calculator_adapter import calculate_professional_chart
+
 
 SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -94,29 +97,19 @@ def require_api_key(x_vedic_api_key: str | None) -> None:
 
 
 def model_config() -> dict[str, str]:
-    api_key = (
-        os.getenv("DEEPSEEK_API_KEY")
-        or os.getenv("OPENAI_API_KEY")
-        or os.getenv("CCSWITCH_API_KEY")
-        or os.getenv("API_KEY")
-        or ""
-    ).strip()
-    base_url = (
-        os.getenv("DEEPSEEK_BASE_URL")
-        or os.getenv("DEEPSEEK_API_BASE")
-        or os.getenv("OPENAI_BASE_URL")
-        or os.getenv("OPENAI_API_BASE")
-        or os.getenv("CCSWITCH_BASE_URL")
-        or "https://api.deepseek.com"
-    ).rstrip("/")
-    model = (
-        os.getenv("DEEPSEEK_MODEL")
-        or os.getenv("CCSWITCH_MODEL")
-        or os.getenv("OPENAI_MODEL")
-        or "deepseek-chat"
-    )
+    providers = {
+        "deepseek": {"api_key": os.getenv("DEEPSEEK_API_KEY", ""), "base_url": os.getenv("DEEPSEEK_BASE_URL") or os.getenv("DEEPSEEK_API_BASE") or "https://api.deepseek.com", "model": os.getenv("DEEPSEEK_MODEL") or "deepseek-chat"},
+        "openai": {"api_key": os.getenv("OPENAI_API_KEY", ""), "base_url": os.getenv("OPENAI_BASE_URL") or os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1", "model": os.getenv("OPENAI_MODEL") or "gpt-4o-mini"},
+        "ccswitch": {"api_key": os.getenv("CCSWITCH_API_KEY") or os.getenv("API_KEY", ""), "base_url": os.getenv("CCSWITCH_BASE_URL") or "https://api.openai.com/v1", "model": os.getenv("CCSWITCH_MODEL") or "gpt-4o-mini"},
+    }
+    requested = (os.getenv("AI_PROVIDER") or os.getenv("MODEL_PROVIDER") or "").lower()
+    provider = requested if requested in providers and providers[requested]["api_key"] else next((name for name in ("deepseek", "openai", "ccswitch") if providers[name]["api_key"]), requested or "deepseek")
+    selected = providers.get(provider, providers["deepseek"])
+    api_key = selected["api_key"].strip()
+    base_url = selected["base_url"].rstrip("/")
+    model = selected["model"]
     chat_url = base_url if base_url.endswith("/chat/completions") else f"{base_url}/chat/completions"
-    return {"api_key": api_key, "chat_url": chat_url, "model": model}
+    return {"api_key": api_key, "chat_url": chat_url, "model": model, "provider": provider}
 
 
 def clip(value: Any, max_length: int = 16000) -> str:
@@ -143,7 +136,7 @@ def call_deepseek(prompt: str, mode: str) -> str:
     system_prompt = (
         "你是高级吠陀占星顾问。当前是连续咨询模式：只回答用户本次问题，必须引用已保存 Life Blueprint、历史对话和结构化星盘数据，不要重新生成完整报告。"
         if mode == "qa"
-        else "你是高级吠陀占星顾问。当前是 Life Blueprint 长报告模式：必须按十章结构加 Executive Summary 输出，像真实咨询师一样深入、连贯、可落地。"
+        else "你是高级吠陀占星顾问。当前是 Life Blueprint 长报告模式：严格执行提示词中的 Vedic Astro Skills v7.0 解读规则，像真实咨询师一样深入、连贯、可落地。"
     )
     body = {
         "model": cfg["model"],
@@ -182,6 +175,12 @@ def build_blueprint_prompt(payload: VedicRequest, chart_result: dict[str, Any]) 
 你是一位拥有二十年以上咨询经验的印度占星咨询师。
 请根据下面所有盘的数据，写一份完整的 Life Blueprint。
 不要简单列点，必须像真实咨询师面对面咨询一样，每个主题都深入解释原因、命盘依据、人格形成、优势、阻碍、现实表现、内在心理、建议。
+
+当前启用的上游解读 Skill：
+{clip(VEDIC_SKILL_SOURCE, 1200)}
+
+Vedic Astro Skills 解读规则（优先执行）：
+{LIFE_BLUEPRINT_SKILL_RULES}
 
 要求：
 1. 目标长度 8000 到 15000 字。不是摘要，是真正完整咨询。
@@ -253,7 +252,7 @@ def set_job(job_id: str, **updates: Any) -> None:
 def run_blueprint_job(job_id: str, payload: VedicRequest) -> None:
     try:
         set_job(job_id, status="running", step="calculate_chart", progress=20)
-        chart_result = calculate_chart(payload.profile)
+        chart_result = calculate_chart(payload.profile, payload.options)
         chart_data = {
             "profile": payload.profile,
             "options": payload.options,
@@ -515,64 +514,29 @@ def chart_to_markdown(profile: dict[str, Any], local_dt: datetime, lat: float, l
     return "\n".join(lines)
 
 
-def calculate_chart(profile: dict[str, Any]) -> dict[str, Any]:
-    local_dt, lat, lon, tz_name, second = parse_birth(profile)
-    jd = calc_julian_day(local_dt)
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
-    ayanamsa = swe.get_ayanamsa_ut(jd)
-    lagna = calc_lagna(jd, lat, lon, ayanamsa)
-    planets: dict[str, Any] = {}
-    for name, planet_id in PLANETS:
-        planets[name] = calc_planet(jd, planet_id, ayanamsa, lagna["sign_index"])
-    rahu_tropical_lon, _lat, _distance, _speed = calc_ut_values(jd, swe.MEAN_NODE)
-    rahu_lon = sidereal_longitude(rahu_tropical_lon, ayanamsa)
-    ketu_lon = (rahu_lon + 180) % 360
-    for name, lon_value in [("Rahu", rahu_lon), ("Ketu", ketu_lon)]:
-        sidx = sign_index(lon_value)
-        planets[name] = {
-            "longitude": round(lon_value, 8),
-            "sign": SIGNS[sidx],
-            "sign_index": sidx,
-            "house": house_from_lagna(sidx, lagna["sign_index"]),
-            "deg_str": deg_string(lon_value),
-            "retrograde": True,
-            "nakshatra": nakshatra_for(lon_value),
-        }
-    dashas = vimshottari_dashas(planets["Moon"]["longitude"], local_dt.date())
-    chart = {
-        "ayanamsa": ayanamsa,
-        "julian_day": jd,
-        "lagna": lagna,
-        "planets": planets,
-        "dashas": dashas,
-    }
-    markdown = chart_to_markdown(profile, local_dt, lat, lon, tz_name, second, chart)
-    return {
-        "structuredDataMarkdown": markdown,
-        "calculationMeta": {
-            "engine": "vedic-python-api",
-            "timezone": tz_name,
-            "lat": lat,
-            "lon": lon,
-            "second": second,
-            "julianDay": jd,
-            "ayanamsa": ayanamsa,
-            "warnings": [
-                "公网 API 当前提供 Swiss Ephemeris D1、Nakshatra 与 Vimshottari Dasha；SAV/BAV、Shadbala、完整分盘量化待接入 PyJHora/JHora 校验。"
-            ],
-        },
-    }
+def calculate_chart(
+    profile: dict[str, Any],
+    options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    return calculate_professional_chart(profile, options)
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"ok": "true", "engine": "vedic-python-api"}
+def health() -> dict[str, Any]:
+    return {
+        "ok": "true",
+        "engine": "vedic-calculator",
+        "upstreamVersion": "v7.0",
+        "commit": "7a6e33e23dc1f45107af2f249848241bb4d22b67",
+        "ayanamsa": "TRUE_CITRA / Lahiri",
+        "nodeMode": "Mean Node",
+    }
 
 
 @app.post("/calculate")
 def calculate(payload: VedicRequest, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
     require_api_key(x_vedic_api_key)
-    result = calculate_chart(payload.profile)
+    result = calculate_chart(payload.profile, payload.options)
     return {"ok": True, **result}
 
 

@@ -1,13 +1,13 @@
 {
-  "name": "Luna Arcana Tarot",
-  "short_name": "Luna Tarot",
-  "description": "专业塔罗占卜与个人化解读工具",
+  "name": "Podo AI Wellness",
+  "short_name": "Podo",
+  "description": "现代 AI 占星与自我探索体验",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#171415",
-  "theme_color": "#d99aaa",
+  "background_color": "#F8F4F6",
+  "theme_color": "#F8F4F6",
   "icons": [
     {
       "src": "assets/app-icon.svg",
@@ -17,4 +17,3 @@
     }
   ]
 }
-
