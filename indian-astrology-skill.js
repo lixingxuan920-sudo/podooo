@@ -52,8 +52,8 @@
   ];
 
   const vedicSkillRuntime = {
-    sourceRepo: "CNWU16/vedic-astro-skills",
-    sourceUrl: "https://github.com/CNWU16/vedic-astro-skills",
+    sourceRepo: "lixingxuan920-sudo/vedic-astro-skills",
+    sourceUrl: "https://github.com/lixingxuan920-sudo/vedic-astro-skills",
     adapter: "web-vedic-skill-adapter",
     calculatorFoundation: "vedic-calculator",
     canonicalOutput: "structured_data.md",
@@ -277,7 +277,7 @@
         system: chart.system,
         ayanamsa: chart.preciseBirth.ayanamsa || "Lahiri",
         chartStyle: "South Indian Rashi",
-        precisionMode: "jhora-style-input-with-web-fallback",
+        precisionMode: "professional-backend-only",
         professionalBackendNeeded: true
       },
       skill_protocol: {
@@ -328,11 +328,32 @@
   function buildChart(profile, options = {}) {
     if (!profile.birthDate) return null;
     const protocol = skillProtocols[options.vedicModule] || skillProtocols.reader;
+    const professional = options.professionalChart;
+    const signNames = {
+      Aries: "白羊", Taurus: "金牛", Gemini: "双子", Cancer: "巨蟹", Leo: "狮子", Virgo: "处女",
+      Libra: "天秤", Scorpio: "天蝎", Sagittarius: "射手", Capricorn: "摩羯", Aquarius: "水瓶", Pisces: "双鱼"
+    };
+    const realSignIndex = (item) => Number(item?.sign_idx ?? item?.signIndex ?? 0);
     const lagna = baseIndex(profile, 0);
     const rahu = baseIndex(profile, 7);
     const ketu = (rahu + 6) % 12;
     const nak = Math.abs(Math.floor((dayOfYear(new Date(`${profile.birthDate}T12:00:00`)) * 27) / 365)) % 27;
-    const placements = grahas.map((graha) => {
+    const placements = professional ? grahas.map((graha) => {
+      const source = graha.key === "lagna"
+        ? professional.lagna
+        : professional.planets?.[{ sun: "Sun", moon: "Moon", mars: "Mars", mercury: "Mercury", jupiter: "Jupiter", venus: "Venus", saturn: "Saturn", rahu: "Rahu", ketu: "Ketu" }[graha.key]];
+      const signIndex = realSignIndex(source);
+      return {
+        ...graha,
+        signIndex,
+        sign: signNames[source?.sign] || rashi[signIndex],
+        house: Number(source?.house || ((signIndex - realSignIndex(professional.lagna) + 12) % 12) + 1),
+        degree: source?.degree || source?.deg_str || "",
+        longitude: source?.longitude,
+        retrograde: Boolean(source?.retrograde),
+        nakshatra: source?.nakshatra?.name || source?.nakshatra || ""
+      };
+    }) : grahas.map((graha) => {
       const signIndex = graha.key === "ketu" ? ketu : graha.key === "rahu" ? rahu : baseIndex(profile, graha.offset);
       return {
         ...graha,
@@ -341,13 +362,14 @@
         house: ((signIndex - lagna + 12) % 12) + 1
       };
     });
-    const divisionalCharts = buildDivisionalCharts(profile, lagna);
-    const dashaTimeline = buildDashaTimeline(profile);
+    const realLagna = professional ? realSignIndex(professional.lagna) : lagna;
+    const divisionalCharts = professional?.divisional_charts || professional?.d9 || professional?.d10 || buildDivisionalCharts(profile, realLagna);
+    const dashaTimeline = professional?.dashas || buildDashaTimeline(profile);
     const strengthSummary = buildStrengthSummary(placements);
     const ashtakavarga = buildAshtakavarga(placements);
     const chart = {
       system: "south-indian-rashi",
-      ayanamsa: "近似 Lahiri 风格",
+      ayanamsa: professional ? "TRUE_CITRA / Lahiri" : "近似 Lahiri 风格",
       skillRuntime: vedicSkillRuntime,
       skillProtocol: protocol,
       preciseBirth: {
@@ -368,8 +390,8 @@
         atmosphericTemperature: profile.atmosphericTemperature || "",
         ayanamsa: profile.ayanamsa || "Lahiri"
       },
-      lagna,
-      nakshatra: nakshatras[nak],
+      lagna: realLagna,
+      nakshatra: professional?.planets?.Moon?.nakshatra?.name || professional?.planets?.Moon?.nakshatra || nakshatras[nak],
       panchanga: buildPanchanga(profile, nak),
       placements,
       divisionalCharts,
@@ -452,8 +474,8 @@
     }));
   }
 
-  function southIndianChart(profile) {
-    const chart = buildChart(profile);
+  function southIndianChart(profile, options = {}) {
+    const chart = buildChart(profile, options);
     if (!chart) return "";
     return `
       <div class="vedic-chart south-indian-chart" aria-label="南印度式 Rashi 命盘">
@@ -637,20 +659,27 @@
     const hasCoordinates = Boolean(profile.latitude && profile.longitude);
     return `
       <div class="vedic-chart-panel">
-        <div class="astro-tags">
-          <span>上升 ${lagna.sign}</span>
-          <span>月亮 ${moon.sign}</span>
-          <span>${chart.nakshatra}</span>
-          <span>Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+        <div class="vedic-chart-hero-card">
+          <div class="vedic-chart-overview">
+            <p class="vedic-kicker">Birth chart · D1</p>
+            <h3>Your celestial signature</h3>
+            <p>以柔和、清晰的方式查看构成本次解读的核心落点。</p>
+            <div class="astro-tags">
+              <span>上升 Ascendant · ${lagna.sign}</span>
+              <span>月亮 Moon · ${moon.sign}</span>
+              <span>月宿 Nakshatra · ${chart.nakshatra}</span>
+              <span>业力轴 · Rahu ${rahu.house}宫 / Ketu ${ketu.house}宫</span>
+            </div>
+            <div class="vedic-birth-line">
+              <strong>${profile.birthCity || "出生地未填写"}</strong>
+              <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
+              <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
+            </div>
+          </div>
+          ${southIndianChart(profile, options)}
         </div>
-        <div class="vedic-birth-line">
-          <strong>${profile.birthCity || "出生地未填写"}</strong>
-          <span>${profile.birthDate || ""} ${profile.birthTime || ""}</span>
-          <span>${hasCoordinates ? `${profile.latitude} / ${profile.longitude}` : "经纬度待匹配"}</span>
-        </div>
-        ${southIndianChart(profile)}
-        <details class="vedic-data-panel complete-chart-panel" open>
-          <summary>完整印度星盘数据</summary>
+        <details class="vedic-data-panel complete-chart-panel">
+          <summary>展开完整印度星盘数据</summary>
           ${chartTable(chart)}
           ${computedDataPanel(chart)}
         </details>
