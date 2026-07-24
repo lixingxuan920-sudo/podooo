@@ -1,5 +1,7 @@
 const { VEDIC_SKILL_SOURCE, LIFE_BLUEPRINT_SKILL_RULES } = require("./vedic-skill-rules.js");
 
+// Keep the production function compatible with gateways that expose DeepSeek v4 models.
+
 function getModelConfig() {
   const requested = String(process.env.AI_PROVIDER || process.env.MODEL_PROVIDER || "").toLowerCase();
   const providers = {
