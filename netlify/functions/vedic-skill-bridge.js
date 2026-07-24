@@ -16,7 +16,7 @@ const REQUIRED_SKILLS = [
 const BUILT_IN_GUIDANCE = {
   "vedic-calculator": {
     role: "从出生日期、时间、地点、经纬度和时区生成吠陀占星结构化命盘，是所有判断的计算基座。",
-    use: "优先使用结构化数据；没有真实 Python 引擎时，使用网页 fallback 数据并明确精度限制。",
+    use: "唯一允许的计算来源是固定版本的专业后端；专业引擎不可用时必须 fail-fast。",
     rules: ["出生时间和地点必须优先校验", "Ayanamsa 默认 Lahiri", "不凭印象改动行星落座和宫位"]
   },
   "vedic-reader": {
@@ -245,7 +245,7 @@ function runCalculator(profile, options, calculatorPath) {
   if (!pythonPath) {
     return {
       ok: false,
-      reason: "未找到可用的 Python 或 vedic-calculator venv，当前使用网页 fallback 排盘数据。"
+      reason: "未找到可用的固定版本 vedic-calculator 专业引擎。"
     };
   }
 
@@ -361,14 +361,13 @@ print(json.dumps({
   }
 }
 
-async function runRemoteCalculator(payload) {
-  const baseUrl = (process.env.VEDIC_API_URL || "").replace(/\/$/, "");
+async function callProfessionalCalculator(payload) {
+  const baseUrl = String(process.env.VEDIC_API_URL || "").replace(/\/$/, "");
   if (!baseUrl) {
-    return { ok: false, reason: "未配置 VEDIC_API_URL。" };
+    return { ok: false, reason: "专业排盘服务地址未配置。" };
   }
-
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number(process.env.VEDIC_API_TIMEOUT_MS || 90000));
+  const timer = setTimeout(() => controller.abort(), 90000);
   try {
     const response = await fetch(`${baseUrl}/calculate`, {
       method: "POST",
@@ -376,28 +375,44 @@ async function runRemoteCalculator(payload) {
         "Content-Type": "application/json",
         ...(process.env.VEDIC_API_KEY ? { "X-Vedic-Api-Key": process.env.VEDIC_API_KEY } : {})
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        profile: payload.profile || {},
+        options: payload.options || {}
+      }),
       signal: controller.signal
     });
-    const text = await response.text();
-    if (!response.ok) {
-      return {
-        ok: false,
-        reason: `公网 Python 排盘接口返回 ${response.status}: ${text.slice(0, 500)}`
-      };
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body.ok) {
+      return { ok: false, reason: body.detail || body.error || `专业排盘服务返回 HTTP ${response.status}` };
     }
-    const data = JSON.parse(text);
+    const meta = body.calculationMeta || {};
+    const chart = body.professionalChart || {};
+    const validation = meta.validation || chart.validation || {};
+    const requiredPlanets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+    const completePlanets = requiredPlanets.every((name) => chart.planets?.[name]);
+    const hardChecks = {
+      sav337: validation.savTotal === 337 && validation.savValid === true,
+      planetsComplete: completePlanets && validation.planetCountValid === true,
+      nodesOpposite: validation.rahuKetuValid === true,
+      lahiri: /Lahiri|TRUE_CITRA/i.test(`${meta.ayanamsaMode || ""} ${meta.ayanamsa || ""}`),
+      meanNode: /Mean Node/i.test(String(meta.nodeMode || validation.nodeMode || "")),
+      d9: Boolean(chart.d9 || chart.divisional_charts?.D9),
+      d10: Boolean(chart.d10 || chart.divisional_charts?.D10),
+      dasha: Array.isArray(chart.dashas) && chart.dashas.length > 0,
+      structuredData: String(body.structuredDataMarkdown || "").includes("structured_data") || String(body.structuredDataMarkdown || "").length > 500
+    };
+    const failed = Object.entries(hardChecks).filter(([, passed]) => !passed).map(([name]) => name);
+    if (failed.length) return { ok: false, reason: `专业排盘硬校验失败：${failed.join(", ")}` };
     return {
-      ok: Boolean(data.ok),
-      structuredDataMarkdown: data.structuredDataMarkdown || "",
-      calculationMeta: data.calculationMeta || null,
-      reason: data.ok ? "" : "公网 Python 排盘接口未返回有效结果。"
+      ok: true,
+      structuredDataMarkdown: body.structuredDataMarkdown,
+      professionalChart: chart,
+      evidenceLedger: body.evidenceLedger || {},
+      calculationMeta: { ...meta, validation: { ...validation, hardChecks } },
+      source: "vedic-calculator"
     };
   } catch (error) {
-    return {
-      ok: false,
-      reason: `公网 Python 排盘接口不可用：${error.message}`
-    };
+    return { ok: false, reason: error.name === "AbortError" ? "专业排盘服务超时。" : `专业排盘服务不可用：${error.message}` };
   } finally {
     clearTimeout(timer);
   }
@@ -421,16 +436,19 @@ exports.handler = async (event) => {
   const activeRoute = routeForOptions(options);
   const skillGuidance = readSkillGuidance(activeRoute, skills);
   const allInstalled = REQUIRED_SKILLS.every((name) => skills.find((item) => item.name === name)?.installed);
-  const calculatorSkill = skills.find((item) => item.name === "vedic-calculator");
-  const remoteCalculator = await runRemoteCalculator(payload);
-  const calculator = remoteCalculator.ok
-    ? remoteCalculator
-    : (calculatorSkill?.installed
-      ? runCalculator(payload.profile || {}, options, calculatorSkill.path)
-      : { ok: false, reason: remoteCalculator.reason || "本机尚未安装 vedic-calculator，当前使用网页 fallback 排盘数据。" });
-  const calculatorSource = remoteCalculator.ok
-    ? "vedic-python-api"
-    : (calculator.ok ? "vedic-calculator" : "web-fallback");
+  const calculator = await callProfessionalCalculator(payload);
+  if (!calculator.ok) {
+    return {
+      statusCode: 503,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        ok: false,
+        error: "专业星历计算暂时失败，请稍后重试",
+        reason: calculator.reason,
+        bridge: { installed: allInstalled, skills, roots, source: "professional-backend", calculatorReady: false, reason: calculator.reason, activeRoute }
+      })
+    };
+  }
 
   const body = {
     ok: true,
@@ -438,15 +456,17 @@ exports.handler = async (event) => {
       installed: allInstalled,
       skills,
       roots,
-      source: calculatorSource,
-      calculatorReady: calculator.ok,
-      reason: calculator.ok ? "" : calculator.reason,
+      source: calculator.source,
+      calculatorReady: true,
+      reason: "",
       activeRoute
     },
     activeRoute,
     skillGuidance,
     structuredDataMarkdown: calculator.structuredDataMarkdown || "",
-    calculationMeta: calculator.calculationMeta || null
+    professionalChart: calculator.professionalChart,
+    evidenceLedger: calculator.evidenceLedger,
+    calculationMeta: calculator.calculationMeta
   };
 
   return {
