@@ -79,9 +79,17 @@ class VedicRequest(BaseModel):
 
 
 app = FastAPI(title="Luna Vedic Ephemeris API", version="1.0.0")
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "VEDIC_ALLOWED_ORIGINS",
+        "https://podooo.netlify.app,https://deploy-preview-1--podooo.netlify.app",
+    ).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
