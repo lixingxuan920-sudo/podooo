@@ -1,6 +1,8 @@
 const { handler: deepseekVedicHandler } = require("./deepseek-vedic.js");
 const { setBlueprintJob, validJobId } = require("./blueprint-job-store.js");
 
+// Long reports use the same persisted professional chart evidence across all segments.
+
 const REPORT_SEGMENTS = [
   "这是首次完整 Life Blueprint 的第1—3部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：1. 命盘整体格局；2. 行星强弱与重点配置；3. 十二宫位解读。必须展开上升、命主星、太阳、月亮、九大行星、尊贵/燃烧/逆行、Shadbala、十二宫审计，并说明每项判断的具体证据。只使用统一evidence ledger和structured_data中的真实数据；无法确认的Yoga或配置必须写“当前数据不足以确认”。",
   "这是首次完整 Life Blueprint 的第4—6部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：4. 事业与财富；5. 婚姻与感情；6. 大运Dasha分析。事业必须调用vedic-career规则并结合2、6、10、11宫、L10、AmK、D10、强星和真实Dasha；感情必须调用vedic-love规则并结合5、7宫、L7、Venus、Moon、DK、UL、D9、Rahu/Ketu和真实Dasha；时间只可使用真实起止日期，不能猜结婚年份或高峰年份。",
