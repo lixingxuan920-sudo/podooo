@@ -10,14 +10,14 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-COPY vedic-python-api/requirements.txt ./requirements.txt
+COPY requirements.txt .
 RUN python -m pip install --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir --only-binary=pysweph,pydantic-core -r requirements.txt \
-    && pip install --no-cache-dir --no-deps "dashaflow>=0.3"
+    && pip install --no-cache-dir --only-binary=pyswisseph,pydantic-core -r requirements.txt
 
-COPY main.py ./main.py
-COPY vedic-python-api ./vedic-python-api
-RUN python vedic-python-api/install_ephemeris.py
+COPY main.py .
+COPY vedic_skill_rules.py .
+COPY vedic_calculator_adapter.py .
+COPY vendor ./vendor
 
 EXPOSE 8000
 
