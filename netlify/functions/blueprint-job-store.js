@@ -14,7 +14,8 @@ async function getJobStore(event) {
 async function setBlueprintJob(event, jobId, value) {
   if (!validJobId(jobId)) throw new Error("Invalid blueprint job ID.");
   const store = await getJobStore(event);
-  await store.setJSON(jobId, value);
+  const previous = await store.get(jobId, { type: "json" }).catch(() => null);
+  await store.setJSON(jobId, { ...(previous || {}), ...value });
 }
 
 async function getBlueprintJob(event, jobId) {
