@@ -20,7 +20,7 @@ PWA App：网站已经支持添加到手机主屏幕。重新部署后，用手�
 
 星盘 skill：`astrology-skill.js` 会根据生日、出生时间生成基础星盘视图，包括太阳、月亮、上升的近似位置、元素倾向和占星解读。当前为本地近似推算，不等同于专业天文星历排盘。
 
-印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面。公网专业排盘由 `vedic-python-api` 提供，使用 Swiss Ephemeris、Lahiri Ayanamsa、Python 3.11.9、FastAPI 和 pyswisseph 生成 D1 本命盘、上升 Lagna、九曜、月宿 Nakshatra、Rahu/Ketu 和 Vimshottari Dasha。网页本地近似盘只作为后端不可用时的备用显示。
+印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面。公网专业排盘唯一来源是固定 commit 的 `vedic-calculator v7.0`，由 `vedic-python-api` 使用 Swiss Ephemeris、Lahiri Ayanamsa、PyJHora 和 Mean Node 生成 D1、D9、D10、九曜、月宿、Vimshottari Dasha、Shadbala、SAV/BAV 及结构化数据。专业后端失败时页面只显示失败与重试，不使用近似盘冒充专业结果。
 
 ## Render 部署印度占星后端
 
@@ -44,7 +44,7 @@ https://你的服务名.onrender.com/health
 应返回：
 
 ```json
-{"ok":"true","engine":"vedic-python-api"}
+{"ok":"true","engine":"vedic-calculator","upstreamVersion":"v7.0","commit":"7a6e33e23dc1f45107af2f249848241bb4d22b67","ayanamsa":"TRUE_CITRA / Lahiri","nodeMode":"Mean Node"}
 ```
 
 Swagger 文档地址：
