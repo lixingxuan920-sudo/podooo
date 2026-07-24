@@ -1549,6 +1549,397 @@ body:not(.astraea-landing-active) .site-header {
   margin-bottom: 10px;
 }
 
+.astro-loading,
+.astro-error {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 32px;
+  border: 1px solid rgba(234, 223, 211, 0.65);
+  border-radius: 24px;
+  background: #fffdf8;
+  color: #4a4542;
+  text-align: left;
+}
+
+.astro-loading-orbit {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid #d8c8ba;
+  border-radius: 50%;
+  color: #9c7765;
+  font-size: 24px;
+  animation: astrology-orbit 2.4s linear infinite;
+}
+
+@keyframes astrology-orbit {
+  to { transform: rotate(360deg); }
+}
+
+.professional-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.professional-chart-header h2 {
+  margin: 4px 0;
+}
+
+.professional-chart-header > div > p:last-child,
+.calculation-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ephemeris-badge {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid rgba(169, 200, 184, 0.5);
+  border-radius: 999px;
+  background: rgba(169, 200, 184, 0.12);
+  color: #a9c8b8;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.astro-key-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.astro-key-grid article {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.astro-key-grid small {
+  color: var(--muted);
+}
+
+.astro-key-grid strong {
+  font-size: 14px;
+}
+
+.professional-wheel-wrap {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #f7f3ee;
+  color: #4a4542;
+}
+
+.professional-wheel {
+  display: block;
+  width: min(620px, 100%);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.professional-wheel text {
+  font-family: "Inter", "HarmonyOS Sans SC", sans-serif;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.wheel-bg {
+  fill: #fffdf8;
+  stroke: #ded1c5;
+  stroke-width: 1.5;
+}
+
+.zodiac-ring,
+.aspect-ring {
+  fill: none;
+  stroke: #cdbdaf;
+  stroke-width: 1.2;
+}
+
+.zodiac-ring.inner {
+  stroke: #e2d8cf;
+}
+
+.zodiac-line {
+  stroke: #d9ccc1;
+  stroke-width: 1;
+}
+
+.house-line {
+  stroke: #d9cec4;
+  stroke-width: 0.9;
+}
+
+.house-line.axis-line {
+  stroke: #9f7966;
+  stroke-width: 2;
+}
+
+.zodiac-glyph {
+  fill: #7a6860;
+  font-size: 19px;
+}
+
+.house-number {
+  fill: #ad9b91;
+  font-size: 12px;
+}
+
+.aspect-line {
+  stroke: var(--aspect-color);
+  stroke-width: 1.1;
+  opacity: 0.56;
+}
+
+.aspect-line.square,
+.aspect-line.opposition {
+  stroke-dasharray: 5 3;
+}
+
+.chart-point circle {
+  stroke-width: 1;
+}
+
+.chart-point text {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.natal-point circle {
+  fill: #fffdf8;
+  stroke: #9e7a68;
+}
+
+.natal-point text {
+  fill: #5d4d47;
+}
+
+.overlay-point circle {
+  fill: #9e7a68;
+  stroke: #fffdf8;
+}
+
+.overlay-point text {
+  fill: #fffdf8;
+  font-size: 13px;
+}
+
+.wheel-center {
+  fill: #4a4542;
+}
+
+.wheel-center-title {
+  fill: #fffdf8;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.wheel-center-subtitle {
+  fill: #d8cbc0;
+  font-size: 5px;
+  letter-spacing: 0.05em;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
+  margin-top: 8px;
+  color: #746963;
+  font-size: 12px;
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border: 1px solid #9e7a68;
+  border-radius: 50%;
+  background: #fffdf8;
+}
+
+.legend-dot.transit {
+  background: #9e7a68;
+}
+
+.legend-line {
+  width: 18px;
+  height: 2px;
+  background: #73978d;
+}
+
+.legend-line.hard {
+  background: #bd756f;
+}
+
+.calculation-meta {
+  margin: 12px 2px 20px;
+  text-align: center;
+}
+
+.astro-notice {
+  margin: 12px 0 20px;
+  padding: 12px 14px;
+  border: 1px solid rgba(245, 207, 167, 0.42);
+  border-radius: 14px;
+  background: rgba(245, 207, 167, 0.08);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.astro-data-section {
+  margin-top: 22px;
+}
+
+.astro-section-title {
+  margin-bottom: 10px;
+}
+
+.astro-section-title h3 {
+  margin: 2px 0 0;
+}
+
+.astro-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.astro-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+.astro-data-table th,
+.astro-data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 13px;
+}
+
+.astro-data-table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.astro-data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.planet-symbol {
+  display: inline-block;
+  width: 25px;
+  color: var(--gold);
+  font-size: 17px;
+}
+
+.professional-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.professional-aspect-grid article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.astro-structure-grid,
+.astro-ruler-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.astro-ruler-grid {
+  margin-top: 12px;
+}
+
+.astro-structure-grid article,
+.astro-ruler-grid article {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line, #eee7de);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.astro-structure-grid small,
+.astro-ruler-grid small {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted, #8f8a86);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+.astro-structure-grid strong,
+.astro-ruler-grid strong {
+  display: block;
+  color: var(--ink, #4a4542);
+  font-size: 0.98rem;
+}
+
+.astro-structure-grid p,
+.astro-ruler-grid p {
+  margin: 7px 0 0;
+  color: var(--muted, #8f8a86);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .astro-structure-grid,
+  .astro-ruler-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.aspect-swatch {
+  width: 3px;
+  height: 32px;
+  border-radius: 99px;
+  background: var(--aspect-color);
+}
+
+.professional-aspect-grid article div {
+  display: grid;
+  gap: 3px;
+}
+
+.professional-aspect-grid strong {
+  font-size: 13px;
+}
+
+.professional-aspect-grid small {
+  color: var(--muted);
+}
+
 .auto-location-note,
 .vedic-birth-line {
   color: var(--muted);
@@ -3492,4 +3883,33 @@ body.astraea-landing-active .app-dashboard {
 .astraea-card-line-svg .card-glow {
   stroke: rgba(212, 175, 55, 0.64);
   stroke-width: 0.9;
+}
+
+@media (max-width: 720px) {
+  .astro-key-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .professional-chart-header {
+    display: grid;
+  }
+
+  .ephemeris-badge {
+    justify-self: start;
+  }
+
+  .professional-wheel-wrap {
+    padding: 8px;
+    border-radius: 18px;
+  }
+
+  .professional-aspect-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .astro-loading,
+  .astro-error {
+    min-height: 280px;
+    padding: 22px;
+  }
 }

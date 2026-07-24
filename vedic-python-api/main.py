@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 
 from vedic_skill_rules import LIFE_BLUEPRINT_SKILL_RULES, VEDIC_SKILL_SOURCE
 from vedic_calculator_adapter import calculate_professional_chart
+from western_astrology import calculate_western_chart
 
 
 SIGNS = [
@@ -76,6 +77,11 @@ class VedicRequest(BaseModel):
     masterSummary: str | None = None
     question: str | None = None
     history: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class WesternChartRequest(BaseModel):
+    profile: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
 
 app = FastAPI(title="Luna Vedic Ephemeris API", version="1.0.0")
@@ -537,6 +543,16 @@ def health() -> dict[str, Any]:
 def calculate(payload: VedicRequest, x_vedic_api_key: str | None = Header(default=None)) -> dict[str, Any]:
     require_api_key(x_vedic_api_key)
     result = calculate_chart(payload.profile, payload.options)
+    return {"ok": True, **result}
+
+
+@app.post("/western/calculate")
+def calculate_western(
+    payload: WesternChartRequest,
+    x_vedic_api_key: str | None = Header(default=None),
+) -> dict[str, Any]:
+    require_api_key(x_vedic_api_key)
+    result = calculate_western_chart(payload.profile, payload.options)
     return {"ok": True, **result}
 
 

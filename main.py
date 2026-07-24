@@ -6,6 +6,9 @@ from pathlib import Path
 
 
 api_path = Path(__file__).parent / "vedic-python-api" / "main.py"
+api_directory = str(api_path.parent)
+if api_directory not in sys.path:
+    sys.path.insert(0, api_directory)
 spec = importlib.util.spec_from_file_location("vedic_python_api_main", api_path)
 if spec is None or spec.loader is None:
     raise RuntimeError(f"Cannot load Vedic API from {api_path}")

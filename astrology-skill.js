@@ -246,6 +246,273 @@
     return `太阳${sun.sign.name}，月亮${moon.sign.name}，上升${asc.sign.name}，${chart.dominantElement}元素突出`;
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function pointByKey(chart, key) {
+    return chart?.points?.find((item) => item.key === key);
+  }
+
+  function degreeLabel(point) {
+    if (!point) return "—";
+    const degree = Math.floor(point.degree);
+    const minute = Math.round((point.degree - degree) * 60);
+    return `${degree}°${String(minute).padStart(2, "0")}′ ${point.sign}`;
+  }
+
+  function dignityLabel(point) {
+    return point?.dignity?.name || "—";
+  }
+
+  function polar(longitude, ascendant, radius, center = 300) {
+    const angle = (180 - (longitude - ascendant)) * Math.PI / 180;
+    return {
+      x: center + Math.cos(angle) * radius,
+      y: center - Math.sin(angle) * radius
+    };
+  }
+
+  function svgLineAt(longitude, ascendant, inner, outer, className) {
+    const a = polar(longitude, ascendant, inner);
+    const b = polar(longitude, ascendant, outer);
+    return `<line class="${className}" x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}" />`;
+  }
+
+  function spreadPointRadii(points, baseRadius) {
+    const sorted = [...points].sort((a, b) => a.longitude - b.longitude);
+    const radii = new Map();
+    sorted.forEach((point, index) => {
+      const previous = sorted[index - 1];
+      const close = previous && Math.abs(point.longitude - previous.longitude) < 6;
+      radii.set(point.key, baseRadius - (close ? 18 : 0));
+    });
+    return radii;
+  }
+
+  function professionalWheel(chart, overlay, chartType) {
+    if (!chart?.points?.length) return "";
+    const ascendant = chart.angles?.asc ?? pointByKey(chart, "asc")?.longitude ?? 0;
+    const zodiacLines = Array.from({ length: 12 }, (_, index) => (
+      svgLineAt(index * 30, ascendant, 224, 274, "zodiac-line")
+    )).join("");
+    const zodiacGlyphs = signs.map((sign, index) => {
+      const point = polar(index * 30 + 15, ascendant, 250);
+      return `<text class="zodiac-glyph" x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${sign.glyph}</text>`;
+    }).join("");
+    const houseLines = chart.houses.map((house) => (
+      svgLineAt(house.longitude, ascendant, 86, 222, `house-line ${house.house === 1 || house.house === 10 ? "axis-line" : ""}`)
+    )).join("");
+    const houseLabels = chart.houses.map((house, index) => {
+      const next = chart.houses[(index + 1) % 12];
+      const span = (next.longitude - house.longitude + 360) % 360;
+      const point = polar((house.longitude + span / 2) % 360, ascendant, 107);
+      return `<text class="house-number" x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${house.house}</text>`;
+    }).join("");
+    const pointRadii = spreadPointRadii(chart.points, 190);
+    const pointLabels = chart.points.map((item) => {
+      const point = polar(item.longitude, ascendant, pointRadii.get(item.key));
+      return `
+        <g class="chart-point natal-point">
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="14"></circle>
+          <text x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${escapeHtml(item.glyph)}</text>
+        </g>
+      `;
+    }).join("");
+    const aspectLines = (chart.aspects || []).slice(0, 24).map((aspect) => {
+      const a = pointByKey(chart, aspect.a);
+      const b = pointByKey(chart, aspect.b);
+      if (!a || !b) return "";
+      const start = polar(a.longitude, ascendant, 154);
+      const end = polar(b.longitude, ascendant, 154);
+      return `<line class="aspect-line ${aspect.type}" style="--aspect-color:${aspect.color}" x1="${start.x.toFixed(2)}" y1="${start.y.toFixed(2)}" x2="${end.x.toFixed(2)}" y2="${end.y.toFixed(2)}" />`;
+    }).join("");
+    const overlayLabels = overlay?.points?.map((item) => {
+      const point = polar(item.longitude, ascendant, 208);
+      return `
+        <g class="chart-point overlay-point">
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="12"></circle>
+          <text x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${escapeHtml(item.glyph)}</text>
+        </g>
+      `;
+    }).join("") || "";
+    return `
+      <div class="professional-wheel-wrap">
+        <svg class="professional-wheel" viewBox="0 0 600 600" role="img" aria-label="真实星历星盘">
+          <circle class="wheel-bg" cx="300" cy="300" r="286"></circle>
+          <circle class="zodiac-ring" cx="300" cy="300" r="274"></circle>
+          <circle class="zodiac-ring inner" cx="300" cy="300" r="224"></circle>
+          <circle class="aspect-ring" cx="300" cy="300" r="154"></circle>
+          ${zodiacLines}
+          ${zodiacGlyphs}
+          ${houseLines}
+          ${houseLabels}
+          ${aspectLines}
+          ${pointLabels}
+          ${overlayLabels}
+          <circle class="wheel-center" cx="300" cy="300" r="45"></circle>
+          <text class="wheel-center-title" x="300" y="295">${chartType === "transit" ? "NATAL + TRANSIT" : "NATAL CHART"}</text>
+          <text class="wheel-center-subtitle" x="300" y="316">TROPICAL · SWISS EPHEMERIS</text>
+        </svg>
+        <div class="chart-legend">
+          <span><i class="legend-dot natal"></i>本命行星</span>
+          ${overlay ? `<span><i class="legend-dot transit"></i>${chartType === "synastry" ? "对方行星" : "行运行星"}</span>` : ""}
+          <span><i class="legend-line soft"></i>和谐相位</span>
+          <span><i class="legend-line hard"></i>紧张相位</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function placementTable(chart, title = "本命行星落点") {
+    if (!chart?.points?.length) return "";
+    return `
+      <section class="astro-data-section">
+        <div class="astro-section-title">
+          <p class="kicker">PLANET POSITIONS</p>
+          <h3>${title}</h3>
+        </div>
+        <div class="astro-table-wrap">
+          <table class="astro-data-table">
+            <thead><tr><th>星体</th><th>位置</th><th>宫位</th><th>尊贵</th><th>状态</th></tr></thead>
+            <tbody>
+              ${chart.points.map((item) => `
+                <tr>
+                  <td><span class="planet-symbol">${escapeHtml(item.glyph)}</span>${escapeHtml(item.name)}</td>
+                  <td>${degreeLabel(item)}</td>
+                  <td>${item.house ? `第 ${item.house} 宫` : "—"}</td>
+                  <td>${escapeHtml(dignityLabel(item))}</td>
+                  <td>${item.retrograde ? "逆行 R" : "顺行"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  function aspectCards(aspects, title) {
+    if (!aspects?.length) return "";
+    return `
+      <section class="astro-data-section">
+        <div class="astro-section-title">
+          <p class="kicker">ASPECTS</p>
+          <h3>${title}</h3>
+        </div>
+        <div class="professional-aspect-grid">
+          ${aspects.slice(0, 18).map((item) => `
+            <article>
+              <span class="aspect-swatch" style="--aspect-color:${item.color}"></span>
+              <div>
+                <strong>${escapeHtml(item.aName)} ${escapeHtml(item.name)} ${escapeHtml(item.bName)}</strong>
+                <small>容许度 ${Number(item.orb).toFixed(2)}°</small>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function balanceAndPatternCards(chart) {
+    if (!chart) return "";
+    const balance = chart.balance || {};
+    const patterns = chart.aspectPatterns || [];
+    const rulers = chart.houseRulers || [];
+    const careerRuler = rulers.find((item) => item.house === 10);
+    const wealthRuler = rulers.find((item) => item.house === 2);
+    const relationshipRuler = rulers.find((item) => item.house === 7);
+    const patternText = patterns.length
+      ? patterns.map((item) => `${item.name}（${item.memberNames.join("、")}）`).join("；")
+      : "未形成主要经典相位格局";
+    return `
+      <section class="astro-data-section">
+        <div class="astro-section-title">
+          <p class="kicker">CHART STRUCTURE</p>
+          <h3>整体格局与宫主星</h3>
+        </div>
+        <div class="astro-structure-grid">
+          <article>
+            <small>元素重点</small>
+            <strong>${escapeHtml(balance.dominantElement || "—")}元素突出</strong>
+            <p>${Object.entries(balance.elements || {}).map(([key, value]) => `${key} ${value}`).join(" · ")}</p>
+          </article>
+          <article>
+            <small>行动模式</small>
+            <strong>${escapeHtml(balance.dominantModality || "—")}模式突出</strong>
+            <p>${Object.entries(balance.modalities || {}).map(([key, value]) => `${key} ${value}`).join(" · ")}</p>
+          </article>
+          <article>
+            <small>相位格局</small>
+            <strong>${patterns.length ? `${patterns.length} 组重点格局` : "无大型格局"}</strong>
+            <p>${escapeHtml(patternText)}</p>
+          </article>
+        </div>
+        <div class="astro-ruler-grid">
+          ${[
+            ["财富", wealthRuler],
+            ["关系", relationshipRuler],
+            ["事业", careerRuler]
+          ].map(([label, ruler]) => `
+            <article>
+              <small>${label}宫主星</small>
+              <strong>${ruler ? `${escapeHtml(ruler.rulerName)}落第 ${ruler.rulerHouse} 宫` : "—"}</strong>
+              ${ruler?.coRulerName ? `<p>现代共主星：${escapeHtml(ruler.coRulerName)}落第 ${ruler.coRulerHouse} 宫</p>` : ""}
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function professionalReading(data, options = {}) {
+    const chartType = data.chartType || options.chartType || "natal";
+    const primary = chartType === "composite" && data.composite ? data.composite : data.natal;
+    const overlay = chartType === "transit"
+      ? data.transit
+      : (chartType === "synastry" ? data.partner : null);
+    const sun = pointByKey(data.natal, "sun");
+    const moon = pointByKey(data.natal, "moon");
+    const asc = pointByKey(data.natal, "asc");
+    const mc = pointByKey(data.natal, "mc");
+    const chartLabel = chartTypes[chartType] || "本命盘";
+    return `
+      <div class="professional-chart-header">
+        <div>
+          <p class="kicker">WESTERN ASTROLOGY · TROPICAL</p>
+          <h2>${escapeHtml(chartLabel)}</h2>
+          <p>${escapeHtml(data.subject?.resolvedName || data.subject?.city || "")}</p>
+        </div>
+        <span class="ephemeris-badge">Swiss Ephemeris</span>
+      </div>
+      <div class="astro-key-grid">
+        <article><small>太阳</small><strong>${degreeLabel(sun)}</strong></article>
+        <article><small>月亮</small><strong>${degreeLabel(moon)}</strong></article>
+        <article><small>上升</small><strong>${degreeLabel(asc)}</strong></article>
+        <article><small>天顶</small><strong>${degreeLabel(mc)}</strong></article>
+      </div>
+      ${professionalWheel(primary, overlay, chartType)}
+      <p class="calculation-meta">
+        热带黄道 · ${escapeHtml(primary.houseSystem || data.natal?.houseSystem || "Placidus")} ·
+        ${escapeHtml(data.subject?.timezone || "")} ·
+        ${escapeHtml(data.subject?.birthDateTime || "")}
+      </p>
+      ${data.calculationNote ? `<p class="astro-notice">${escapeHtml(data.calculationNote)}</p>` : ""}
+      ${balanceAndPatternCards(primary)}
+      ${placementTable(primary, chartType === "composite" ? "组合盘行星中点" : "本命行星落点")}
+      ${overlay ? placementTable(overlay, chartType === "synastry" ? "对方行星落点" : "行运行星位置") : ""}
+      ${aspectCards(primary.aspects, chartType === "composite" ? "组合盘主要相位" : "本命主要相位")}
+      ${aspectCards(data.interAspects, chartType === "synastry" ? "双方交互相位" : "行运触发相位")}
+      <p class="disclaimer">星盘用于自我观察与娱乐参考，不替代医疗、法律、财务或其他专业意见。</p>
+    `;
+  }
+
   window.AstrologySkill = {
     signs,
     planets,
@@ -253,6 +520,7 @@
     buildChart,
     buildComposite,
     reading,
+    professionalReading,
     wheel: (profile) => wheelFromChart(buildChart(profile)),
     shortText
   };
