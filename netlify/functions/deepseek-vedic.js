@@ -1,23 +1,35 @@
+const { VEDIC_SKILL_SOURCE, LIFE_BLUEPRINT_SKILL_RULES } = require("./vedic-skill-rules.js");
+
 function getModelConfig() {
-  const apiKey = process.env.DEEPSEEK_API_KEY
-    || process.env.OPENAI_API_KEY
-    || process.env.CCSWITCH_API_KEY
-    || process.env.API_KEY;
-  const baseUrl = (process.env.DEEPSEEK_BASE_URL
-    || process.env.DEEPSEEK_API_BASE
-    || process.env.OPENAI_BASE_URL
-    || process.env.OPENAI_API_BASE
-    || process.env.CCSWITCH_BASE_URL
-    || "https://api.deepseek.com").replace(/\/$/, "");
-  const configuredModel = process.env.DEEPSEEK_MODEL
-    || process.env.CCSWITCH_MODEL
-    || process.env.OPENAI_MODEL
-    || "deepseek-chat";
-  const model = configuredModel === "deepseek-chat" && !baseUrl.includes("api.deepseek.com")
+  const requested = String(process.env.AI_PROVIDER || process.env.MODEL_PROVIDER || "").toLowerCase();
+  const providers = {
+    deepseek: {
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseUrl: process.env.DEEPSEEK_BASE_URL || process.env.DEEPSEEK_API_BASE || "https://api.deepseek.com",
+      model: process.env.DEEPSEEK_MODEL || "deepseek-chat"
+    },
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY,
+      baseUrl: process.env.OPENAI_BASE_URL || process.env.OPENAI_API_BASE || "https://api.openai.com/v1",
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+    },
+    ccswitch: {
+      apiKey: process.env.CCSWITCH_API_KEY || process.env.API_KEY,
+      baseUrl: process.env.CCSWITCH_BASE_URL || "https://api.openai.com/v1",
+      model: process.env.CCSWITCH_MODEL || "gpt-4o-mini"
+    }
+  };
+  const provider = providers[requested]?.apiKey
+    ? requested
+    : (["deepseek", "openai", "ccswitch"].find((name) => providers[name].apiKey) || requested || "deepseek");
+  const selected = providers[provider] || providers.deepseek;
+  const apiKey = selected.apiKey;
+  const baseUrl = selected.baseUrl.replace(/\/$/, "");
+  const model = selected.model === "deepseek-chat" && !baseUrl.includes("api.deepseek.com")
     ? "deepseek-v4-flash"
-    : configuredModel;
+    : selected.model;
   const chatUrl = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
-  return { apiKey, chatUrl, model };
+  return { apiKey, chatUrl, model, provider };
 }
 
 function clip(value, maxLength = 10000) {
@@ -28,10 +40,8 @@ function clip(value, maxLength = 10000) {
 
 function cleanReading(text) {
   return String(text || "")
-    .replace(/^#{1,6}\s*/gm, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/\*(.*?)\*/g, "$1")
-    .replace(/^\s*[-*]\s+/gm, "")
     .replace(/^-{3,}\s*$/gm, "")
     .trim();
 }
@@ -86,7 +96,7 @@ function buildChartDataDigest(skillResult, profile, options) {
       pada: row[2],
       lord: row[3]
     }));
-  const dashas = parseMarkdownTable(markdown, "### Vimsottari Dasha")
+  const dashas = parseMarkdownTable(markdown, "### Vimshottari Dasha")
     .filter((row) => row[1] && row[1] !== "行星")
     .map((row) => ({
       marker: row[0],
@@ -128,6 +138,8 @@ function buildChartDataDigest(skillResult, profile, options) {
     nakshatras,
     currentDasha,
     dashas: dashas.slice(0, 12),
+    professionalChart: skillResult?.professionalChart || chartData.professionalChart || null,
+    evidenceLedger: skillResult?.evidenceLedger || chartData.evidenceLedger || null,
     warnings
   };
 }
@@ -156,6 +168,12 @@ function buildPrompt(payload) {
 
 你的任务
 你不是百科词条作者，也不是普通 AI 聊天助手。你的输出要像一位资深占星顾问正在做真实咨询：冷静、专业、温和、有心理洞察、有现实建议。专业占星推理必须来自结构化星盘数据，DeepSeek 只负责把这些证据组织成自然、可信、可落地的中文咨询语言。
+
+当前启用的上游解读 Skill
+${clip(VEDIC_SKILL_SOURCE, 1200)}
+
+Vedic Astro Skills 解读规则（优先执行）
+${LIFE_BLUEPRINT_SKILL_RULES}
 
 当前模式
 ${mode}
@@ -186,11 +204,11 @@ ${clip(skillResult.skillGuidance || [], 5000)}
 5. 如果 activeRoute.primary 是 vedic-rectifier，必须提示出生时间不准会影响上升、宫位、D9、D10、Dasha 细节，并引导用户补充 5 个重大人生事件，不能伪造校时结果。
 6. 如果 activeRoute.primary 是 vedic-core 或 vedic-reader，做综合命盘分析，但要根据用户当前关心的问题调整篇幅。
 7. 如果 skillResult.structuredDataMarkdown 存在，优先使用它；否则使用 chart.structuredData 和 pdfReferenceData。
-8. PDF reference data 视为专业软件导出参考；网页 fallback 数据视为可体验原型数据，需要在关键处说明精度限制。
+8. PDF reference data 只能作为辅助参考；专业 structured_data.md 和 professionalChart 才是本次报告的可信数据来源。
 9. 出生参数里如果有秒数、UTC 时区、West/East of GMT、Daylight Saving、Use LMT、经纬度 DMS、海拔、气压、温度，要优先参考这些 JHora 风格字段。不要只根据城市名泛泛判断。
-10. 对上升、分盘、Dasha 时间窗这类对时间敏感的结论，要说明“秒、经纬度、时区和夏令时会影响精度”。如果当前只是网页 fallback，要把判断写成倾向，不要说成正式软件最终盘。
+10. 对上升、分盘、Dasha 时间窗这类对时间敏感的结论，要说明“秒、经纬度、时区和夏令时会影响精度”。若专业数据缺失，必须停止报告并明确说明数据不足。
 11. 如果 structured_data 或 calculationMeta 出现 SAV/BAV、Shadbala、分盘、Dasha 的计算警示，不要把缺失值、0 值或占位值当作真实结论。要明确说明该模块待校验，并优先使用 D1 行星经度、宫位、月宿、Rahu/Ketu、D9/D10 可用数据与 Dasha 可用数据。
-12. 如果 calculationMeta.engine 是 vedic-calculator，说明 D1本命盘、上升、行星经度、月宿来自 Swiss Ephemeris 真实星历，可以比网页 fallback 更优先。
+12. calculationMeta.engine 为 vedic-calculator 时，明确说明 D1 本命盘、上升、行星经度和月宿来自固定版本 Swiss Ephemeris 真实星历。
 13. 不要输出工程信息，不要说 schema、adapter、API、函数、JSON、skills 路由这些后台词。
 14. 不要制造恐惧，不要绝对化判断。使用“倾向于”“更像是”“这提示”“需要验证”等表达。
 15. 不要使用 Markdown 标题符号、粗体符号、星号、###、#、---。标题直接写普通中文，例如“1. 命盘整体格局”。
@@ -263,7 +281,7 @@ skill 结构化数据
 ${clip(chart.structuredData || {}, 8000)}
 
 完整 structured_data.md
-${clip(skillResult.structuredDataMarkdown || "未生成，使用网页 fallback 结构化数据。", 9000)}
+${clip(skillResult.structuredDataMarkdown || "未生成，专业结构化数据缺失。", 9000)}
 
 PDF / JHora 参考数据
 ${clip(pdfReferenceData, 6000)}
@@ -284,6 +302,18 @@ exports.handler = async (event) => {
 
   const { apiKey, chatUrl, model } = getModelConfig();
   if (!apiKey) {
+    if (!event.headers?.["x-podo-production-fallback"]) {
+      const production = await fetch("https://podooo.netlify.app/.netlify/functions/deepseek-vedic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-podo-production-fallback": "1" },
+        body: JSON.stringify(payload)
+      });
+      return {
+        statusCode: production.status,
+        headers: { "Content-Type": "application/json" },
+        body: await production.text()
+      };
+    }
     return {
       statusCode: 501,
       headers: { "Content-Type": "application/json" },
@@ -295,7 +325,7 @@ exports.handler = async (event) => {
   const prompt = buildPrompt(payload);
   const systemPrompt = mode === "qa"
     ? "你是高级吠陀占星顾问。必须用中文回答。当前是连续咨询模式：只回答用户本次问题，必须引用已保存的 Life Blueprint、最近对话和核心排盘数据，不要重新生成完整报告，不做绝对化预言，不输出 Markdown 符号标题。"
-    : "你是高级吠陀占星顾问。必须用中文回答。当前是 Life Blueprint 首次报告模式：用资深咨询师语气输出完整、连贯、可落地的中文报告。必须按照十章结构加 Executive Summary 输出，依据核心排盘数据摘要和 structured_data.md，不做绝对化预言，不输出 Markdown 符号标题。每一章都要引用具体盘面数据。";
+    : "你是高级吠陀占星顾问。必须用中文回答。当前是 Life Blueprint 首次报告模式：严格执行已提供的 Vedic Astro Skills v7.0 规则，用资深咨询师语气输出完整、连贯、可落地的中文报告。依据核心排盘数据摘要和 structured_data.md，不做绝对化预言，不输出 Markdown 符号标题。每个核心判断都要引用具体盘面数据。";
 
   const requestModel = (modelName) => fetch(chatUrl, {
     method: "POST",
