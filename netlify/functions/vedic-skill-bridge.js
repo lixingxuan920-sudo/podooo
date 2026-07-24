@@ -3,6 +3,8 @@ const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
+// Production chart requests must remain fail-fast and professional-backend-only.
+
 const REQUIRED_SKILLS = [
   "vedic-calculator",
   "vedic-core",
