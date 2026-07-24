@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+try:
+    from timezonefinder import TimezoneFinder
+except Exception:  # pragma: no cover - dependency is installed in production
+    TimezoneFinder = None
+
 
 SKILL_COMMIT = "7a6e33e23dc1f45107af2f249848241bb4d22b67"
 SKILL_REPOSITORY = "https://github.com/lixingxuan920-sudo/vedic-astro-skills"
@@ -71,41 +76,13 @@ def timezone_to_iana(profile: dict[str, Any], lon: float | None) -> str:
         except Exception:
             pass
 
-    city = str(profile.get("birthCity", "")).lower()
-    timezone = str(profile.get("timezone", "")).lower()
-    if (
-        "south grafton" in city
-        or "massachusetts" in city
-        or "-04" in timezone
-        or "-05" in timezone
-    ):
-        return "America/New_York"
-    if (
-        "india" in city
-        or "delhi" in city
-        or "mumbai" in city
-        or "05:30" in timezone
-    ):
-        return "Asia/Kolkata"
-    if "hong" in city or "香港" in city:
-        return "Asia/Hong_Kong"
-    if "taipei" in city or "台北" in city:
-        return "Asia/Taipei"
-    if (
-        "+08" in timezone
-        or "china" in city
-        or any(
-            item in city
-            for item in [
-                "北京", "上海", "广州", "深圳", "西宁", "成都",
-                "重庆", "武汉", "南京", "杭州", "西安",
-            ]
-        )
-    ):
-        return "Asia/Shanghai"
-    if lon is not None and 68 < lon < 98:
-        return "Asia/Kolkata"
-    return "Asia/Shanghai"
+    lat = dms_to_decimal(profile.get("latitude"))
+    if TimezoneFinder is not None and lat is not None and lon is not None:
+        resolved = TimezoneFinder().timezone_at(lat=lat, lng=lon)
+        if resolved:
+            return resolved
+
+    raise ValueError("无法根据出生坐标解析 IANA 时区，请补充明确的 IANA 时区。")
 
 
 def parse_birth(
@@ -185,6 +162,28 @@ def compact_professional_chart(chart: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def build_evidence_ledger(chart: dict[str, Any], calculation_meta: dict[str, Any]) -> dict[str, Any]:
+    """Create the single evidence source consumed by all report sections."""
+    planets = chart.get("planets", {})
+    return {
+        "lagna": chart.get("lagna"),
+        "planets": planets,
+        "dignity": chart.get("dignity", {}),
+        "combustion": chart.get("combustion", {}),
+        "shadbala": chart.get("shadbala", {}),
+        "house_lords": chart.get("house_lords", {}),
+        "d9": chart.get("d9", {}),
+        "d10": chart.get("d10", {}),
+        "dashas": chart.get("dashas", []),
+        "karakas": chart.get("karakas", {}),
+        "special_points": chart.get("special_points", {}),
+        "sav": chart.get("sav", {}),
+        "sav_by_house": chart.get("sav_by_house", {}),
+        "validation": calculation_meta.get("validation", {}),
+        "warnings": calculation_meta.get("warnings", []),
+    }
+
+
 def calculate_professional_chart(
     profile: dict[str, Any],
     options: dict[str, Any] | None = None,
@@ -252,23 +251,25 @@ def calculate_professional_chart(
             "vedic-calculator v7.0 的 PyJHora 量化接口按分钟计算；出生秒数已保留在元数据中。"
         )
 
+    calculation_meta = {
+        "engine": "vedic-calculator",
+        "upstreamVersion": "v7.0",
+        "repository": SKILL_REPOSITORY,
+        "commit": SKILL_COMMIT,
+        "timezone": timezone,
+        "lat": lat,
+        "lon": lon,
+        "second": second,
+        "ayanamsa": chart["ayanamsa"],
+        "ayanamsaMode": "TRUE_CITRA / Lahiri",
+        "nodeMode": "Mean Node",
+        "validation": compact_professional_chart(chart)["validation"],
+        "warnings": warnings,
+        "calculatedAt": datetime.utcnow().isoformat() + "Z",
+    }
     return {
         "structuredDataMarkdown": markdown,
         "professionalChart": compact_professional_chart(chart),
-        "calculationMeta": {
-            "engine": "vedic-calculator",
-            "upstreamVersion": "v7.0",
-            "repository": SKILL_REPOSITORY,
-            "commit": SKILL_COMMIT,
-            "timezone": timezone,
-            "lat": lat,
-            "lon": lon,
-            "second": second,
-            "ayanamsa": chart["ayanamsa"],
-            "ayanamsaMode": "TRUE_CITRA / Lahiri",
-            "nodeMode": "Mean Node",
-            "validation": compact_professional_chart(chart)["validation"],
-            "warnings": warnings,
-            "calculatedAt": datetime.utcnow().isoformat() + "Z",
-        },
+        "calculationMeta": calculation_meta,
+        "evidenceLedger": build_evidence_ledger(chart, calculation_meta),
     }
