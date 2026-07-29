@@ -1,5 +1,5 @@
 const WESTERN_SKILL_SOURCE = {
-  name: "Astro — Western Tropical interpretation rules",
+  name: "Astro — Western astrology interpretation rules",
   repository: "https://github.com/aryaminus/astro",
   license: "MIT",
   adaptedFor: "Podo",
@@ -11,7 +11,10 @@ const WESTERN_SKILL_RULES = `
 
 【适用边界】
 - 本规则只用于 Podo 的“星盘”板块，不用于“印占”板块。
-- 只解读 Tropical 热带黄道的西洋占星结构化数据，不读取或引用 Vedic Skill、Lahiri Ayanamsa、Nakshatra、Vimshottari Dasha、D1/D9/D10 或 Yoga。
+- 按输入元数据解读 Tropical 回归黄道、Sidereal 恒星黄道或 Draconic 龙首黄道的西洋占星结构化数据。
+- Sidereal + Lahiri 仍按西洋恒星黄道解释；不得读取或引用 Vedic Skill、Nakshatra、Vimshottari Dasha、D1/D9/D10 或 Yoga。
+- Geocentric 地心盘可使用角轴和宫位；Heliocentric 日心盘只解读行星位置与相位，不补造上升、天顶、宫位或宫主星。
+- Topocentric、交点类型、岁差体系和光行时设置必须以 calculationSettings 为准。
 
 【可信度纪律】
 - 星体、度数、宫位、逆行、相位只允许引用输入 JSON；绝不猜测或自行改写。

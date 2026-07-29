@@ -2585,6 +2585,37 @@ input:focus {
   margin-bottom: 14px;
 }
 
+.western-calculation-settings .compact-fields {
+  padding: 0 14px;
+}
+
+.western-calculation-settings .compact-fields label {
+  width: auto;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.western-setting-check {
+  width: auto !important;
+  min-height: 44px;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin: 0 14px 12px !important;
+  color: var(--muted);
+}
+
+.western-setting-check input {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.western-calculation-settings .disclaimer {
+  margin: 0;
+  padding: 0 14px 14px;
+}
+
 .status {
   min-height: 28px;
   color: var(--gold);

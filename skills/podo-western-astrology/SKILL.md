@@ -1,6 +1,6 @@
 ---
 name: podo-western-astrology
-description: Calculate and interpret Western astrology charts for Podo's “星盘” section using the tropical zodiac, Swiss Ephemeris, and supported Western house systems. Use for Western natal charts, transits, synastry, composite charts, and topic-based readings. Never use this skill for Podo's Indian/Vedic astrology section.
+description: Calculate and interpret Podo “星盘” Western astrology charts with Swiss Ephemeris, including Tropical, Sidereal, and Draconic zodiacs; geocentric, heliocentric, and topocentric modes; Western house systems; natal, transit, synastry, composite, and topic readings. Never use for Podo’s Indian/Vedic astrology section.
 ---
 
 # Podo Western Astrology
@@ -12,13 +12,26 @@ interpretation rules.
 ## Enforce the scope
 
 - Require or attach the scope marker `western-chart`.
-- Use the tropical zodiac.
+- Default to Tropical, geocentric, Placidus, mean node, non-topocentric
+  positions, and light-time correction so existing Podo results do not change.
+- Allow Sidereal only with an explicit ayanamsa (`fagan-bradley` or `lahiri`).
+- Allow Draconic only with an explicit node basis (`mean` or `true`) and rotate
+  every longitude, angle, and house cusp so that the selected north node is
+  Aries 0°.
+- Allow Heliocentric as a planet-and-aspect chart without Ascendant,
+  Midheaven, houses, or house rulers. Reject heliocentric + topocentric and
+  heliocentric + draconic combinations.
+- Allow Topocentric only for geocentric charts and require coordinates plus
+  observer altitude.
+- Treat `lightTimeCorrection: false` as the Swiss Ephemeris true-position
+  research option. Keep it enabled by default.
 - Use Swiss Ephemeris for astronomical positions.
 - Default to Placidus houses unless the user or application explicitly
   selects Koch, Equal House, or Whole Sign.
 - Reject data containing Vedic-only structures or requests to interpret
-  Lahiri ayanamsa, Nakshatra, Vimshottari Dasha, divisional charts, or Yoga
-  rules.
+  Nakshatra, Vimshottari Dasha, divisional charts, or Yoga rules. Lahiri is
+  permitted only as the declared ayanamsa of a Western Sidereal chart and
+  must never activate Vedic interpretation rules.
 - Never import or call `vedic_skill_rules.py`, the Vedic Skill bridge, or
   Indian astrology prompts from this skill.
 
@@ -48,9 +61,15 @@ Calculate and preserve:
 - house cusps for the selected house system;
 - major aspects and their orbs;
 - chart type and calculation metadata.
+- zodiac, ayanamsa or node basis, observation center, topocentric altitude,
+  light-time setting, and whether houses are available.
 
 Never invent a placement or aspect. If the calculation fails, report the
 failure instead of estimating the chart from Sun signs.
+
+For Heliocentric output, replace the geocentric Sun with Earth and omit the
+Moon, lunar nodes, Ascendant, Midheaven, houses, and house rulers. Do not
+interpret missing angles or houses as zero-degree placements.
 
 ## Interpret the chart
 

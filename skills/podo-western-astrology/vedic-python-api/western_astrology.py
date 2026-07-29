@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import threading
 from itertools import combinations
 from datetime import datetime, time
 from functools import lru_cache
@@ -97,6 +98,27 @@ HOUSE_SYSTEMS = {
     "whole-sign": (b"W", "Whole Sign"),
 }
 
+ZODIAC_MODES = {
+    "tropical": "Tropical",
+    "sidereal": "Sidereal",
+    "draconic": "Draconic",
+}
+
+AYANAMSA_MODES = {
+    "fagan-bradley": (swe.SIDM_FAGAN_BRADLEY, "Fagan–Bradley"),
+    "lahiri": (swe.SIDM_LAHIRI, "Lahiri"),
+}
+
+NODE_TYPES = {
+    "mean": (swe.MEAN_NODE, "Mean Node"),
+    "true": (swe.TRUE_NODE, "True Node"),
+}
+
+CENTERS = {
+    "geocentric": "Geocentric",
+    "heliocentric": "Heliocentric",
+}
+
 CITY_PRESETS = {
     "上海": (31.2304, 121.4737, "Asia/Shanghai"),
     "shanghai": (31.2304, 121.4737, "Asia/Shanghai"),
@@ -120,6 +142,7 @@ CITY_PRESETS = {
 
 _timezone_finder = TimezoneFinder()
 _geolocator = Nominatim(user_agent="podo-western-astrology/1.0", timeout=10)
+_swe_lock = threading.RLock()
 
 
 def _longitude_distance(a: float, b: float) -> float:
@@ -309,7 +332,8 @@ def _aspects(points: list[dict[str, Any]], other: list[dict[str, Any]] | None = 
 
 
 def _chart_balance(points: list[dict[str, Any]]) -> dict[str, Any]:
-    core = [point for point in points if point["key"] in {item[0] for item in PLANETS[:10]}]
+    excluded = {"asc", "mc", "northNode", "southNode"}
+    core = [point for point in points if point["key"] not in excluded]
     elements = {key: 0 for key in ("火", "土", "风", "水")}
     modalities = {key: 0 for key in ("开创", "固定", "变动")}
     for point in core:
@@ -345,6 +369,48 @@ def _house_rulers(houses: list[dict[str, Any]], points: list[dict[str, Any]]) ->
             }
         )
     return results
+
+
+def _normalize_calculation_settings(options: dict[str, Any]) -> dict[str, Any]:
+    house_system = str(options.get("houseSystem") or "placidus").lower()
+    zodiac = str(options.get("zodiac") or "tropical").lower()
+    ayanamsa = str(options.get("ayanamsa") or "fagan-bradley").lower()
+    node_type = str(options.get("nodeType") or "mean").lower()
+    center = str(options.get("center") or "geocentric").lower()
+    topocentric = bool(options.get("topocentric", False))
+    light_time_correction = bool(options.get("lightTimeCorrection", True))
+    try:
+        observer_altitude = float(options.get("observerAltitudeMeters") or 0)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="观测点海拔必须是数字") from exc
+
+    if house_system not in HOUSE_SYSTEMS:
+        raise HTTPException(status_code=400, detail=f"不支持的宫制：{house_system}")
+    if zodiac not in ZODIAC_MODES:
+        raise HTTPException(status_code=400, detail=f"不支持的黄道体系：{zodiac}")
+    if ayanamsa not in AYANAMSA_MODES:
+        raise HTTPException(status_code=400, detail=f"不支持的岁差体系：{ayanamsa}")
+    if node_type not in NODE_TYPES:
+        raise HTTPException(status_code=400, detail=f"不支持的交点类型：{node_type}")
+    if center not in CENTERS:
+        raise HTTPException(status_code=400, detail=f"不支持的观测中心：{center}")
+    if not -500 <= observer_altitude <= 10000:
+        raise HTTPException(status_code=400, detail="观测点海拔需在 -500 至 10000 米之间")
+    if center == "heliocentric" and topocentric:
+        raise HTTPException(status_code=400, detail="日心盘不能同时启用地面点坐标")
+    if center == "heliocentric" and zodiac == "draconic":
+        raise HTTPException(status_code=400, detail="龙首黄道仅适用于地心盘")
+
+    return {
+        "houseSystem": house_system,
+        "zodiac": zodiac,
+        "ayanamsa": ayanamsa,
+        "nodeType": node_type,
+        "center": center,
+        "topocentric": topocentric,
+        "observerAltitudeMeters": observer_altitude,
+        "lightTimeCorrection": light_time_correction,
+    }
 
 
 def _aspect_type_map(aspects: list[dict[str, Any]]) -> dict[frozenset[str], str]:
@@ -406,44 +472,108 @@ def _aspect_patterns(points: list[dict[str, Any]], aspects: list[dict[str, Any]]
     return patterns
 
 
-def _chart(local_dt: datetime, location: dict[str, Any], house_system: str = "placidus") -> dict[str, Any]:
+def _chart(local_dt: datetime, location: dict[str, Any], settings: dict[str, Any]) -> dict[str, Any]:
     jd = _julian_day(local_dt)
+    house_system = settings["houseSystem"]
+    zodiac = settings["zodiac"]
+    center = settings["center"]
+    topocentric = settings["topocentric"]
+    light_time_correction = settings["lightTimeCorrection"]
     system_code, system_name = HOUSE_SYSTEMS.get(house_system, HOUSE_SYSTEMS["placidus"])
-    try:
-        cusp_values, ascmc = swe.houses_ex(
-            jd,
-            float(location["latitude"]),
-            float(location["longitude"]),
-            system_code,
-            swe.FLG_TROPICAL,
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"当前纬度无法使用 {system_name} 宫制") from exc
-    cusp_list = list(cusp_values)
-    if len(cusp_list) == 13:
-        cusp_list = cusp_list[1:]
-    if len(cusp_list) != 12:
-        raise HTTPException(status_code=500, detail="Swiss Ephemeris 返回了无效宫头数据")
-    cusps = [float(value) % 360 for value in cusp_list]
-    points: list[dict[str, Any]] = []
+    houses_available = center == "geocentric"
     flags = swe.FLG_SWIEPH | swe.FLG_SPEED
-    for key, name, glyph, planet_id in PLANETS:
-        calculation = swe.calc_ut(jd, planet_id, flags)
-        values = calculation[0] if isinstance(calculation[0], (list, tuple)) else calculation
-        if len(values) < 4:
-            raise HTTPException(status_code=500, detail=f"无法计算{name}位置")
-        longitude = float(values[0]) % 360
-        speed = float(values[3])
-        points.append(_point_payload(key, name, glyph, longitude, speed, _house_for(longitude, cusps)))
+    if zodiac == "sidereal":
+        flags |= swe.FLG_SIDEREAL
+    if center == "heliocentric":
+        flags |= swe.FLG_HELCTR
+    if topocentric:
+        flags |= swe.FLG_TOPOCTR
+    if not light_time_correction:
+        flags |= swe.FLG_TRUEPOS
 
-    asc = float(ascmc[0]) % 360
-    mc = float(ascmc[1]) % 360
-    points.extend(
-        [
-            _point_payload("asc", "上升点", "ASC", asc, 0, 1),
-            _point_payload("mc", "天顶", "MC", mc, 0, 10),
+    planet_set = PLANETS
+    if center == "heliocentric":
+        planet_set = [
+            ("earth", "地球", "⊕", swe.EARTH),
+            *[item for item in PLANETS if item[0] in {
+                "mercury", "venus", "mars", "jupiter", "saturn",
+                "uranus", "neptune", "pluto",
+            }],
         ]
-    )
+    elif settings["nodeType"] == "true":
+        planet_set = [
+            (key, name, glyph, swe.TRUE_NODE if key == "northNode" else planet_id)
+            for key, name, glyph, planet_id in PLANETS
+        ]
+
+    with _swe_lock:
+        if zodiac == "sidereal":
+            swe.set_sid_mode(AYANAMSA_MODES[settings["ayanamsa"]][0])
+        if topocentric:
+            swe.set_topo(
+                float(location["longitude"]),
+                float(location["latitude"]),
+                settings["observerAltitudeMeters"],
+            )
+
+        cusps: list[float] = []
+        asc: float | None = None
+        mc: float | None = None
+        if houses_available:
+            house_flags = swe.FLG_SIDEREAL if zodiac == "sidereal" else swe.FLG_TROPICAL
+            try:
+                cusp_values, ascmc = swe.houses_ex(
+                    jd,
+                    float(location["latitude"]),
+                    float(location["longitude"]),
+                    system_code,
+                    house_flags,
+                )
+            except Exception as exc:
+                raise HTTPException(status_code=400, detail=f"当前纬度无法使用 {system_name} 宫制") from exc
+            cusp_list = list(cusp_values)
+            if len(cusp_list) == 13:
+                cusp_list = cusp_list[1:]
+            if len(cusp_list) != 12:
+                raise HTTPException(status_code=500, detail="Swiss Ephemeris 返回了无效宫头数据")
+            cusps = [float(value) % 360 for value in cusp_list]
+            asc = float(ascmc[0]) % 360
+            mc = float(ascmc[1]) % 360
+
+        raw_points: list[tuple[str, str, str, float, float]] = []
+        for key, name, glyph, planet_id in planet_set:
+            calculation = swe.calc_ut(jd, planet_id, flags)
+            values = calculation[0] if isinstance(calculation[0], (list, tuple)) else calculation
+            if len(values) < 4:
+                raise HTTPException(status_code=500, detail=f"无法计算{name}位置")
+            raw_points.append((key, name, glyph, float(values[0]) % 360, float(values[3])))
+
+        draconic_offset = 0.0
+        draconic_speed = 0.0
+        if zodiac == "draconic":
+            node_id = NODE_TYPES[settings["nodeType"]][0]
+            node_calculation = swe.calc_ut(jd, node_id, flags)
+            node_values = node_calculation[0] if isinstance(node_calculation[0], (list, tuple)) else node_calculation
+            draconic_offset = float(node_values[0]) % 360
+            draconic_speed = float(node_values[3])
+            cusps = [(value - draconic_offset) % 360 for value in cusps]
+            asc = (asc - draconic_offset) % 360 if asc is not None else None
+            mc = (mc - draconic_offset) % 360 if mc is not None else None
+
+    points: list[dict[str, Any]] = []
+    for key, name, glyph, raw_longitude, raw_speed in raw_points:
+        longitude = (raw_longitude - draconic_offset) % 360
+        speed = raw_speed - draconic_speed if zodiac == "draconic" else raw_speed
+        house = _house_for(longitude, cusps) if houses_available else None
+        points.append(_point_payload(key, name, glyph, longitude, speed, house))
+
+    if houses_available and asc is not None and mc is not None:
+        points.extend(
+            [
+                _point_payload("asc", "上升点", "ASC", asc, 0, 1),
+                _point_payload("mc", "天顶", "MC", mc, 0, 10),
+            ]
+        )
     houses = []
     for index, longitude in enumerate(cusps):
         sign_index = int(longitude // 30) % 12
@@ -458,6 +588,8 @@ def _chart(local_dt: datetime, location: dict[str, Any], house_system: str = "pl
             }
         )
     aspects = _aspects(points)
+    ayanamsa_name = AYANAMSA_MODES[settings["ayanamsa"]][1] if zodiac == "sidereal" else None
+    node_name = NODE_TYPES[settings["nodeType"]][1] if zodiac == "draconic" else None
     return {
         "localDateTime": local_dt.isoformat(),
         "utcDateTime": local_dt.astimezone(ZoneInfo("UTC")).isoformat(),
@@ -468,46 +600,63 @@ def _chart(local_dt: datetime, location: dict[str, Any], house_system: str = "pl
         "balance": _chart_balance(points),
         "houseRulers": _house_rulers(houses, points),
         "aspectPatterns": _aspect_patterns(points, aspects),
-        "angles": {"asc": round(asc, 8), "mc": round(mc, 8)},
-        "houseSystem": system_name,
+        "angles": {
+            "asc": round(asc, 8) if asc is not None else None,
+            "mc": round(mc, 8) if mc is not None else None,
+        },
+        "houseSystem": system_name if houses_available else None,
+        "calculationSettings": {
+            "zodiac": ZODIAC_MODES[zodiac],
+            "zodiacKey": zodiac,
+            "ayanamsa": ayanamsa_name,
+            "nodeType": node_name,
+            "center": CENTERS[center],
+            "centerKey": center,
+            "topocentric": topocentric,
+            "observerAltitudeMeters": settings["observerAltitudeMeters"] if topocentric else None,
+            "lightTimeCorrection": light_time_correction,
+            "housesAvailable": houses_available,
+        },
     }
 
 
-def _target_chart(primary_profile: dict[str, Any], target_date: str, target_time: str, house_system: str) -> dict[str, Any]:
+def _target_chart(primary_profile: dict[str, Any], target_date: str, target_time: str, settings: dict[str, Any]) -> dict[str, Any]:
     target_profile = {
         **primary_profile,
         "birthDate": target_date,
         "birthTime": target_time or "12:00",
     }
     local_dt, location = _parse_local_datetime(target_profile)
-    return _chart(local_dt, location, house_system)
+    return _chart(local_dt, location, settings)
 
 
 def _composite_chart(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
     second_by_key = {item["key"]: item for item in second["points"]}
-    asc = _circular_midpoint(first["angles"]["asc"], second["angles"]["asc"])
+    has_houses = first["angles"].get("asc") is not None and second["angles"].get("asc") is not None
+    asc = _circular_midpoint(first["angles"]["asc"], second["angles"]["asc"]) if has_houses else None
     points = []
     for item in first["points"]:
         pair = second_by_key.get(item["key"])
         if not pair:
             continue
         longitude = _circular_midpoint(item["longitude"], pair["longitude"])
-        house = int(((longitude - asc) % 360) // 30) + 1
+        house = int(((longitude - asc) % 360) // 30) + 1 if asc is not None else None
         points.append(_point_payload(item["key"], item["name"], item["glyph"], longitude, 0, house))
     houses = []
-    for index in range(12):
-        longitude = (asc + index * 30) % 360
-        sign_index = int(longitude // 30) % 12
-        houses.append(
-            {
-                "house": index + 1,
-                "longitude": round(longitude, 8),
-                "degree": round(longitude % 30, 4),
-                "signIndex": sign_index,
-                "sign": SIGNS[sign_index][1],
-                "signGlyph": SIGNS[sign_index][2],
-            }
-        )
+    if asc is not None:
+        for index in range(12):
+            longitude = (asc + index * 30) % 360
+            sign_index = int(longitude // 30) % 12
+            houses.append(
+                {
+                    "house": index + 1,
+                    "longitude": round(longitude, 8),
+                    "degree": round(longitude % 30, 4),
+                    "signIndex": sign_index,
+                    "sign": SIGNS[sign_index][1],
+                    "signGlyph": SIGNS[sign_index][2],
+                }
+            )
     aspects = _aspects(points)
     return {
         "points": points,
@@ -516,21 +665,31 @@ def _composite_chart(first: dict[str, Any], second: dict[str, Any]) -> dict[str,
         "balance": _chart_balance(points),
         "houseRulers": _house_rulers(houses, points),
         "aspectPatterns": _aspect_patterns(points, aspects),
-        "angles": {"asc": round(asc, 8), "mc": round((asc + 270) % 360, 8)},
-        "houseSystem": "Composite Equal Houses",
-        "calculationNote": "组合盘行星与轴点使用最短弧中点；宫位采用组合上升起算的等宫制。",
+        "angles": {
+            "asc": round(asc, 8) if asc is not None else None,
+            "mc": round((asc + 270) % 360, 8) if asc is not None else None,
+        },
+        "houseSystem": "Composite Equal Houses" if has_houses else None,
+        "calculationSettings": first.get("calculationSettings", {}),
+        "calculationNote": (
+            "组合盘行星与轴点使用最短弧中点；宫位采用组合上升起算的等宫制。"
+            if has_houses
+            else "日心组合盘仅使用行星最短弧中点，不生成角轴与宫位。"
+        ),
     }
 
 
 def calculate_western_chart(profile: dict[str, Any], options: dict[str, Any] | None = None) -> dict[str, Any]:
     options = options or {}
     chart_type = str(options.get("chartType") or "natal")
-    house_system = str(options.get("houseSystem") or "placidus")
+    settings = _normalize_calculation_settings(options)
     local_dt, location = _parse_local_datetime(profile)
-    natal = _chart(local_dt, location, house_system)
+    natal = _chart(local_dt, location, settings)
     result: dict[str, Any] = {
         "engine": "Swiss Ephemeris",
-        "zodiac": "Tropical",
+        "zodiac": ZODIAC_MODES[settings["zodiac"]],
+        "zodiacMode": settings["zodiac"],
+        "calculationSettings": natal["calculationSettings"],
         "interpretationSkill": {
             "name": "Astro Western interpretation rules",
             "source": "https://github.com/aryaminus/astro",
@@ -545,7 +704,7 @@ def calculate_western_chart(profile: dict[str, Any], options: dict[str, Any] | N
     if chart_type in ("transit", "solar-return", "lunar-return"):
         target_date = str(options.get("targetDate") or datetime.now(ZoneInfo(location["timezone"])).date().isoformat())
         target_time = str(options.get("targetTime") or "12:00")
-        transit = _target_chart(profile, target_date, target_time, house_system)
+        transit = _target_chart(profile, target_date, target_time, settings)
         result["transit"] = transit
         result["interAspects"] = _aspects(transit["points"], natal["points"], cross=True)
         if chart_type != "transit":
@@ -554,7 +713,7 @@ def calculate_western_chart(profile: dict[str, Any], options: dict[str, Any] | N
     if chart_type in ("synastry", "composite"):
         partner = options.get("partner") or {}
         partner_dt, partner_location = _parse_local_datetime(partner)
-        partner_chart = _chart(partner_dt, partner_location, house_system)
+        partner_chart = _chart(partner_dt, partner_location, settings)
         result["partnerSubject"] = {**partner_location, "birthDateTime": partner_dt.isoformat()}
         result["partner"] = partner_chart
         result["interAspects"] = _aspects(natal["points"], partner_chart["points"], cross=True)

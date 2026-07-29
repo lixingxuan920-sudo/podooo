@@ -305,11 +305,12 @@
       const point = polar(index * 30 + 15, ascendant, 250);
       return `<text class="zodiac-glyph" x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${sign.glyph}</text>`;
     }).join("");
-    const houseLines = chart.houses.map((house) => (
+    const houses = chart.houses || [];
+    const houseLines = houses.map((house) => (
       svgLineAt(house.longitude, ascendant, 86, 222, `house-line ${house.house === 1 || house.house === 10 ? "axis-line" : ""}`)
     )).join("");
-    const houseLabels = chart.houses.map((house, index) => {
-      const next = chart.houses[(index + 1) % 12];
+    const houseLabels = houses.map((house, index) => {
+      const next = houses[(index + 1) % 12];
       const span = (next.longitude - house.longitude + 360) % 360;
       const point = polar((house.longitude + span / 2) % 360, ascendant, 107);
       return `<text class="house-number" x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}">${house.house}</text>`;
@@ -357,7 +358,7 @@
           ${overlayLabels}
           <circle class="wheel-center" cx="300" cy="300" r="45"></circle>
           <text class="wheel-center-title" x="300" y="295">${chartType === "transit" ? "NATAL + TRANSIT" : "NATAL CHART"}</text>
-          <text class="wheel-center-subtitle" x="300" y="316">TROPICAL · SWISS EPHEMERIS</text>
+          <text class="wheel-center-subtitle" x="300" y="316">${escapeHtml(chart.calculationSettings?.zodiac || "Tropical").toUpperCase()} · SWISS EPHEMERIS</text>
         </svg>
         <div class="chart-legend">
           <span><i class="legend-dot natal"></i>本命行星</span>
@@ -482,10 +483,20 @@
     const asc = pointByKey(data.natal, "asc");
     const mc = pointByKey(data.natal, "mc");
     const chartLabel = chartTypes[chartType] || "本命盘";
+    const settings = data.calculationSettings || primary.calculationSettings || {};
+    const settingParts = [
+      settings.zodiac || data.zodiac || "Tropical",
+      settings.ayanamsa,
+      settings.nodeType,
+      settings.center || "Geocentric",
+      settings.topocentric ? `Topocentric ${settings.observerAltitudeMeters || 0}m` : null,
+      settings.lightTimeCorrection === false ? "无光行时修正" : "光行时修正",
+      primary.houseSystem,
+    ].filter(Boolean);
     return `
       <div class="professional-chart-header">
         <div>
-          <p class="kicker">WESTERN ASTROLOGY · TROPICAL</p>
+          <p class="kicker">WESTERN ASTROLOGY · ${escapeHtml(settings.zodiac || data.zodiac || "TROPICAL").toUpperCase()}</p>
           <h2>${escapeHtml(chartLabel)}</h2>
           <p>${escapeHtml(data.subject?.resolvedName || data.subject?.city || "")}</p>
         </div>
@@ -499,7 +510,7 @@
       </div>
       ${professionalWheel(primary, overlay, chartType)}
       <p class="calculation-meta">
-        热带黄道 · ${escapeHtml(primary.houseSystem || data.natal?.houseSystem || "Placidus")} ·
+        ${settingParts.map(escapeHtml).join(" · ")} ·
         ${escapeHtml(data.subject?.timezone || "")} ·
         ${escapeHtml(data.subject?.birthDateTime || "")}
       </p>

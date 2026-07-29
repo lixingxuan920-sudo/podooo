@@ -5,7 +5,10 @@ isolation commit `a7958ad`.
 
 ## Scope
 
-- Tropical zodiac only
+- Tropical, Sidereal (Fagan–Bradley or Lahiri), and Draconic zodiac modes
+- Geocentric, heliocentric, and topocentric calculation modes
+- Mean or true node basis for Draconic charts
+- Optional no-light-time-correction research mode
 - Swiss Ephemeris calculation
 - Placidus, Koch, Equal House, and Whole Sign house systems
 - Natal, transit, synastry, and composite charts
@@ -17,7 +20,7 @@ isolation commit `a7958ad`.
 This package is for Podo's “星盘” section only. It intentionally excludes:
 
 - Vedic Skill rules
-- Lahiri Ayanamsa
+- Vedic interpretation rules triggered merely by selecting Lahiri ayanamsa
 - Nakshatra
 - Vimshottari Dasha
 - D1/D9/D10 divisional charts

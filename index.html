@@ -330,6 +330,53 @@
                 </select>
               </div>
             </div>
+            <details class="intake-details western-calculation-settings">
+              <summary>高级排盘设置</summary>
+              <div class="compact-fields">
+                <div>
+                  <label for="astroZodiac">黄道体系</label>
+                  <select id="astroZodiac">
+                    <option value="tropical">回归黄道 Tropical</option>
+                    <option value="sidereal">恒星黄道 Sidereal</option>
+                    <option value="draconic">龙首黄道 Draconic</option>
+                  </select>
+                </div>
+                <div id="astroAyanamsaField" hidden>
+                  <label for="astroAyanamsa">岁差体系</label>
+                  <select id="astroAyanamsa">
+                    <option value="fagan-bradley">Fagan–Bradley</option>
+                    <option value="lahiri">Lahiri</option>
+                  </select>
+                </div>
+                <div id="astroNodeTypeField" hidden>
+                  <label for="astroNodeType">龙首基准</label>
+                  <select id="astroNodeType">
+                    <option value="mean">平均北交点 Mean Node</option>
+                    <option value="true">真北交点 True Node</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="astroCenter">观测中心</label>
+                  <select id="astroCenter">
+                    <option value="geocentric">地心 Geocentric</option>
+                    <option value="heliocentric">日心 Heliocentric</option>
+                  </select>
+                </div>
+              </div>
+              <label class="western-setting-check">
+                <input id="astroTopocentric" type="checkbox" />
+                <span>使用地面点坐标 Topocentric</span>
+              </label>
+              <div id="astroAltitudeField" hidden>
+                <label for="astroObserverAltitude">观测点海拔（米）</label>
+                <input id="astroObserverAltitude" type="number" min="-500" max="10000" step="1" value="0" />
+              </div>
+              <label class="western-setting-check">
+                <input id="astroNoLightTime" type="checkbox" />
+                <span>不使用光行时修正（研究选项）</span>
+              </label>
+              <p class="disclaimer" id="astroCalculationHint">默认设置与当前星盘一致：回归黄道、地心、Placidus、使用光行时修正。</p>
+            </details>
             <details class="intake-details">
               <summary>合盘对象 / 推运目标资料</summary>
               <label for="astroPartnerName">对象称呼</label>

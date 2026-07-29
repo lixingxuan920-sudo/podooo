@@ -26,8 +26,9 @@ function getModelConfig() {
 }
 
 function isWesternChart(chart) {
+  const allowedZodiacs = new Set(["Tropical", "Sidereal", "Draconic"]);
   return chart
-    && chart.zodiac === "Tropical"
+    && allowedZodiacs.has(chart.zodiac)
     && chart.interpretationSkill?.scope === WESTERN_SKILL_SCOPE
     && chart.interpretationSkill?.source === WESTERN_SKILL_REPOSITORY
     && chart.natal?.points?.length;
@@ -54,7 +55,7 @@ exports.handler = async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         error: "Western chart data required",
-        detail: "该接口仅接受“星盘”板块生成的热带黄道西洋占星数据。"
+        detail: "该接口仅接受“星盘”板块生成的西洋占星结构化数据。"
       })
     };
   }
@@ -73,8 +74,9 @@ exports.handler = async (event) => {
 
 系统边界：
 - 当前 Skill 只服务 Podo 的“星盘”板块。
-- 只使用热带黄道、西洋占星宫制、行星尊贵、宫主星和西洋占星相位规则。
-- 严禁混入印度占星的恒星黄道、Lahiri Ayanamsa、Nakshatra、Vimshottari Dasha、D1/D9/D10、Yoga 或 Vedic Skill 规则。
+- 严格使用输入中声明的 Tropical、Sidereal 或 Draconic 西洋占星计算口径，以及地心／日心、宫制、行星尊贵、宫主星和西洋占星相位规则。
+- Sidereal + Lahiri 在这里仍是西洋恒星黄道模式；不得因此引入印度占星的 Nakshatra、Vimshottari Dasha、D1/D9/D10、Yoga 或 Vedic Skill 规则。
+- 日心盘不含上升、天顶和十二宫，不得补造角轴、宫位或宫主星判断。
 - 如果输入出现印度占星字段，不得引用或解读。
 
 规则来源：

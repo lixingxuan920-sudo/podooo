@@ -252,6 +252,17 @@ els.astroBirthTime = document.querySelector("#astroBirthTime");
 els.astroBirthCity = document.querySelector("#astroBirthCity");
 els.astroChartType = document.querySelector("#astroChartType");
 els.astroHouseSystem = document.querySelector("#astroHouseSystem");
+els.astroZodiac = document.querySelector("#astroZodiac");
+els.astroAyanamsa = document.querySelector("#astroAyanamsa");
+els.astroAyanamsaField = document.querySelector("#astroAyanamsaField");
+els.astroNodeType = document.querySelector("#astroNodeType");
+els.astroNodeTypeField = document.querySelector("#astroNodeTypeField");
+els.astroCenter = document.querySelector("#astroCenter");
+els.astroTopocentric = document.querySelector("#astroTopocentric");
+els.astroAltitudeField = document.querySelector("#astroAltitudeField");
+els.astroObserverAltitude = document.querySelector("#astroObserverAltitude");
+els.astroNoLightTime = document.querySelector("#astroNoLightTime");
+els.astroCalculationHint = document.querySelector("#astroCalculationHint");
 els.astroPartnerName = document.querySelector("#astroPartnerName");
 els.astroPartnerBirthDate = document.querySelector("#astroPartnerBirthDate");
 els.astroPartnerBirthTime = document.querySelector("#astroPartnerBirthTime");
@@ -692,6 +703,13 @@ function persistProfileFromAstrologyFields() {
     birthCity: els.astroBirthCity.value.trim(),
     astroChartType: els.astroChartType.value,
     astroHouseSystem: els.astroHouseSystem.value,
+    astroZodiac: els.astroZodiac.value,
+    astroAyanamsa: els.astroAyanamsa.value,
+    astroNodeType: els.astroNodeType.value,
+    astroCenter: els.astroCenter.value,
+    astroTopocentric: els.astroTopocentric.checked,
+    astroObserverAltitude: els.astroObserverAltitude.value,
+    astroNoLightTime: els.astroNoLightTime.checked,
     astroPartner: {
       name: els.astroPartnerName.value.trim(),
       birthDate: els.astroPartnerBirthDate.value,
@@ -1071,6 +1089,13 @@ async function renderAstrologyPage() {
   const options = {
     chartType: els.astroChartType.value,
     houseSystem: els.astroHouseSystem.value,
+    zodiac: els.astroZodiac.value,
+    ayanamsa: els.astroAyanamsa.value,
+    nodeType: els.astroNodeType.value,
+    center: els.astroCenter.value,
+    topocentric: els.astroTopocentric.checked,
+    observerAltitudeMeters: Number(els.astroObserverAltitude.value || 0),
+    lightTimeCorrection: !els.astroNoLightTime.checked,
     partner,
     targetDate: els.astroTargetDate.value
   };
@@ -1129,6 +1154,26 @@ async function renderAstrologyPage() {
       </div>
     `;
   }
+}
+
+function updateWesternCalculationSettings() {
+  const zodiac = els.astroZodiac.value;
+  const center = els.astroCenter.value;
+  const isHeliocentric = center === "heliocentric";
+  els.astroAyanamsaField.hidden = zodiac !== "sidereal";
+  els.astroNodeTypeField.hidden = zodiac !== "draconic";
+  els.astroTopocentric.disabled = isHeliocentric;
+  if (isHeliocentric) els.astroTopocentric.checked = false;
+  els.astroAltitudeField.hidden = !els.astroTopocentric.checked || isHeliocentric;
+  els.astroHouseSystem.disabled = isHeliocentric;
+
+  if (isHeliocentric && zodiac === "draconic") {
+    els.astroZodiac.value = "tropical";
+    els.astroNodeTypeField.hidden = true;
+  }
+  els.astroCalculationHint.textContent = isHeliocentric
+    ? "日心盘仅计算日心行星位置与相位，不生成上升、天顶和十二宫。"
+    : "默认设置与当前星盘一致：回归黄道、地心、Placidus、使用光行时修正。";
 }
 
 function getIndianModuleForFocus(focusArea, partner) {
@@ -2162,6 +2207,14 @@ function renderProfile() {
   els.astroBirthCity.value = profile.birthCity || "";
   els.astroChartType.value = profile.astroChartType || "natal";
   els.astroHouseSystem.value = profile.astroHouseSystem || "placidus";
+  els.astroZodiac.value = profile.astroZodiac || "tropical";
+  els.astroAyanamsa.value = profile.astroAyanamsa || "fagan-bradley";
+  els.astroNodeType.value = profile.astroNodeType || "mean";
+  els.astroCenter.value = profile.astroCenter || "geocentric";
+  els.astroTopocentric.checked = Boolean(profile.astroTopocentric);
+  els.astroObserverAltitude.value = profile.astroObserverAltitude ?? "0";
+  els.astroNoLightTime.checked = Boolean(profile.astroNoLightTime);
+  updateWesternCalculationSettings();
   els.astroPartnerName.value = profile.astroPartner?.name || "";
   els.astroPartnerBirthDate.value = profile.astroPartner?.birthDate || "";
   els.astroPartnerBirthTime.value = profile.astroPartner?.birthTime || "";
@@ -2646,6 +2699,13 @@ document.querySelectorAll("[data-tab-target]").forEach((tab) => {
   });
 });
 els.refreshAstrologyButton.addEventListener("click", renderAstrologyPage);
+[
+  els.astroZodiac,
+  els.astroCenter,
+  els.astroTopocentric
+].forEach((element) => {
+  element.addEventListener("change", updateWesternCalculationSettings);
+});
 els.refreshIndianButton.addEventListener("click", renderIndianPage);
 els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
 els.loadJhoraSouthGraftonButton.addEventListener("click", loadJhoraSouthGraftonSample);

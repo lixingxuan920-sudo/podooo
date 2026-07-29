@@ -8,9 +8,10 @@ Podo's Western astrology interpretation layer is adapted from:
   `skills/astrology/references/synastry-and-timing.md`
 - License: MIT
 
-Podo keeps its own Swiss Ephemeris calculation path for tropical positions,
-Placidus and other supported house systems. The upstream pure-Python chart
-engine is not bundled or used for chart calculation.
+Podo keeps its own Swiss Ephemeris calculation path for Tropical, Sidereal,
+and Draconic positions; geocentric, heliocentric, and topocentric modes; and
+Placidus plus other supported Western house systems. The upstream pure-Python
+chart engine is not bundled or used for chart calculation.
 
 The adapted interpretation layer preserves the upstream trust discipline:
 calculate first, never invent placements, ground interpretations in specific
