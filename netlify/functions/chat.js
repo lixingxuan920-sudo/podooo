@@ -1,7 +1,9 @@
 const { handler: deepseekVedicHandler } = require("./deepseek-vedic.js");
 
 function renderBaseUrl() {
-  return (process.env.VEDIC_API_URL || "").replace(/\/$/, "");
+  return (
+    process.env.VEDIC_API_URL || "https://podooo.onrender.com"
+  ).replace(/\/$/, "");
 }
 
 exports.handler = async (event) => {
