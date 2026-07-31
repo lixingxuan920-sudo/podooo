@@ -365,7 +365,9 @@ print(json.dumps({
 }
 
 async function callProfessionalCalculator(payload) {
-  const baseUrl = String(process.env.VEDIC_API_URL || "").replace(/\/$/, "");
+  const baseUrl = String(
+    process.env.VEDIC_API_URL || "https://podooo.onrender.com"
+  ).replace(/\/$/, "");
   if (!baseUrl) {
     return { ok: false, reason: "专业排盘服务地址未配置。" };
   }
