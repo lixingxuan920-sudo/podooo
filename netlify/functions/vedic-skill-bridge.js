@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { getChartJson } = require("./vedic-chart-contract.js");
 
 // Production chart requests must remain fail-fast and professional-backend-only.
 
@@ -405,10 +406,15 @@ async function callProfessionalCalculator(payload) {
     };
     const failed = Object.entries(hardChecks).filter(([, passed]) => !passed).map(([name]) => name);
     if (failed.length) return { ok: false, reason: `专业排盘硬校验失败：${failed.join(", ")}` };
+    const { chartJson, validation: contractValidation } = getChartJson(body, payload.profile || {});
+    if (!contractValidation.ok) {
+      return { ok: false, reason: `统一命盘JSON校验失败：${contractValidation.errors.join(", ")}` };
+    }
     return {
       ok: true,
       structuredDataMarkdown: body.structuredDataMarkdown,
       professionalChart: chart,
+      chartJson,
       evidenceLedger: body.evidenceLedger || {},
       calculationMeta: { ...meta, validation: { ...validation, hardChecks } },
       source: "vedic-calculator"
@@ -467,6 +473,7 @@ exports.handler = async (event) => {
     skillGuidance,
     structuredDataMarkdown: calculator.structuredDataMarkdown || "",
     professionalChart: calculator.professionalChart,
+    chartJson: calculator.chartJson,
     evidenceLedger: calculator.evidenceLedger,
     calculationMeta: calculator.calculationMeta
   };

@@ -20,7 +20,9 @@ PWA App：网站已经支持添加到手机主屏幕。重新部署后，用手�
 
 星盘 skill：`astrology-skill.js` 会根据生日、出生时间生成基础星盘视图，包括太阳、月亮、上升的近似位置、元素倾向和占星解读。当前为本地近似推算，不等同于专业天文星历排盘。
 
-印度占星 skill：`indian-astrology-skill.js` 提供独立印占页面。公网专业排盘由 `vedic-python-api` 提供，使用 Swiss Ephemeris、Lahiri Ayanamsa、Python 3.11.9、FastAPI 和 pyswisseph 生成 D1 本命盘、上升 Lagna、九曜、月宿 Nakshatra、Rahu/Ketu 和 Vimshottari Dasha。网页本地近似盘只作为后端不可用时的备用显示。
+印度占星采用严格两阶段架构：Stage 1 仅由固定 commit `7a6e33e23dc1f45107af2f249848241bb4d22b67` 的 `vedic-calculator v7.0` 在 Python 中计算真实命盘；Stage 2 仅把统一 JSON 交给 DeepSeek 解读。固定参数为 Swiss Ephemeris、TRUE_CITRA / Lahiri、Mean Node 和 Whole Sign。Stage 1 输出 D1、九曜、十二宫、月宿、宫主、Parashari Graha Drishti、Vimshottari Mahadasha/Antardasha、D9、Shadbala 和已核验 Yoga。专业后端失败时页面会停止并提示重试，不显示本地近似盘，也不生成 AI 假报告。
+
+统一命盘契约由 `vedic-python-api/vedic_chart_schema.py` 生成，字段固定为 `birth`、`lagna`、`planets`、`houses`、`nakshatra`、`dasha`、`navamsa`、`yogas`、`aspects`、`shadbala`。`netlify/functions/vedic-chart-contract.js` 负责边界校验；`deepseek-vedic.js` 只接受通过校验的 JSON。未来 Tarot、八字、西洋占星、紫微斗数或 Human Design 可沿用同一“计算器 → 领域 JSON → AI 解释器”接口，只替换 Stage 1 计算器和对应契约。
 
 ## Render 部署印度占星后端
 
@@ -44,7 +46,7 @@ https://你的服务名.onrender.com/health
 应返回：
 
 ```json
-{"ok":"true","engine":"vedic-python-api"}
+{"ok":"true","engine":"vedic-calculator","upstreamVersion":"v7.0","commit":"7a6e33e23dc1f45107af2f249848241bb4d22b67","ayanamsa":"TRUE_CITRA / Lahiri","nodeMode":"Mean Node","schema":"podo.vedic.chart.v1"}
 ```
 
 Swagger 文档地址：

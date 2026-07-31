@@ -4,9 +4,9 @@ const { setBlueprintJob, validJobId } = require("./blueprint-job-store.js");
 // Long reports use the same persisted professional chart evidence across all segments.
 
 const REPORT_SEGMENTS = [
-  "这是首次完整 Life Blueprint 的第1—3部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：1. 命盘整体格局；2. 行星强弱与重点配置；3. 十二宫位解读。必须展开上升、命主星、太阳、月亮、九大行星、尊贵/燃烧/逆行、Shadbala、十二宫审计，并说明每项判断的具体证据。只使用统一evidence ledger和structured_data中的真实数据；无法确认的Yoga或配置必须写“当前数据不足以确认”。",
-  "这是首次完整 Life Blueprint 的第4—6部分。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：4. 事业与财富；5. 婚姻与感情；6. 大运Dasha分析。事业必须调用vedic-career规则并结合2、6、10、11宫、L10、AmK、D10、强星和真实Dasha；感情必须调用vedic-love规则并结合5、7宫、L7、Venus、Moon、DK、UL、D9、Rahu/Ketu和真实Dasha；时间只可使用真实起止日期，不能猜结婚年份或高峰年份。",
-  "这是首次完整 Life Blueprint 的第7—9部分及总结。请输出约2800—3400个中文字符，使用清晰的Markdown章节标题，完整包含：7. Navamsa D9解读；8. 重要瑜伽与特殊组合；9. 现实建议；最后总结人生优势、主要课题、未来几年重点方向和当前最应该做的三件事。逐项核验D1成立依据、激活大运/小运、D9兑现度；证据不足写“当前数据不足以确认”。健康只能给生活方式提醒，不作医学诊断。"
+  "请输出完整报告的第1—4部分，约2800—3400个中文字符：1.命盘整体格局；2.九大行星逐颗分析；3.十二宫（重点1、2、4、5、7、9、10、11、12宫）；4.事业。每个结论必须引用命盘JSON的具体依据。",
+  "请输出完整报告的第5—9部分，约2800—3400个中文字符：5.财富；6.婚姻；7.健康；8.学业；9.家庭。婚恋时间只能使用JSON中真实Dasha起止日期；健康不作医学诊断；JSON未提供的信息明确写无法判断。",
+  "请输出完整报告的第10—13部分和最终总结，约2800—3400个中文字符：10.Dasha（当前大运、小运和未来3—5年）；11.Navamsa D9；12.Yoga（只能逐条解释JSON中已列出的Yoga，禁止新增）；13.现实建议。最后依次输出①命盘总结、②人生优势、③人生课题、④未来几年重点、⑤约300字人生建议。"
 ];
 
 async function generateSegment(payload, question) {
@@ -15,7 +15,7 @@ async function generateSegment(payload, question) {
     headers: {},
     body: JSON.stringify({
       ...payload,
-      mode: "qa",
+      mode: "segment",
       question,
       masterReading: "",
       masterSummary: "",
@@ -74,6 +74,7 @@ exports.handler = async (event) => {
       birthData: payload.profile || {},
       structuredDataMarkdown: chartData.structuredDataMarkdown || payload.skillResult?.structuredDataMarkdown || "",
       professionalChart: chartData.professionalChart || payload.skillResult?.professionalChart || null,
+      chartJson: chartData.chartJson || payload.skillResult?.chartJson || null,
       calculationMeta: chartData.calculationMeta || payload.skillResult?.calculationMeta || null,
       evidenceLedger: chartData.evidenceLedger || payload.skillResult?.evidenceLedger || null,
       skillVersion: payload.skillResult?.calculationMeta?.upstreamVersion || "v7.0",

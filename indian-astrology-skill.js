@@ -107,64 +107,7 @@
     }
   };
 
-  const pdfReferenceData = {
-    source: "1025.pdf",
-    birth: {
-      date: "2002-10-25",
-      time: "07:05:34",
-      timezone: "UTC+08:00",
-      place: "Qinghaihu, China",
-      longitude: "101E49'10\"",
-      latitude: "36N50'00\""
-    },
-    chartSettings: {
-      ayanamsa: "Lahiri",
-      chartType: "Natal Chart / Rasi",
-      lunarDay: "Chitrabhanu Aswayuja Krishna Chaturthi",
-      nakshatra: "Rohini",
-      weekday: "Thursday",
-      yoga: "Variyan Yoga",
-      karana: "Bava Karana",
-      hora: "Sun Hora"
-    },
-    grahaPositions: [
-      { body: "Lagna", sign: "Libra", degree: "1°50'04.14\"", nakshatra: "Chitra", pada: "3" },
-      { body: "Sun", sign: "Libra", degree: "7°29'26.54\"", nakshatra: "Swati", pada: "1" },
-      { body: "Moon", sign: "Taurus", degree: "21°31'16.08\"", nakshatra: "Rohini", pada: "4" },
-      { body: "Mars", sign: "Virgo", degree: "0°21'17.20\"", nakshatra: "Hasta", pada: "1" },
-      { body: "Mercury", sign: "Virgo", degree: "24°31'10.74\"", nakshatra: "Chitra", pada: "1" },
-      { body: "Jupiter", sign: "Cancer", degree: "21°42'00.67\"", nakshatra: "Ashlesha", pada: "2" },
-      { body: "Venus (R)", sign: "Libra", degree: "17°48'12.48\"", nakshatra: "Swati", pada: "4" },
-      { body: "Saturn (R)", sign: "Gemini", degree: "12°53'32.14\"", nakshatra: "Mrigashira", pada: "4" },
-      { body: "Rahu", sign: "Taurus", degree: "16°45'21.25\"", nakshatra: "Rohini", pada: "2" },
-      { body: "Ketu", sign: "Scorpio", degree: "16°45'21.25\"", nakshatra: "Jyeshtha", pada: "1" },
-      { body: "Maandi", sign: "Leo", degree: "16°39'39.36\"", nakshatra: "Purva Phalguni", pada: "1" },
-      { body: "Gulika", sign: "Leo", degree: "14°43'52.04\"", nakshatra: "Magha", pada: "4" },
-      { body: "Sree Lagna", sign: "Aries", degree: "27°36'18.22\"", nakshatra: "Krittika", pada: "1" },
-      { body: "Hora Lagna", sign: "Virgo", degree: "5°23'55.04\"", nakshatra: "Hasta", pada: "4" },
-      { body: "Ghati Lagna", sign: "Virgo", degree: "2°53'34.85\"", nakshatra: "Uttara Phalguni", pada: "2" },
-      { body: "Vighati Lagna", sign: "Taurus", degree: "0°40'55.39\"", nakshatra: "Krittika", pada: "2" }
-    ],
-    modules: [
-      "Rasi / D-1 本命盘",
-      "Hora / D-2 财富分盘",
-      "Drekkana / D-3 手足与行动分盘",
-      "Chaturthamsha / D-4 房产与根基分盘",
-      "Saptamsha / D-7 子女与创造分盘",
-      "Navamsa / D-9 婚姻与灵魂成熟分盘",
-      "Dasamsa / D-10 事业分盘",
-      "Dwadasamsa / D-12 家族与父母分盘",
-      "Shodasamsa / D-16 舒适与载具分盘",
-      "Trimshamsa / D-30 隐性压力分盘",
-      "Shastiamsa / D-60 深层业力分盘",
-      "Ashtakavarga of Rasi Chart",
-      "Shadbala / Vimshopaka Bala",
-      "Vimshottari Dasha",
-      "Yogini Dasha",
-      "Narayana Dasha",
-      "Jaimini / Chara Dasha"
-    ]
-  };
+  const pdfReferenceData = {};
 
   function dayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 0);
@@ -212,7 +155,7 @@
   }
 
   function baseIndex(profile, offset = 0) {
-    const date = new Date(`${profile.birthDate || "2000-01-01"}T12:00:00`);
+    const date = new Date(`${profile.birthDate}T12:00:00`);
     const day = dayOfYear(date);
     const { hour, minute, second } = birthTimeParts(profile);
     const longitude = dmsToDecimal(profile.longitude);
@@ -329,6 +272,7 @@
     if (!profile.birthDate) return null;
     const protocol = skillProtocols[options.vedicModule] || skillProtocols.reader;
     const professional = options.professionalChart;
+    if (!professional) return null;
     const signNames = {
       Aries: "白羊", Taurus: "金牛", Gemini: "双子", Cancer: "巨蟹", Leo: "狮子", Virgo: "处女",
       Libra: "天秤", Scorpio: "天蝎", Sagittarius: "射手", Capricorn: "摩羯", Aquarius: "水瓶", Pisces: "双鱼"
@@ -405,7 +349,7 @@
   }
 
   function buildPanchanga(profile, nakIndex) {
-    const date = new Date(`${profile.birthDate || "2000-01-01"}T12:00:00`);
+    const date = new Date(`${profile.birthDate}T12:00:00`);
     const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const tithis = ["Pratipada", "Dvitiya", "Tritiya", "Chaturthi", "Panchami", "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami", "Ekadashi", "Dvadashi", "Trayodashi", "Chaturdashi", "Purnima/Amavasya"];
     const yogas = ["Vishkumbha", "Priti", "Ayushman", "Saubhagya", "Shobhana", "Atiganda", "Sukarma", "Dhriti", "Shoola", "Ganda", "Vriddhi", "Dhruva", "Vyaghata", "Harshana", "Vajra", "Siddhi", "Vyatipata", "Variyan"];
@@ -513,18 +457,8 @@
     `;
   }
 
-  function isPdfSample(profile) {
-    if (profile.indianSource === "1025.pdf") return true;
-    const city = (profile.birthCity || "").toLowerCase();
-    const longitude = (profile.longitude || "").toLowerCase();
-    const latitude = (profile.latitude || "").toLowerCase();
-    return profile.birthDate === pdfReferenceData.birth.date
-      && (city.includes("qinghai") || longitude.includes("101e49") || latitude.includes("36n50"));
-  }
-
   function pdfDataPanel(profile) {
-    const usingSample = isPdfSample(profile);
-    const birth = usingSample ? pdfReferenceData.birth : {
+    const birth = {
       date: profile.birthDate || "未填写",
       time: formattedBirthTime(profile) || "未填写",
       timezone: profile.timezone || "未填写",
@@ -550,29 +484,10 @@
           <span>夏令时<strong>${birth.daylightSaving || "未填写"}</strong></span>
           <span>气压<strong>${birth.pressure || "未填写"}</strong></span>
           <span>温度<strong>${birth.temperature || "未填写"}</strong></span>
-          <span>Ayanamsa<strong>${profile.ayanamsa || pdfReferenceData.chartSettings.ayanamsa}</strong></span>
-          <span>数据源<strong>${usingSample ? "1025.pdf 样例" : "用户输入"}</strong></span>
+          <span>Ayanamsa<strong>${profile.ayanamsa || "Lahiri"}</strong></span>
+          <span>数据源<strong>用户输入</strong></span>
         </div>
-
-        ${usingSample ? `
-          <h3>PDF 行星与特殊点数据</h3>
-          <div class="vedic-position-table">
-            ${pdfReferenceData.grahaPositions.map((item) => `
-              <div>
-                <strong>${item.body}</strong>
-                <span>${item.sign}</span>
-                <span>${item.degree}</span>
-                <span>${item.nakshatra} ${item.pada}</span>
-              </div>
-            `).join("")}
-          </div>
-          <h3>PDF 包含的数据模块</h3>
-          <div class="vedic-module-list">
-            ${pdfReferenceData.modules.map((item) => `<span>${item}</span>`).join("")}
-          </div>
-        ` : `
-          <p class="disclaimer">当前显示用户输入的精准出生参数。若要查看 1025.pdf 的完整样例数据，请点击“载入 PDF 样例数据”。</p>
-        `}
+        <p class="disclaimer">当前只显示本次用户输入的出生参数；仓库不内置任何个人命盘样例。</p>
       </div>
     `;
   }
@@ -650,7 +565,9 @@
   function chartView(profile, options = {}) {
     const chart = buildChart(profile, options);
     if (!chart) {
-      return "<p>请先填写生日、出生时间和出生城市，然后生成印度星盘。</p>";
+      return profile.birthDate
+        ? "<div class=\"vedic-chart-panel\"><p class=\"disclaimer\">正在由 Python / Swiss Ephemeris 计算真实印度星盘。通过 Lahiri、Mean Node、D1、D9、Dasha 与 SAV 硬校验后才会显示，不使用网页近似盘。</p></div>"
+        : "<p>请先填写生日、出生时间和出生城市，然后生成印度星盘。</p>";
     }
     const lagna = chart.placements.find((item) => item.key === "lagna");
     const moon = chart.placements.find((item) => item.key === "moon");

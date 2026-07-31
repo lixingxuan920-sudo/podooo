@@ -12,10 +12,16 @@ RUN apt-get update \
 
 COPY requirements.txt .
 RUN python -m pip install --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir --only-binary=pyswisseph,pydantic-core -r requirements.txt
+    && pip install --no-cache-dir --only-binary=pysweph,pydantic-core -r requirements.txt \
+    && pip install --no-cache-dir --no-deps "dashaflow>=0.3"
 
 COPY main.py .
 COPY vedic_skill_rules.py .
+COPY vedic_calculator_adapter.py .
+COPY vedic_chart_schema.py .
+COPY install_ephemeris.py .
+COPY vendor ./vendor
+RUN python install_ephemeris.py
 
 EXPOSE 8000
 

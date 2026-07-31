@@ -7,10 +7,12 @@ ENV PORT=8000
 WORKDIR /app
 
 COPY vedic-python-api/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir --only-binary=pyswisseph,pydantic-core -r requirements.txt
+RUN pip install --no-cache-dir --only-binary=pysweph,pydantic-core -r requirements.txt
+RUN pip install --no-cache-dir --no-deps "dashaflow>=0.3"
 
 COPY main.py ./main.py
 COPY vedic-python-api ./vedic-python-api
+RUN python vedic-python-api/install_ephemeris.py
 
 EXPOSE 8000
 

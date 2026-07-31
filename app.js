@@ -280,7 +280,6 @@ els.indianLatitudeSecond = document.querySelector("#indianLatitudeSecond");
 els.indianAltitude = document.querySelector("#indianAltitude");
 els.indianPressure = document.querySelector("#indianPressure");
 els.indianTemperature = document.querySelector("#indianTemperature");
-els.loadJhoraSouthGraftonButton = document.querySelector("#loadJhoraSouthGraftonButton");
 els.indianLocationStatus = document.querySelector("#indianLocationStatus");
 els.indianConcernSelect = document.querySelector("#indianConcernSelect");
 els.vedicModuleSelect = document.querySelector("#vedicModuleSelect");
@@ -288,7 +287,6 @@ els.vedicPartnerName = document.querySelector("#vedicPartnerName");
 els.vedicPartnerBirthDate = document.querySelector("#vedicPartnerBirthDate");
 els.vedicPartnerBirthTime = document.querySelector("#vedicPartnerBirthTime");
 els.vedicPartnerBirthCity = document.querySelector("#vedicPartnerBirthCity");
-els.loadPdfIndianButton = document.querySelector("#loadPdfIndianButton");
 els.resolveIndianLocationButton = document.querySelector("#resolveIndianLocationButton");
 els.startVedicFormButton = document.querySelector("#startVedicFormButton");
 els.copyIndianReadingButton = document.querySelector("#copyIndianReadingButton");
@@ -909,96 +907,7 @@ function persistProfileFromIndianFields() {
   renderProfile();
 }
 
-function loadPdfIndianSample() {
-  els.indianBirthDate.value = "2002-10-25";
-  els.indianBirthTime.value = "07:05";
-  els.indianBirthSecond.value = "34";
-  els.indianBirthCity.value = "Qinghaihu, China";
-  els.indianLatitude.value = "36N50'00\"";
-  els.indianLongitude.value = "101E49'10\"";
-  els.indianTimezone.value = "UTC+08:00";
-  els.indianAyanamsa.value = "Lahiri";
-  syncIndianCanonicalToAdvanced({
-    birthTime: els.indianBirthTime.value,
-    birthSecond: els.indianBirthSecond.value,
-    latitude: els.indianLatitude.value,
-    longitude: els.indianLongitude.value,
-    timezone: els.indianTimezone.value,
-    ayanamsa: "Lahiri"
-  });
-  const precision = getIndianPrecisionData();
-  const current = getProfile();
-  saveProfile({
-    ...current,
-    birthDate: els.indianBirthDate.value,
-    birthTime: els.indianBirthTime.value,
-    birthSecond: precision.birthSecond,
-    birthCity: els.indianBirthCity.value,
-    latitude: els.indianLatitude.value,
-    longitude: els.indianLongitude.value,
-    timezone: els.indianTimezone.value,
-    ayanamsa: els.indianAyanamsa.value,
-    ...precision,
-    indianSource: "1025.pdf"
-  });
-  renderIndianPage();
-}
-
-function loadJhoraSouthGraftonSample() {
-  els.indianBirthDate.value = "2026-06-25";
-  els.indianBirthTime.value = "09:11";
-  els.indianBirthSecond.value = "23.999991";
-  els.indianBirthCity.value = "South Grafton, Massachusetts, USA";
-  els.indianLatitude.value = "42N12'10\"";
-  els.indianLongitude.value = "71W41'10\"";
-  els.indianTimezone.value = "UTC-04:00";
-  els.indianAyanamsa.value = els.indianAyanamsa.value || "Lahiri";
-  els.indianTimezoneHour.value = "4";
-  els.indianTimezoneMinute.value = "0";
-  els.indianTimezoneDirection.value = "W";
-  els.indianDaylightSaving.checked = true;
-  els.indianUseLmt.checked = false;
-  els.indianLongitudeDegree.value = "71";
-  els.indianLongitudeDirection.value = "W";
-  els.indianLongitudeMinute.value = "41";
-  els.indianLongitudeSecond.value = "10";
-  els.indianLatitudeDegree.value = "42";
-  els.indianLatitudeDirection.value = "N";
-  els.indianLatitudeMinute.value = "12";
-  els.indianLatitudeSecond.value = "10";
-  els.indianAltitude.value = "425";
-  els.indianPressure.value = "1013.25";
-  els.indianTemperature.value = "20";
-  setIndianLocationStatus("已填入截图示例：South Grafton / UTC-04:00 / 71W41'10\" / 42N12'10\"");
-  persistProfileFromIndianFields();
-  saveProfile({
-    ...getProfile(),
-    indianSource: "jhora-south-grafton"
-  });
-  renderProfile();
-  renderIndianPage();
-}
-
-const locationPresets = {
-  "south grafton": { city: "South Grafton, Massachusetts, USA", latitude: "42N12'10\"", longitude: "71W41'10\"", timezone: "UTC-04:00", birthSecond: "23.999991", timezoneHour: "4", timezoneMinute: "0", timezoneDirection: "W", daylightSaving: true, altitude: "425", atmosphericPressure: "1013.25", atmosphericTemperature: "20" },
-  "south grafton ma": { city: "South Grafton, Massachusetts, USA", latitude: "42N12'10\"", longitude: "71W41'10\"", timezone: "UTC-04:00", birthSecond: "23.999991", timezoneHour: "4", timezoneMinute: "0", timezoneDirection: "W", daylightSaving: true, altitude: "425", atmosphericPressure: "1013.25", atmosphericTemperature: "20" },
-  "qinghaihu": { city: "Qinghaihu, China", latitude: "36N50'00\"", longitude: "101E49'10\"", timezone: "UTC+08:00" },
-  "青海湖": { city: "Qinghaihu, China", latitude: "36N50'00\"", longitude: "101E49'10\"", timezone: "UTC+08:00" },
-  "西宁": { city: "西宁, China", latitude: "36N37'00\"", longitude: "101E46'00\"", timezone: "UTC+08:00" },
-  "xining": { city: "Xining, China", latitude: "36N37'00\"", longitude: "101E46'00\"", timezone: "UTC+08:00" },
-  "上海": { city: "上海, China", latitude: "31N13'43\"", longitude: "121E28'29\"", timezone: "UTC+08:00" },
-  "北京": { city: "北京, China", latitude: "39N54'20\"", longitude: "116E24'29\"", timezone: "UTC+08:00" },
-  "广州": { city: "广州, China", latitude: "23N07'53\"", longitude: "113E15'53\"", timezone: "UTC+08:00" },
-  "深圳": { city: "深圳, China", latitude: "22N32'43\"", longitude: "114E03'10\"", timezone: "UTC+08:00" },
-  "杭州": { city: "杭州, China", latitude: "30N16'00\"", longitude: "120E09'00\"", timezone: "UTC+08:00" },
-  "成都": { city: "成都, China", latitude: "30N39'49\"", longitude: "104E04'00\"", timezone: "UTC+08:00" },
-  "重庆": { city: "重庆, China", latitude: "29N33'00\"", longitude: "106E33'00\"", timezone: "UTC+08:00" },
-  "武汉": { city: "武汉, China", latitude: "30N35'00\"", longitude: "114E18'00\"", timezone: "UTC+08:00" },
-  "西安": { city: "西安, China", latitude: "34N16'00\"", longitude: "108E56'00\"", timezone: "UTC+08:00" },
-  "南京": { city: "南京, China", latitude: "32N03'00\"", longitude: "118E47'00\"", timezone: "UTC+08:00" },
-  "香港": { city: "香港, China", latitude: "22N18'00\"", longitude: "114E10'00\"", timezone: "UTC+08:00" },
-  "台北": { city: "台北, China", latitude: "25N02'00\"", longitude: "121E34'00\"", timezone: "UTC+08:00" }
-};
+const locationPresets = {};
 
 function decimalToDms(value, axis) {
   const number = Number(value);
@@ -1199,18 +1108,19 @@ async function fetchVedicSkillResult(profile, options, chart) {
       body: JSON.stringify({ profile, options, chart })
     });
     if (!response.ok) {
+      const issue = await response.json().catch(() => ({}));
       return {
         ok: false,
-        bridge: { source: "web-fallback", calculatorReady: false, reason: "专业排盘接口暂时不可用。" },
+        bridge: { source: "professional-backend", calculatorReady: false, reason: issue.reason || issue.error || "专业排盘接口暂时不可用。" },
         structuredDataMarkdown: "",
         calculationMeta: null
       };
     }
     return response.json();
-  } catch {
+  } catch (error) {
     return {
       ok: false,
-      bridge: { source: "web-fallback", calculatorReady: false, reason: "当前页面无法连接本机 Python 排盘服务。" },
+      bridge: { source: "professional-backend", calculatorReady: false, reason: `当前页面无法连接 Python 排盘服务：${error.message}` },
       structuredDataMarkdown: "",
       calculationMeta: null
     };
@@ -1270,9 +1180,14 @@ function saveChartCache(signature, chartData) {
 async function getOrCreateVedicChartData(profile, options, chart) {
   const signature = stableVedicSignature(profile, options);
   const cache = getChartCache();
-  if (cache[signature]) return cache[signature];
+  if (cache[signature]?.skillResult?.ok && cache[signature]?.chartJson && cache[signature]?.calculationMeta?.commit === "7a6e33e23dc1f45107af2f249848241bb4d22b67") {
+    return cache[signature];
+  }
   const skillResult = state.indianSkillResult || (state.indianSkillPromise ? await state.indianSkillPromise : null)
     || await fetchVedicSkillResult(profile, options, chart);
+  if (!skillResult?.ok || !skillResult.chartJson || skillResult.calculationMeta?.commit !== "7a6e33e23dc1f45107af2f249848241bb4d22b67") {
+    throw new Error(skillResult?.bridge?.reason || "专业星历计算暂时失败，请稍后重试。");
+  }
   state.indianSkillResult = skillResult;
   const chartData = {
     signature,
@@ -1282,6 +1197,9 @@ async function getOrCreateVedicChartData(profile, options, chart) {
     skillResult,
     structuredData: chart?.structuredData || {},
     structuredDataMarkdown: skillResult?.structuredDataMarkdown || "",
+    professionalChart: skillResult?.professionalChart || null,
+    chartJson: skillResult?.chartJson || null,
+    evidenceLedger: skillResult?.evidenceLedger || null,
     calculationMeta: skillResult?.calculationMeta || null,
     pdfReferenceData: window.IndianAstrologySkill?.pdfReferenceData || {}
   };
@@ -1332,7 +1250,14 @@ function summarizeReading(reading) {
 
 function findMasterReading(profile, options) {
   const signature = stableVedicSignature(profile, options);
-  return getMasterReadings().find((item) => item.signature === signature) || null;
+  return getMasterReadings().find((item) => {
+    const contract = item.chartData?.chartJson || item.skillResult?.chartJson || item.chartJson;
+    return item.signature === signature
+      && contract?.birth
+      && Array.isArray(contract?.planets)
+      && Array.isArray(contract?.houses)
+      && contract?.navamsa;
+  }) || null;
 }
 
 function renderVedicProgress(activeStep = 0) {
@@ -1476,7 +1401,10 @@ async function renderIndianPage() {
     els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
     return;
   }
-  const options = getIndianOptions();
+  const options = {
+    ...getIndianOptions(),
+    professionalChart: state.indianSkillResult?.professionalChart || null
+  };
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   els.indianReading.innerHTML = window.IndianAstrologySkill.chartView(profile, options);
   const blueprintActions = els.indianReading.querySelector(".chart-actions");
@@ -1495,8 +1423,21 @@ async function renderIndianPage() {
       </section>
     `;
   }
-  if (!chart) return;
-  warmVedicSkillResult(profile, options, chart);
+  if (!options.professionalChart) {
+    warmVedicSkillResult(profile, options, chart).then((skillResult) => {
+      if (skillResult?.ok && skillResult.professionalChart && skillResult.chartJson) {
+        renderIndianPage();
+        return;
+      }
+      els.indianReading.innerHTML = `
+        <div class="vedic-chart-panel">
+          <p class="disclaimer">专业 Python 排盘暂时失败。系统不会显示网页近似盘，也不会启动 AI 解读。${escapeHtml(skillResult?.bridge?.reason || "请稍后重试。")}</p>
+          <button class="button primary" id="retryIndianChartButton" type="button">重试计算星盘</button>
+        </div>
+      `;
+      document.querySelector("#retryIndianChartButton")?.addEventListener("click", () => renderIndianPage());
+    });
+  }
 }
 
 async function renderIndianInterpretation() {
@@ -1506,7 +1447,10 @@ async function renderIndianInterpretation() {
     els.indianReading.innerHTML = "<p>印度占星 skill 未加载。</p>";
     return;
   }
-  const options = getIndianOptions();
+  const options = {
+    ...getIndianOptions(),
+    professionalChart: state.indianSkillResult?.professionalChart || null
+  };
   const chart = window.IndianAstrologySkill.buildChart(profile, options);
   const deepseekBox = document.querySelector("#deepseekIndianReading");
   if (!chart || !deepseekBox) return;
@@ -1569,7 +1513,8 @@ async function renderIndianInterpretation() {
       signature: stableVedicSignature(profile, options),
       userId: getCurrentUser(),
       birthData: profile,
-      chartJson: chart,
+      chartJson: chartData.chartJson,
+      webChart: chart,
       chartData: job.chartData || chartData,
       skillResult: (job.chartData || chartData)?.skillResult || chartData.skillResult,
       masterReading,
@@ -1587,31 +1532,16 @@ async function renderIndianInterpretation() {
     renderIndianBlueprint(masterRecord, "这份总报告已保存。之后你可以直接追问具体问题，系统会基于这份报告和咨询记忆继续回答。");
   } catch (error) {
     window.clearInterval(progressTimer);
-    const fallbackReading = window.IndianAstrologySkill.reading(profile, options);
-    const masterRecord = {
-      id: `${stableVedicSignature(profile, options)}-${Date.now()}`,
-      signature: stableVedicSignature(profile, options),
-      userId: getCurrentUser(),
-      birthData: profile,
-      chartJson: chart,
-      chartData,
-      skillResult: chartData?.skillResult || null,
-      masterReading: fallbackReading.replace(/<[^>]+>/g, "\n"),
-      summary: "DeepSeek 暂时不可用，已显示本地基础解读。配置模型后可重新生成更完整的 Life Blueprint。",
-      favoriteChapters: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    state.indianMasterReading = masterRecord;
-    state.indianContext = { profile, chart, options, skillResult: chartData?.skillResult || null, chartData, masterReading: masterRecord.masterReading };
+    state.indianMasterReading = null;
+    state.indianContext = null;
     state.indianChatHistory = [];
-    const reason = error?.message ? `原因：${error.message}` : "原因：完整解读服务暂时没有返回。";
+    const reason = error?.message ? `原因：${error.message}` : "原因：专业星历或完整解读服务暂时没有返回。";
     deepseekBox.innerHTML = `
       <h3>Life Blueprint</h3>
-      <p class="disclaimer">在线完整解读暂时没有生成，已先显示本地基础蓝图。你可以稍后点击“开始生成完整解读”重试。${escapeHtml(reason)}</p>
-      ${fallbackReading}
-      ${indianChatMarkup()}
+      <p class="disclaimer">专业星历计算或AI解读暂时失败，请稍后重试。系统不会使用本地近似星盘，也不会生成无真实JSON依据的报告。${escapeHtml(reason)}</p>
+      <button class="button primary" id="retryIndianReadingButton" type="button">重试专业计算</button>
     `;
+    document.querySelector("#retryIndianReadingButton")?.addEventListener("click", () => renderIndianInterpretation());
   }
 }
 
@@ -2829,8 +2759,6 @@ els.appMain?.addEventListener("scroll", () => {
   if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
 }, { passive: true });
 
-els.loadPdfIndianButton.addEventListener("click", loadPdfIndianSample);
-els.loadJhoraSouthGraftonButton.addEventListener("click", loadJhoraSouthGraftonSample);
 els.resolveIndianLocationButton.addEventListener("click", resolveIndianLocation);
 [
   "indianBirthSecond",
