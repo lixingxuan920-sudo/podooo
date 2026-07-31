@@ -1,13 +1,13 @@
-const CACHE_NAME = "podo-vedic-two-stage-v47";
+const CACHE_NAME = "podo-vedic-two-stage-v48";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/styles.css?v=42",
   "/indian-wellness.css?v=42",
   "/cream-system.css?v=46",
-  "/app.js?v=47",
+  "/app.js?v=48",
   "/astrology-skill.js?v=41",
-  "/indian-astrology-skill.js?v=47",
+  "/indian-astrology-skill.js?v=48",
   "/tarot-skill.js?v=41",
   "/manifest.webmanifest",
   "/assets/app-icon.svg",
